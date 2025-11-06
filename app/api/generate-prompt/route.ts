@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import type { PromptConfig } from '@/lib/store';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 function buildPromptFromConfig(config: PromptConfig): string {
   let prompt = 'You are an AI assistant with the following configuration:\n\n';
 
@@ -137,6 +133,11 @@ export async function POST(request: NextRequest) {
 
     // Use OpenAI to enhance and optimize the prompt
     const systemPrompt = buildPromptFromConfig(config);
+
+    // Initialize OpenAI client only when API key is available
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
