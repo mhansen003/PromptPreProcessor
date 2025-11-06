@@ -3,47 +3,52 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
-interface PublishedPromptData {
-  promptId: string;
-  promptText: string;
-  configName: string;
-  publishedAt: string;
+interface PersonalityData {
+  id: string;
+  name: string;
+  emoji: string;
+  slug: string;
+  systemPrompt: string;
+  createdAt: string;
+  username: string;
 }
 
-export default function PublishedPromptPage() {
+export default function PublicPersonalityPage() {
   const params = useParams();
-  const urlId = params.urlId as string;
-  const [promptData, setPromptData] = useState<PublishedPromptData | null>(null);
+  const username = params.username as string;
+  const slug = params.slug as string;
+
+  const [personalityData, setPersonalityData] = useState<PersonalityData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!urlId) return;
+    if (!username || !slug) return;
 
-    const fetchPrompt = async () => {
+    const fetchPersonality = async () => {
       try {
-        const response = await fetch(`/api/p/${urlId}`);
+        const response = await fetch(`/api/personalities/${username}/${slug}`);
         const data = await response.json();
 
         if (response.ok) {
-          setPromptData(data);
+          setPersonalityData(data);
         } else {
-          setError(data.error || 'Failed to load prompt');
+          setError(data.error || 'Failed to load personality');
         }
       } catch (err) {
-        setError('An error occurred while loading the prompt');
+        setError('An error occurred while loading the personality');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPrompt();
-  }, [urlId]);
+    fetchPersonality();
+  }, [username, slug]);
 
   const copyToClipboard = async () => {
-    if (promptData) {
-      await navigator.clipboard.writeText(promptData.promptText);
+    if (personalityData) {
+      await navigator.clipboard.writeText(personalityData.systemPrompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -59,7 +64,7 @@ export default function PublishedPromptPage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </div>
-          <p className="text-white text-lg font-semibold">Loading Prompt...</p>
+          <p className="text-white text-lg font-semibold">Loading Personality...</p>
         </div>
       </div>
     );
@@ -74,8 +79,14 @@ export default function PublishedPromptPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Prompt Not Found</h1>
-          <p className="text-gray-400">{error}</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Personality Not Found</h1>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <a
+            href="/"
+            className="inline-block px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all"
+          >
+            Create Your Own
+          </a>
         </div>
       </div>
     );
@@ -87,19 +98,22 @@ export default function PublishedPromptPage() {
         {/* Header */}
         <div className="bg-robinhood-card border border-robinhood-green rounded-xl p-6 mb-6 shadow-2xl">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {promptData?.configName || 'System Prompt Personality'}
-              </h1>
-              <p className="text-sm text-gray-400">
-                Published on {new Date(promptData?.publishedAt || '').toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="text-5xl">{personalityData?.emoji}</div>
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-1">
+                  {personalityData?.name}
+                </h1>
+                <p className="text-sm text-gray-400">
+                  by <span className="text-robinhood-green font-semibold">@{personalityData?.username}</span>
+                  {' • '}
+                  Published {new Date(personalityData?.createdAt || '').toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -118,7 +132,7 @@ export default function PublishedPromptPage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Copy to Clipboard
+                    Copy Prompt
                   </>
                 )}
               </button>
@@ -129,16 +143,16 @@ export default function PublishedPromptPage() {
         {/* Prompt Content */}
         <div className="bg-robinhood-card border border-robinhood-border rounded-xl overflow-hidden shadow-2xl">
           <div className="px-6 py-4 border-b border-robinhood-border bg-robinhood-darker">
-            <h2 className="text-lg font-semibold text-white">System Prompt Personality</h2>
+            <h2 className="text-lg font-semibold text-white">System Prompt</h2>
           </div>
           <div className="p-6 bg-robinhood-darker/50">
             <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-robinhood-dark p-6 rounded-lg border border-robinhood-border overflow-x-auto">
-              {promptData?.promptText}
+              {personalityData?.systemPrompt}
             </pre>
           </div>
           <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker flex items-center justify-between">
             <p className="text-xs text-gray-400">
-              <span className="font-semibold text-robinhood-green">Character Count:</span> {promptData?.promptText.length.toLocaleString()}
+              <span className="font-semibold text-robinhood-green">Character Count:</span> {personalityData?.systemPrompt.length.toLocaleString()}
             </p>
             <a
               href="/"
@@ -158,7 +172,20 @@ export default function PublishedPromptPage() {
             <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>This is a publicly shared system prompt personality. You can copy it and use it for your own AI projects.</span>
+            <span>
+              This is a publicly shared AI personality configuration.
+              You can copy this prompt and use it as a system prompt in your AI projects.
+            </span>
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Powered by{' '}
+            <a href="/" className="text-robinhood-green hover:text-robinhood-green/80 font-semibold">
+              PromptPreProcessor
+            </a>
           </p>
         </div>
       </div>

@@ -49,7 +49,12 @@ export interface PromptConfig {
   // Custom Instructions
   customInstructions: string;
   customStyle: string;  // Additional style instructions like "output to PDF"
-  systemPrompt?: string;  // Generated prompt
+
+  // Generated Prompt & Publishing
+  systemPrompt?: string;  // Auto-generated prompt
+  slug?: string;  // URL-friendly name (auto-generated from name)
+  publishedUrl?: string;  // Public URL if published
+  isPublished?: boolean;  // Publishing status
 }
 
 interface StoreState {
@@ -112,7 +117,7 @@ const createDefaultConfig = (): PromptConfig => ({
       customStyle: '',
 });
 
-// Pre-configured example templates
+// Pre-configured example personalities
 const createExampleConfigs = (): PromptConfig[] => {
   const baseDate = new Date('2024-01-01').toISOString();
 

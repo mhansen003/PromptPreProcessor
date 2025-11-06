@@ -11,7 +11,7 @@ function getValueDescription(value: number): string {
 }
 
 function buildPromptFromConfig(config: PromptConfig): string {
-  const prompt = `## 🧩 Pre-Prompt Configuration Template
+  const prompt = `## 🧩 Pre-Prompt Configuration Personality
 
 ### 🧠 Summary
 This configuration defines how the AI should construct its responses.
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
           role: 'system',
           content: `You are a prompt configuration formatter. Your job is to return the provided configuration EXACTLY as given, without modification.
 
-The configuration is already formatted in a strict template structure with:
+The configuration is already formatted in a strict personality structure with:
 - Markdown tables
 - Emoji section headers
 - Detailed descriptions

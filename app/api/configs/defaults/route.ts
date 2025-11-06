@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
 import { getUserConfigs } from '@/lib/redis';
 
-// GET /api/configs/defaults - Get default templates for new users (from mhansen's templates)
+// GET /api/configs/defaults - Get default personalities for new users (from mhansen's personalities)
 export async function GET() {
   try {
-    // Fetch mhansen's templates to use as defaults
-    const mhansenTemplates = await getUserConfigs('mhansen');
+    // Fetch mhansen's personalities to use as defaults
+    const mhansenPersonalities = await getUserConfigs('mhansen');
 
     // Remove generated prompts and user-specific data
-    const defaultTemplates = mhansenTemplates.map(template => ({
-      ...template,
+    const defaultPersonalities = mhansenPersonalities.map(personality => ({
+      ...personality,
       systemPrompt: undefined, // Remove any generated prompts
     }));
 
-    return NextResponse.json({ templates: defaultTemplates });
+    return NextResponse.json({ personalities: defaultPersonalities });
   } catch (error: any) {
-    console.error('Error fetching default templates:', error);
+    console.error('Error fetching default personalities:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch default templates', details: error.message, templates: [] },
+      { error: 'Failed to fetch default personalities', details: error.message, personalities: [] },
       { status: 500 }
     );
   }
