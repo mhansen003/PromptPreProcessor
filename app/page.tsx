@@ -51,6 +51,11 @@ export default function Home() {
   const [selectedPromptRecord, setSelectedPromptRecord] = useState<GeneratedPromptRecord | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showDeletePromptsModal, setShowDeletePromptsModal] = useState(false);
+  const [promptsToDelete, setPromptsToDelete] = useState<Set<string>>(new Set());
+  const [pendingGenerateCount, setPendingGenerateCount] = useState(3);
+  const [showDeleteTemplateModal, setShowDeleteTemplateModal] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -300,6 +305,26 @@ export default function Home() {
     });
   };
 
+  const handleBulkDeleteAndGenerate = async () => {
+    // Delete selected prompts
+    const deletePromises = Array.from(promptsToDelete).map(async (promptId) => {
+      return fetch(`/api/generated?id=${promptId}`, {
+        method: 'DELETE',
+      });
+    });
+
+    await Promise.all(deletePromises);
+
+    // Update local state
+    const updatedHistory = generatedHistory.filter((record) => !promptsToDelete.has(record.id));
+    setGeneratedHistory(updatedHistory);
+
+    // Close deletion modal and open generation modal
+    setShowDeletePromptsModal(false);
+    setPromptsToDelete(new Set());
+    setShowGenerateModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-robinhood-dark flex">
       {/* Left Sidebar - Prompt Templates List */}
@@ -341,9 +366,8 @@ export default function Home() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm(`⚠️ DELETE TEMPLATE: "${config.name}"\n\nThis will permanently delete:\n• All template settings and controls\n• This cannot be undone\n\nAre you sure you want to delete this template?`)) {
-                    deleteConfig(config.id);
-                  }
+                  setTemplateToDelete(config.id);
+                  setShowDeleteTemplateModal(true);
                 }}
                 disabled={configs.length === 1}
                 className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-red-500/20 text-red-400 hover:text-red-300 disabled:opacity-0 disabled:cursor-not-allowed"
@@ -429,9 +453,8 @@ export default function Home() {
               {/* Delete Template Button */}
               <button
                 onClick={() => {
-                  if (confirm(`⚠️ DELETE TEMPLATE: "${currentConfig.name}"\n\nThis will permanently delete:\n• All template settings and controls\n• This cannot be undone\n\nAre you sure you want to delete this template?`)) {
-                    deleteConfig(currentConfig.id);
-                  }
+                  setTemplateToDelete(currentConfig.id);
+                  setShowDeleteTemplateModal(true);
                 }}
                 disabled={configs.length === 1}
                 className="px-3 py-1.5 text-sm bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -825,7 +848,21 @@ export default function Home() {
                   <h3 className="text-sm font-semibold text-white mb-3">Actions</h3>
                   <div className="space-y-2">
                     <button
-                      onClick={() => setShowGenerateModal(true)}
+                      onClick={() => {
+                        // Filter prompts for current template
+                        const currentTemplatePrompts = generatedHistory.filter(
+                          r => r.templateId === currentConfig.id || !r.templateId
+                        );
+
+                        // Check if there's space for new prompts (limit is 10 per template)
+                        if (currentTemplatePrompts.length + generateCount > 10) {
+                          setPendingGenerateCount(generateCount);
+                          setPromptsToDelete(new Set());
+                          setShowDeletePromptsModal(true);
+                        } else {
+                          setShowGenerateModal(true);
+                        }
+                      }}
                       disabled={isGenerating}
                       className="w-full px-4 py-2.5 text-sm bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50 glow-green"
                     >
@@ -1329,6 +1366,194 @@ export default function Home() {
                   className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Prompts Modal */}
+      {showDeletePromptsModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-robinhood-border">
+              <h3 className="text-xl font-semibold text-white">⚠️ Prompt Limit Reached</h3>
+              <p className="text-sm text-gray-400 mt-2">
+                You're trying to generate {pendingGenerateCount} new prompt{pendingGenerateCount !== 1 ? 's' : ''}, but you've reached the limit of 10 prompts per template.
+                <br />
+                Please delete at least {
+                  (generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length + pendingGenerateCount) - 10
+                } prompt{((generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length + pendingGenerateCount) - 10) !== 1 ? 's' : ''} to continue.
+              </p>
+            </div>
+
+            <div className="px-6 py-4 overflow-y-auto flex-1">
+              <div className="space-y-2">
+                {generatedHistory
+                  .filter(r => r.templateId === currentConfig.id || !r.templateId)
+                  .map((record) => (
+                    <div
+                      key={record.id}
+                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        promptsToDelete.has(record.id)
+                          ? 'border-red-500 bg-red-900/20'
+                          : 'border-robinhood-border bg-robinhood-darker hover:border-robinhood-green/50'
+                      }`}
+                      onClick={() => {
+                        const newSet = new Set(promptsToDelete);
+                        if (newSet.has(record.id)) {
+                          newSet.delete(record.id);
+                        } else {
+                          newSet.add(record.id);
+                        }
+                        setPromptsToDelete(newSet);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs text-gray-500">{record.timestamp}</span>
+                            {record.publishedUrl && (
+                              <span className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded">
+                                Published
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm font-medium text-gray-300">{record.configName}</p>
+                          <p className="text-xs text-gray-500">
+                            {record.totalVariations > 1 ? `Variation ${record.variation}/${record.totalVariations}` : 'Single'}
+                          </p>
+                          <p className="text-xs text-gray-600 truncate mt-1">{record.promptText.substring(0, 80)}...</p>
+                        </div>
+                        <div className="ml-4">
+                          {promptsToDelete.has(record.id) ? (
+                            <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 border-2 border-robinhood-border rounded"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-gray-400">
+                  Selected: <span className="text-robinhood-green font-semibold">{promptsToDelete.size}</span> prompt{promptsToDelete.size !== 1 ? 's' : ''}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Space needed: <span className="text-yellow-400 font-semibold">
+                    {(generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length + pendingGenerateCount) - 10}
+                  </span>
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleBulkDeleteAndGenerate}
+                  disabled={promptsToDelete.size < ((generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length + pendingGenerateCount) - 10)}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Delete Selected & Generate
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeletePromptsModal(false);
+                    setPromptsToDelete(new Set());
+                  }}
+                  className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Template Modal */}
+      {showDeleteTemplateModal && templateToDelete && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-gradient-to-br from-red-950/90 to-robinhood-card border-2 border-red-500 rounded-xl max-w-lg w-full shadow-2xl">
+            <div className="px-6 py-5 border-b-2 border-red-500/30">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Delete Template</h3>
+                  <p className="text-sm text-red-300">This action cannot be undone</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-4 mb-4">
+                <p className="text-white font-semibold mb-2">
+                  You are about to permanently delete:
+                </p>
+                <p className="text-xl text-robinhood-green font-bold mb-3">
+                  "{configs.find(c => c.id === templateToDelete)?.name}"
+                </p>
+                <div className="space-y-2 text-sm text-gray-300">
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 mt-0.5">•</span>
+                    <span>All template settings and controls will be lost</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 mt-0.5">•</span>
+                    <span>This template configuration cannot be recovered</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 mt-0.5">•</span>
+                    <span>Associated generated prompts will remain but won't be linked</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
+                <p className="text-xs text-yellow-300 flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Consider duplicating this template first if you might need it later</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t-2 border-red-500/30 bg-robinhood-darker/50">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    if (templateToDelete) {
+                      deleteConfig(templateToDelete);
+                      setShowDeleteTemplateModal(false);
+                      setTemplateToDelete(null);
+                    }
+                  }}
+                  className="flex-1 px-5 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all shadow-lg hover:shadow-red-500/50 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Template
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteTemplateModal(false);
+                    setTemplateToDelete(null);
+                  }}
+                  className="flex-1 px-5 py-3 bg-robinhood-card border-2 border-robinhood-green text-white font-semibold rounded-lg hover:bg-robinhood-green hover:text-robinhood-dark transition-all"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
