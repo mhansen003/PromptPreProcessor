@@ -22,9 +22,14 @@ export async function getUserConfigs(userId: string = DEFAULT_USER_ID): Promise<
 
     const configs: PromptConfig[] = [];
     for (const id of configIds) {
-      const config = await redis.hgetall(KEYS.config(id as string));
-      if (config) {
-        configs.push(config as unknown as PromptConfig);
+      const hashData = await redis.hgetall(KEYS.config(id as string));
+      if (hashData && hashData.data) {
+        try {
+          const config = JSON.parse(hashData.data as string);
+          configs.push(config);
+        } catch (parseError) {
+          console.error('Error parsing config JSON:', parseError);
+        }
       }
     }
 
@@ -37,7 +42,8 @@ export async function getUserConfigs(userId: string = DEFAULT_USER_ID): Promise<
 
 export async function saveConfig(config: PromptConfig, userId: string = DEFAULT_USER_ID): Promise<boolean> {
   try {
-    await redis.hset(KEYS.config(config.id), config as any);
+    // Store config as JSON string in a single hash field
+    await redis.hset(KEYS.config(config.id), { data: JSON.stringify(config) });
     await redis.sadd(KEYS.userConfigs(userId), config.id);
     return true;
   } catch (error) {
@@ -67,9 +73,14 @@ export async function getGeneratedPrompts(userId: string = DEFAULT_USER_ID, limi
 
     const prompts: any[] = [];
     for (const id of promptIds) {
-      const prompt = await redis.hgetall(KEYS.generated(id as string));
-      if (prompt) {
-        prompts.push(prompt);
+      const hashData = await redis.hgetall(KEYS.generated(id as string));
+      if (hashData && hashData.data) {
+        try {
+          const prompt = JSON.parse(hashData.data as string);
+          prompts.push(prompt);
+        } catch (parseError) {
+          console.error('Error parsing generated prompt JSON:', parseError);
+        }
       }
     }
 
@@ -84,7 +95,8 @@ export async function saveGeneratedPrompt(promptData: any, userId: string = DEFA
   try {
     const promptId = `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    await redis.hset(KEYS.generated(promptId), promptData);
+    // Store prompt as JSON string in a single hash field
+    await redis.hset(KEYS.generated(promptId), { data: JSON.stringify(promptData) });
     await redis.lpush(KEYS.userGenerated(userId), promptId);
     await redis.ltrim(KEYS.userGenerated(userId), 0, 49); // Keep only last 50
 

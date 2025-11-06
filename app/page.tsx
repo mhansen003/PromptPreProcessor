@@ -6,6 +6,7 @@ import { Slider } from '@/components/Slider';
 import { Toggle } from '@/components/Toggle';
 import { Select } from '@/components/Select';
 import { ControlSection } from '@/components/ControlSection';
+import { Tooltip } from '@/components/Tooltip';
 
 interface GeneratedPromptRecord {
   id: string;
@@ -402,52 +403,112 @@ export default function Home() {
                 <ControlSection title="Response Structure" icon="📋" defaultOpen={true}>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Examples</span>
-                      <Toggle label="" checked={currentConfig.useExamples} onChange={(v) => handleUpdate({ useExamples: v })} description="" />
+                      <Toggle
+                        label="Examples"
+                        checked={currentConfig.useExamples}
+                        onChange={(v) => handleUpdate({ useExamples: v })}
+                        description=""
+                        tooltip="Include concrete examples to illustrate concepts and make ideas more tangible"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Bullets</span>
-                      <Toggle label="" checked={currentConfig.useBulletPoints} onChange={(v) => handleUpdate({ useBulletPoints: v })} description="" />
+                      <Toggle
+                        label="Bullets"
+                        checked={currentConfig.useBulletPoints}
+                        onChange={(v) => handleUpdate({ useBulletPoints: v })}
+                        description=""
+                        tooltip="Format information as bullet points for easier scanning and readability"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Numbers</span>
-                      <Toggle label="" checked={currentConfig.useNumberedLists} onChange={(v) => handleUpdate({ useNumberedLists: v })} description="" />
+                      <Toggle
+                        label="Numbers"
+                        checked={currentConfig.useNumberedLists}
+                        onChange={(v) => handleUpdate({ useNumberedLists: v })}
+                        description=""
+                        tooltip="Use numbered lists for sequential steps or ordered information"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Code</span>
-                      <Toggle label="" checked={currentConfig.includeCodeSamples} onChange={(v) => handleUpdate({ includeCodeSamples: v })} description="" />
+                      <Toggle
+                        label="Code"
+                        checked={currentConfig.includeCodeSamples}
+                        onChange={(v) => handleUpdate({ includeCodeSamples: v })}
+                        description=""
+                        tooltip="Include code snippets and programming examples in responses"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Analogies</span>
-                      <Toggle label="" checked={currentConfig.includeAnalogies} onChange={(v) => handleUpdate({ includeAnalogies: v })} description="" />
+                      <Toggle
+                        label="Analogies"
+                        checked={currentConfig.includeAnalogies}
+                        onChange={(v) => handleUpdate({ includeAnalogies: v })}
+                        description=""
+                        tooltip="Use analogies and metaphors to explain complex concepts through familiar comparisons"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Visual</span>
-                      <Toggle label="" checked={currentConfig.includeVisualDescriptions} onChange={(v) => handleUpdate({ includeVisualDescriptions: v })} description="" />
+                      <Toggle
+                        label="Visual"
+                        checked={currentConfig.includeVisualDescriptions}
+                        onChange={(v) => handleUpdate({ includeVisualDescriptions: v })}
+                        description=""
+                        tooltip="Provide visual descriptions and mental imagery to help visualize concepts"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Tables</span>
-                      <Toggle label="" checked={currentConfig.includeTables} onChange={(v) => handleUpdate({ includeTables: v })} description="" />
+                      <Toggle
+                        label="Tables"
+                        checked={currentConfig.includeTables}
+                        onChange={(v) => handleUpdate({ includeTables: v })}
+                        description=""
+                        tooltip="Present structured data and comparisons in table format"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Snippets</span>
-                      <Toggle label="" checked={currentConfig.includeSnippets} onChange={(v) => handleUpdate({ includeSnippets: v })} description="" />
+                      <Toggle
+                        label="Snippets"
+                        checked={currentConfig.includeSnippets}
+                        onChange={(v) => handleUpdate({ includeSnippets: v })}
+                        description=""
+                        tooltip="Extract and highlight key quotes or important snippets from content"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">References</span>
-                      <Toggle label="" checked={currentConfig.includeExternalReferences} onChange={(v) => handleUpdate({ includeExternalReferences: v })} description="" />
+                      <Toggle
+                        label="References"
+                        checked={currentConfig.includeExternalReferences}
+                        onChange={(v) => handleUpdate({ includeExternalReferences: v })}
+                        description=""
+                        tooltip="Include references to external resources, documentation, and sources"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Thought Process</span>
-                      <Toggle label="" checked={currentConfig.showThoughtProcess} onChange={(v) => handleUpdate({ showThoughtProcess: v })} description="" />
+                      <Toggle
+                        label="Thought Process"
+                        checked={currentConfig.showThoughtProcess}
+                        onChange={(v) => handleUpdate({ showThoughtProcess: v })}
+                        description=""
+                        tooltip="Show internal reasoning and chain of thought before answering (helps with complex problems)"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Step-by-Step</span>
-                      <Toggle label="" checked={currentConfig.includeStepByStep} onChange={(v) => handleUpdate({ includeStepByStep: v })} description="" />
+                      <Toggle
+                        label="Step-by-Step"
+                        checked={currentConfig.includeStepByStep}
+                        onChange={(v) => handleUpdate({ includeStepByStep: v })}
+                        description=""
+                        tooltip="Break down processes into clear, numbered step-by-step instructions"
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
-                      <span className="text-xs text-gray-300 font-medium">Summary</span>
-                      <Toggle label="" checked={currentConfig.includeSummary} onChange={(v) => handleUpdate({ includeSummary: v })} description="" />
+                      <Toggle
+                        label="Summary"
+                        checked={currentConfig.includeSummary}
+                        onChange={(v) => handleUpdate({ includeSummary: v })}
+                        description=""
+                        tooltip="Include a summary section highlighting key points and takeaways"
+                      />
                     </div>
                   </div>
                 </ControlSection>
@@ -455,7 +516,11 @@ export default function Home() {
                 {/* Advanced */}
                 <ControlSection title="Advanced Settings" icon="⚙️" defaultOpen={false}>
                   <div className="grid grid-cols-2 gap-4">
-                    <Select label="Response Length" value={currentConfig.responseLength} onChange={(v: any) => handleUpdate({ responseLength: v })}
+                    <Select
+                      label="Response Length"
+                      value={currentConfig.responseLength}
+                      onChange={(v: any) => handleUpdate({ responseLength: v })}
+                      tooltip="Control target response length: Auto (context-dependent), Short (1-2 paragraphs), Medium (3-5 paragraphs), Long (5-10 paragraphs), Comprehensive (detailed deep-dive)"
                       options={[
                         { value: 'auto', label: 'Auto' },
                         { value: 'short', label: 'Short' },
@@ -464,7 +529,11 @@ export default function Home() {
                         { value: 'comprehensive', label: 'Comprehensive' },
                       ]}
                     />
-                    <Select label="Perspective" value={currentConfig.perspective} onChange={(v: any) => handleUpdate({ perspective: v })}
+                    <Select
+                      label="Perspective"
+                      value={currentConfig.perspective}
+                      onChange={(v: any) => handleUpdate({ perspective: v })}
+                      tooltip="Set grammatical perspective: First Person (I/We), Second Person (You - direct address), Third Person (They - objective), Mixed (context-dependent)"
                       options={[
                         { value: '1st-person', label: 'First Person (I/We)' },
                         { value: '2nd-person', label: 'Second Person (You)' },
@@ -472,7 +541,11 @@ export default function Home() {
                         { value: 'mixed', label: 'Mixed' },
                       ]}
                     />
-                    <Select label="Target Generation" value={currentConfig.audience} onChange={(v: any) => handleUpdate({ audience: v })}
+                    <Select
+                      label="Target Generation"
+                      value={currentConfig.audience}
+                      onChange={(v: any) => handleUpdate({ audience: v })}
+                      tooltip="Tailor language and references to age group: Gen Z (modern slang, digital-native), Millennial (tech-savvy), Gen X (balanced), Boomer (traditional), Senior (accessible)"
                       options={[
                         { value: 'gen-z', label: 'Gen Z (18-27)' },
                         { value: 'millennial', label: 'Millennial (28-43)' },
@@ -482,7 +555,11 @@ export default function Home() {
                         { value: 'mixed', label: 'Mixed Audience' },
                       ]}
                     />
-                    <Select label="Explanation Style" value={currentConfig.explanationStyle} onChange={(v: any) => handleUpdate({ explanationStyle: v })}
+                    <Select
+                      label="Explanation Style"
+                      value={currentConfig.explanationStyle}
+                      onChange={(v: any) => handleUpdate({ explanationStyle: v })}
+                      tooltip="Choose teaching approach: Direct (straightforward answers), Socratic (learning through questions), Narrative (story-based), Analytical (structured breakdown)"
                       options={[
                         { value: 'direct', label: 'Direct' },
                         { value: 'socratic', label: 'Socratic' },
@@ -491,22 +568,42 @@ export default function Home() {
                       ]}
                     />
                   </div>
-                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-robinhood-border">
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Accuracy</span>
-                      <Toggle label="" checked={currentConfig.prioritizeAccuracy} onChange={(v) => handleUpdate({ prioritizeAccuracy: v })} description="" />
+                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-robinhood-border/30">
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <Toggle
+                        label="Accuracy"
+                        checked={currentConfig.prioritizeAccuracy}
+                        onChange={(v) => handleUpdate({ prioritizeAccuracy: v })}
+                        description=""
+                        tooltip="Prioritize factual correctness and precision over speed or brevity"
+                      />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Speed</span>
-                      <Toggle label="" checked={currentConfig.prioritizeSpeed} onChange={(v) => handleUpdate({ prioritizeSpeed: v })} description="" />
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <Toggle
+                        label="Speed"
+                        checked={currentConfig.prioritizeSpeed}
+                        onChange={(v) => handleUpdate({ prioritizeSpeed: v })}
+                        description=""
+                        tooltip="Prioritize quick, concise responses over comprehensive coverage"
+                      />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Clarity</span>
-                      <Toggle label="" checked={currentConfig.prioritizeClarity} onChange={(v) => handleUpdate({ prioritizeClarity: v })} description="" />
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <Toggle
+                        label="Clarity"
+                        checked={currentConfig.prioritizeClarity}
+                        onChange={(v) => handleUpdate({ prioritizeClarity: v })}
+                        description=""
+                        tooltip="Prioritize clear, understandable explanations using simple language"
+                      />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Complete</span>
-                      <Toggle label="" checked={currentConfig.prioritizeComprehensiveness} onChange={(v) => handleUpdate({ prioritizeComprehensiveness: v })} description="" />
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <Toggle
+                        label="Complete"
+                        checked={currentConfig.prioritizeComprehensiveness}
+                        onChange={(v) => handleUpdate({ prioritizeComprehensiveness: v })}
+                        description=""
+                        tooltip="Prioritize thorough, comprehensive coverage of topics with all relevant details"
+                      />
                     </div>
                   </div>
                 </ControlSection>
@@ -515,7 +612,14 @@ export default function Home() {
                 <ControlSection title="Custom Instructions" icon="✍️" defaultOpen={false}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-medium text-gray-300 mb-1 block">Additional Style</label>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <label className="text-sm font-medium text-gray-300">Additional Style</label>
+                        <Tooltip content="Add formatting or presentation requirements like 'Output as PDF', 'Use emojis', 'Include charts', 'Format for email'">
+                          <div className="flex items-center justify-center w-4 h-4 rounded-full bg-robinhood-green/20 text-robinhood-green text-[10px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
+                            i
+                          </div>
+                        </Tooltip>
+                      </div>
                       <input
                         type="text"
                         value={currentConfig.customStyle}
@@ -525,7 +629,14 @@ export default function Home() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-300 mb-1 block">Custom Instructions</label>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <label className="text-sm font-medium text-gray-300">Custom Instructions</label>
+                        <Tooltip content="Add domain-specific requirements, context, or behaviors. Examples: 'Use mortgage industry standards', 'Reference CMG policies', 'Emphasize compliance requirements', 'Focus on customer service'">
+                          <div className="flex items-center justify-center w-4 h-4 rounded-full bg-robinhood-green/20 text-robinhood-green text-[10px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
+                            i
+                          </div>
+                        </Tooltip>
+                      </div>
                       <textarea
                         value={currentConfig.customInstructions}
                         onChange={(e) => handleUpdate({ customInstructions: e.target.value })}
