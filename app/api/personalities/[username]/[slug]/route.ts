@@ -30,6 +30,7 @@ export async function GET(
       id: personality.id,
       name: personality.name,
       emoji: personality.emoji,
+      description: personality.description || 'AI persona',
       slug: personality.slug,
       systemPrompt: personality.systemPrompt,
       createdAt: personality.createdAt,

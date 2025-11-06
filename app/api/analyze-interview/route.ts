@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
 Based on these answers, configure all personality settings. Return a JSON object with the following structure:
 
 {
+  "description": "One-sentence overview of the persona",
   "detailLevel": 0-100,
   "formalityLevel": 0-100,
   "technicalDepth": 0-100,
@@ -67,6 +68,7 @@ Based on these answers, configure all personality settings. Return a JSON object
 }
 
 **Guidelines:**
+- **description**: A concise, one-sentence summary of what this persona is designed for (e.g., "Patient educator for first-time homebuyers" or "Technical expert for mortgage professionals")
 - **detailLevel**: How detailed should responses be? (0=very concise, 100=extremely detailed)
 - **formalityLevel**: How formal? (0=very casual, 100=very formal)
 - **technicalDepth**: How technical? (0=simple language, 100=highly technical)
@@ -125,6 +127,7 @@ Return ONLY valid JSON, no additional text.`;
       id: Date.now().toString(),
       name: name || 'Custom Persona',
       emoji: configData.emoji || '⚙️',
+      description: configData.description || 'Custom AI persona based on interview responses',
       createdAt: new Date().toISOString(),
 
       // Response Style

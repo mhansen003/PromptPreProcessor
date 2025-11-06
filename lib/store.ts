@@ -4,6 +4,7 @@ export interface PersonaConfig {
   id: string;
   name: string;
   emoji: string;  // Decorative emoji for aesthetics
+  description: string;  // One-sentence overview of the persona
   createdAt: string;
 
   // Response Style Controls (Personality Tab)
@@ -101,6 +102,7 @@ const createDefaultConfig = (): PersonaConfig => ({
   id: Date.now().toString(),
   name: 'New Persona',
   emoji: '⚙️',  // Default emoji
+  description: 'A balanced AI persona for general assistance',
   createdAt: new Date().toISOString(),
 
   // Personality Tab - Response Style
@@ -175,6 +177,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       id: 'example-1',
       name: 'Teaching Assistant',
       emoji: '🎓',
+      description: 'Patient educator who guides learners through concepts with questions and examples',
       createdAt: baseDate,
       detailLevel: 70,
       formalityLevel: 40,

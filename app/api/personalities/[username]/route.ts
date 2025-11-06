@@ -22,6 +22,7 @@ export async function GET(
         id: c.id,
         name: c.name,
         emoji: c.emoji,
+        description: c.description || 'AI persona',
         slug: c.slug,
         url: `/personalities/${username}/${c.slug}`,
         createdAt: c.createdAt,
