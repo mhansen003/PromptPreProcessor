@@ -10,7 +10,7 @@ export async function GET(
     const { username } = await params;
 
     // Construct user email from username
-    const userEmail = `${username}@default.com`;
+    const userEmail = `${username}@cmgfi.com`;
 
     // Get all user configs
     const configs = await getUserConfigs(userEmail);

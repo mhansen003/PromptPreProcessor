@@ -10,7 +10,7 @@ export async function GET(
     const { username, slug } = await params;
 
     // Construct user email from username (reverse of publish logic)
-    const userEmail = `${username}@default.com`; // Simplified - in production you'd look this up
+    const userEmail = `${username}@cmgfi.com`;
 
     // Get all user configs
     const configs = await getUserConfigs(userEmail);

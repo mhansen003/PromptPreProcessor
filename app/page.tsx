@@ -25,9 +25,24 @@ export default function Home() {
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState('');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [username, setUsername] = useState<string>('default-user');
 
   useEffect(() => {
     setMounted(true);
+
+    // Fetch user session to get email
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated && data.email) {
+          setUserEmail(data.email);
+          // Extract username from email (part before @)
+          const extractedUsername = data.email.split('@')[0];
+          setUsername(extractedUsername);
+        }
+      })
+      .catch(err => console.error('Error fetching session:', err));
 
     // Load configs from Redis - this is the single source of truth
     fetch('/api/configs')
@@ -982,20 +997,35 @@ export default function Home() {
                 </div>
                 <div className="bg-robinhood-darker border border-robinhood-border rounded-lg p-3 flex items-center justify-between gap-3">
                   <code className="text-sm text-robinhood-green flex-1 truncate">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/default-user` : '/api/personalities/default-user'}
+                    {typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/${username}` : `/api/personalities/${username}`}
                   </code>
-                  <button
-                    onClick={() => {
-                      copyToClipboard(typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/default-user` : '/api/personalities/default-user');
-                      showToast('📋 List endpoint copied!');
-                    }}
-                    className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copy
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const url = typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/${username}` : `/api/personalities/${username}`;
+                        window.open(url, '_blank');
+                      }}
+                      className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Test
+                    </button>
+                    <button
+                      onClick={() => {
+                        const url = typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/${username}` : `/api/personalities/${username}`;
+                        copyToClipboard(url);
+                        showToast('📋 List endpoint copied!');
+                      }}
+                      className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1016,18 +1046,33 @@ export default function Home() {
                   <code className="text-sm text-robinhood-green flex-1 truncate">
                     {typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl}
                   </code>
-                  <button
-                    onClick={() => {
-                      copyToClipboard(typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl || '');
-                      showToast('📋 Personality endpoint copied!');
-                    }}
-                    className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copy
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const url = typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl || '';
+                        window.open(url, '_blank');
+                      }}
+                      className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Test
+                    </button>
+                    <button
+                      onClick={() => {
+                        const url = typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl || '';
+                        copyToClipboard(url);
+                        showToast('📋 Personality endpoint copied!');
+                      }}
+                      className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
                 </div>
               </div>
 
