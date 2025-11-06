@@ -56,6 +56,8 @@ export default function Home() {
   const [pendingGenerateCount, setPendingGenerateCount] = useState(3);
   const [showDeleteTemplateModal, setShowDeleteTemplateModal] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [selectedPromptsForBulkDelete, setSelectedPromptsForBulkDelete] = useState<Set<string>>(new Set());
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -323,6 +325,25 @@ export default function Home() {
     setShowDeletePromptsModal(false);
     setPromptsToDelete(new Set());
     setShowGenerateModal(true);
+  };
+
+  const handleBulkDelete = async () => {
+    // Delete selected prompts
+    const deletePromises = Array.from(selectedPromptsForBulkDelete).map(async (promptId) => {
+      return fetch(`/api/generated?id=${promptId}`, {
+        method: 'DELETE',
+      });
+    });
+
+    await Promise.all(deletePromises);
+
+    // Update local state
+    const updatedHistory = generatedHistory.filter((record) => !selectedPromptsForBulkDelete.has(record.id));
+    setGeneratedHistory(updatedHistory);
+
+    // Close modal and clear selection
+    setShowBulkDeleteConfirm(false);
+    setSelectedPromptsForBulkDelete(new Set());
   };
 
   return (
@@ -874,10 +895,55 @@ export default function Home() {
                 {/* Generated Prompts History */}
                 <div className="bg-robinhood-card border border-robinhood-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-white">Generated Prompts</h3>
-                    <span className="text-xs text-robinhood-green font-mono">
-                      {generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-sm font-semibold text-white">Generated Prompts</h3>
+                      <span className="text-xs text-robinhood-green font-mono">
+                        {generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {selectedPromptsForBulkDelete.size > 0 && (
+                        <>
+                          <span className="text-xs text-gray-400">
+                            {selectedPromptsForBulkDelete.size} selected
+                          </span>
+                          <button
+                            onClick={() => setShowBulkDeleteConfirm(true)}
+                            className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-all flex items-center gap-1"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setSelectedPromptsForBulkDelete(new Set())}
+                            className="px-2 py-1 text-xs bg-robinhood-card border border-robinhood-border text-gray-400 rounded hover:border-robinhood-green hover:text-white transition-all"
+                          >
+                            Clear
+                          </button>
+                        </>
+                      )}
+                      {generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length > 0 && (
+                        <button
+                          onClick={() => {
+                            const currentTemplatePrompts = generatedHistory.filter(
+                              r => r.templateId === currentConfig.id || !r.templateId
+                            );
+                            if (selectedPromptsForBulkDelete.size === currentTemplatePrompts.length) {
+                              setSelectedPromptsForBulkDelete(new Set());
+                            } else {
+                              setSelectedPromptsForBulkDelete(new Set(currentTemplatePrompts.map(r => r.id)));
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-robinhood-card border border-robinhood-border text-gray-400 rounded hover:border-robinhood-green hover:text-white transition-all"
+                        >
+                          {selectedPromptsForBulkDelete.size === generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length
+                            ? 'Deselect All'
+                            : 'Select All'}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
@@ -888,33 +954,65 @@ export default function Home() {
                         <div
                           key={record.id}
                           className={`relative group p-2 bg-robinhood-darker border-2 rounded transition-all ${
-                            record.publishedUrl
+                            selectedPromptsForBulkDelete.has(record.id)
+                              ? 'border-blue-500 bg-blue-900/20'
+                              : record.publishedUrl
                               ? 'border-robinhood-green shadow-lg shadow-robinhood-green/20'
                               : 'border-robinhood-border hover:border-robinhood-green/50'
                           }`}
                         >
-                          <div
-                            onClick={() => {
-                              setSelectedPromptRecord(record);
-                              setShowPromptModal(true);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-gray-500">{record.timestamp}</span>
-                                {record.publishedUrl && (
-                                  <span className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded">
-                                    Published
-                                  </span>
+                          <div className="flex gap-2">
+                            {/* Checkbox */}
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newSet = new Set(selectedPromptsForBulkDelete);
+                                if (newSet.has(record.id)) {
+                                  newSet.delete(record.id);
+                                } else {
+                                  newSet.add(record.id);
+                                }
+                                setSelectedPromptsForBulkDelete(newSet);
+                              }}
+                              className="flex-shrink-0 cursor-pointer"
+                            >
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                selectedPromptsForBulkDelete.has(record.id)
+                                  ? 'bg-blue-500 border-blue-500'
+                                  : 'border-robinhood-border hover:border-robinhood-green'
+                              }`}>
+                                {selectedPromptsForBulkDelete.has(record.id) && (
+                                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
                                 )}
                               </div>
                             </div>
-                            <p className="text-xs font-medium text-gray-300 truncate">{record.configName}</p>
-                            <p className="text-[10px] text-gray-600">
-                              {record.totalVariations > 1 ? `${record.variation}/${record.totalVariations}` : 'Single'}
-                            </p>
-                            <p className="text-[10px] text-gray-500 truncate mt-1">{record.promptText.substring(0, 60)}...</p>
+
+                            {/* Content */}
+                            <div
+                              onClick={() => {
+                                setSelectedPromptRecord(record);
+                                setShowPromptModal(true);
+                              }}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-500">{record.timestamp}</span>
+                                  {record.publishedUrl && (
+                                    <span className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded">
+                                      Published
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-xs font-medium text-gray-300 truncate">{record.configName}</p>
+                              <p className="text-[10px] text-gray-600">
+                                {record.totalVariations > 1 ? `${record.variation}/${record.totalVariations}` : 'Single'}
+                              </p>
+                              <p className="text-[10px] text-gray-500 truncate mt-1">{record.promptText.substring(0, 60)}...</p>
+                            </div>
                           </div>
 
                           {/* Action buttons */}
@@ -1552,6 +1650,92 @@ export default function Home() {
                     setTemplateToDelete(null);
                   }}
                   className="flex-1 px-5 py-3 bg-robinhood-card border-2 border-robinhood-green text-white font-semibold rounded-lg hover:bg-robinhood-green hover:text-robinhood-dark transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {showBulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border-2 border-red-500/50 rounded-xl max-w-md w-full shadow-2xl">
+            <div className="px-6 py-5 border-b border-red-500/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Delete Selected Prompts</h3>
+                  <p className="text-sm text-gray-400">This action cannot be undone</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                <p className="text-white font-medium mb-2">
+                  You are about to permanently delete:
+                </p>
+                <p className="text-2xl text-red-400 font-bold mb-3">
+                  {selectedPromptsForBulkDelete.size} prompt{selectedPromptsForBulkDelete.size !== 1 ? 's' : ''}
+                </p>
+                <div className="space-y-1.5 text-sm text-gray-300">
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">•</span>
+                    <span>All selected prompts will be permanently removed</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">•</span>
+                    <span>Published prompts will be unpublished</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">•</span>
+                    <span>This cannot be recovered</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Show count by status */}
+              <div className="flex gap-2 text-xs">
+                {generatedHistory.filter(r => selectedPromptsForBulkDelete.has(r.id) && r.publishedUrl).length > 0 && (
+                  <div className="flex-1 bg-robinhood-green/10 border border-robinhood-green/30 rounded px-2 py-1.5">
+                    <span className="text-robinhood-green font-semibold">
+                      {generatedHistory.filter(r => selectedPromptsForBulkDelete.has(r.id) && r.publishedUrl).length}
+                    </span>
+                    <span className="text-gray-400 ml-1">published</span>
+                  </div>
+                )}
+                {generatedHistory.filter(r => selectedPromptsForBulkDelete.has(r.id) && !r.publishedUrl).length > 0 && (
+                  <div className="flex-1 bg-gray-500/10 border border-gray-500/30 rounded px-2 py-1.5">
+                    <span className="text-gray-300 font-semibold">
+                      {generatedHistory.filter(r => selectedPromptsForBulkDelete.has(r.id) && !r.publishedUrl).length}
+                    </span>
+                    <span className="text-gray-400 ml-1">unpublished</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-red-500/30 bg-robinhood-darker/50">
+              <div className="flex gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all shadow-lg hover:shadow-red-500/30 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete {selectedPromptsForBulkDelete.size} Prompt{selectedPromptsForBulkDelete.size !== 1 ? 's' : ''}
+                </button>
+                <button
+                  onClick={() => setShowBulkDeleteConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-robinhood-card border border-robinhood-border text-white font-semibold rounded-lg hover:border-robinhood-green transition-all"
                 >
                   Cancel
                 </button>
