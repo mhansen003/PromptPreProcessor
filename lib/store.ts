@@ -1,25 +1,25 @@
 import { create } from 'zustand';
 
-export interface PromptConfig {
+export interface PersonaConfig {
   id: string;
   name: string;
   emoji: string;  // Decorative emoji for aesthetics
   createdAt: string;
 
-  // Response Style Controls
+  // Response Style Controls (Personality Tab)
   detailLevel: number;         // 0-100: Concise to Extremely Detailed
   formalityLevel: number;       // 0-100: Casual to Formal
   technicalDepth: number;       // 0-100: Simple to Highly Technical
   creativityLevel: number;      // 0-100: Factual to Creative
   verbosity: number;            // 0-100: Brief to Lengthy
 
-  // Tone Controls
+  // Tone Controls (Personality Tab)
   enthusiasm: number;           // 0-100: Neutral to Enthusiastic
   empathy: number;             // 0-100: Objective to Empathetic
   confidence: number;          // 0-100: Cautious to Assertive
   humor: number;               // 0-100: Serious to Humorous
 
-  // Structure Controls
+  // Structure Controls (Response Structure Tab)
   useExamples: boolean;
   useBulletPoints: boolean;
   useNumberedLists: boolean;
@@ -33,22 +33,44 @@ export interface PromptConfig {
   includeStepByStep: boolean;
   includeSummary: boolean;
 
-  // Advanced Controls
+  // Advanced Controls (Advanced Tab)
   responseLength: 'auto' | 'short' | 'medium' | 'long' | 'comprehensive';
   perspective: '1st-person' | '2nd-person' | '3rd-person' | 'mixed';
   audience: 'gen-z' | 'millennial' | 'gen-x' | 'boomer' | 'senior' | 'mixed';
   explanationStyle: 'direct' | 'socratic' | 'narrative' | 'analytical';
   industryKnowledge: number;  // 0-100: Explain Terms to Use Acronyms
 
-  // Focus Areas
+  // Focus Areas (Advanced Tab)
   prioritizeAccuracy: boolean;
   prioritizeSpeed: boolean;
   prioritizeClarity: boolean;
   prioritizeComprehensiveness: boolean;
 
-  // Custom Instructions
+  // Custom Instructions (Advanced Tab)
   customInstructions: string;
   customStyle: string;  // Additional style instructions like "output to PDF"
+
+  // Regional Settings (Regional Tab)
+  region: 'northeast' | 'southeast' | 'midwest' | 'southwest' | 'west' | 'pacific-northwest' | 'mountain-west' | 'national' | 'none';
+  state: string;  // Specific state (e.g., "California", "Texas", "New York")
+  dialect: 'standard-american' | 'southern' | 'midwestern' | 'northeast' | 'california' | 'neutral';
+  includeLocalReferences: boolean;  // Include local landmarks, culture, etc.
+  timeZoneAwareness: boolean;  // Mention time-specific context
+  regionalTerminology: number;  // 0-100: Generic to Region-Specific terms
+  localMarketKnowledge: boolean;  // Include local real estate/mortgage market insights
+  culturalSensitivity: number;  // 0-100: General to Highly Culturally Aware
+
+  // Role Settings (Role Tab - Mortgage/Financial)
+  jobRole: 'loan-officer' | 'processor' | 'underwriter' | 'sales' | 'sales-assistant' | 'branch-manager' | 'operations' | 'closer' | 'account-executive' | 'general';
+  yearsExperience: number;  // 0-50+
+  specializations: string[];  // FHA, VA, Conventional, Jumbo, Reverse, USDA, Non-QM, Construction
+  certifications: string;  // e.g., "NMLS #12345, MLO Licensed"
+  clientFocus: 'first-time-buyers' | 'refinance' | 'investors' | 'purchase' | 'mixed';
+  teamRole: 'individual' | 'team-lead' | 'manager' | 'executive';
+  complianceEmphasis: number;  // 0-100: Minimal to Highly Compliance-Focused
+  productKnowledge: number;  // 0-100: Basic to Expert Product Knowledge
+  loanTypes: string[];  // Specific products: "30-Year Fixed", "15-Year Fixed", "ARM", "FHA 203(b)", etc.
+  marketExpertise: string[];  // "Purchase", "Refinance", "Cash-Out Refi", "HELOC", "Construction-to-Perm"
 
   // Generated Prompt & Publishing
   systemPrompt?: string;  // Auto-generated prompt
@@ -56,6 +78,9 @@ export interface PromptConfig {
   publishedUrl?: string;  // Public URL if published
   isPublished?: boolean;  // Publishing status
 }
+
+// For backward compatibility, export as PromptConfig as well
+export type PromptConfig = PersonaConfig;
 
 interface StoreState {
   configs: PromptConfig[];
@@ -72,23 +97,26 @@ interface StoreState {
   clearStore: () => void; // Clear everything
 }
 
-const createDefaultConfig = (): PromptConfig => ({
+const createDefaultConfig = (): PersonaConfig => ({
   id: Date.now().toString(),
-  name: 'New Configuration',
+  name: 'New Persona',
   emoji: '⚙️',  // Default emoji
   createdAt: new Date().toISOString(),
 
+  // Personality Tab - Response Style
   detailLevel: 50,
   formalityLevel: 50,
   technicalDepth: 50,
   creativityLevel: 30,
   verbosity: 50,
 
+  // Personality Tab - Tone
   enthusiasm: 50,
   empathy: 50,
   confidence: 70,
   humor: 20,
 
+  // Response Structure Tab
   useExamples: true,
   useBulletPoints: true,
   useNumberedLists: false,
@@ -102,19 +130,40 @@ const createDefaultConfig = (): PromptConfig => ({
   includeStepByStep: false,
   includeSummary: false,
 
+  // Advanced Tab
   responseLength: 'auto',
   perspective: '2nd-person',
   audience: 'mixed',
   explanationStyle: 'direct',
   industryKnowledge: 50,
-
   prioritizeAccuracy: true,
   prioritizeSpeed: false,
   prioritizeClarity: true,
   prioritizeComprehensiveness: false,
-
   customInstructions: '',
-      customStyle: '',
+  customStyle: '',
+
+  // Regional Tab
+  region: 'national',
+  state: '',
+  dialect: 'neutral',
+  includeLocalReferences: false,
+  timeZoneAwareness: false,
+  regionalTerminology: 50,
+  localMarketKnowledge: false,
+  culturalSensitivity: 50,
+
+  // Role Tab (Mortgage/Financial)
+  jobRole: 'general',
+  yearsExperience: 5,
+  specializations: [],
+  certifications: '',
+  clientFocus: 'mixed',
+  teamRole: 'individual',
+  complianceEmphasis: 50,
+  productKnowledge: 50,
+  loanTypes: [],
+  marketExpertise: [],
 });
 
 // Pre-configured example personalities
@@ -159,6 +208,24 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Help users learn by guiding them through concepts with questions and examples.',
       customStyle: '',
+      region: 'national',
+      state: '',
+      dialect: 'neutral',
+      includeLocalReferences: false,
+      timeZoneAwareness: false,
+      regionalTerminology: 50,
+      localMarketKnowledge: false,
+      culturalSensitivity: 50,
+      jobRole: 'general',
+      yearsExperience: 5,
+      specializations: [],
+      certifications: '',
+      clientFocus: 'mixed',
+      teamRole: 'individual',
+      complianceEmphasis: 50,
+      productKnowledge: 50,
+      loanTypes: [],
+      marketExpertise: [],
     },
     {
       id: 'example-2',

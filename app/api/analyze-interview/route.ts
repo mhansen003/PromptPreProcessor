@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import type { PromptConfig } from '@/lib/store';
+import type { PersonaConfig } from '@/lib/store';
 
 // POST /api/analyze-interview - Analyze interview answers and create personality config
 export async function POST(request: NextRequest) {
@@ -120,10 +120,10 @@ Return ONLY valid JSON, no additional text.`;
 
     const configData = JSON.parse(completion.choices[0].message.content || '{}');
 
-    // Build complete PromptConfig object
-    const newConfig: PromptConfig = {
+    // Build complete PersonaConfig object
+    const newConfig: PersonaConfig = {
       id: Date.now().toString(),
-      name: name || 'Custom Personality',
+      name: name || 'Custom Persona',
       emoji: configData.emoji || '⚙️',
       createdAt: new Date().toISOString(),
 
@@ -170,6 +170,28 @@ Return ONLY valid JSON, no additional text.`;
       // Custom Instructions
       customInstructions: configData.customInstructions || '',
       customStyle: '',
+
+      // Regional Settings (defaults for interview-created personas)
+      region: 'national',
+      state: '',
+      dialect: 'neutral',
+      includeLocalReferences: false,
+      timeZoneAwareness: false,
+      regionalTerminology: 50,
+      localMarketKnowledge: false,
+      culturalSensitivity: 50,
+
+      // Role Settings (defaults for interview-created personas)
+      jobRole: 'general',
+      yearsExperience: 5,
+      specializations: [],
+      certifications: '',
+      clientFocus: 'mixed',
+      teamRole: 'individual',
+      complianceEmphasis: 50,
+      productKnowledge: 50,
+      loanTypes: [],
+      marketExpertise: [],
     };
 
     return NextResponse.json({

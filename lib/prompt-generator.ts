@@ -1,4 +1,4 @@
-import type { PromptConfig } from '@/lib/store';
+import type { PersonaConfig } from '@/lib/store';
 import OpenAI from 'openai';
 
 function getValueDescription(value: number): string {
@@ -9,7 +9,7 @@ function getValueDescription(value: number): string {
   return 'Very High';
 }
 
-export function buildPromptFromConfig(config: PromptConfig): string {
+export function buildPromptFromConfig(config: PersonaConfig): string {
   const prompt = `## Pre-Prompt Configuration Personality
 
 ### Summary
@@ -138,7 +138,7 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
   return prompt;
 }
 
-export async function generatePrompt(config: PromptConfig): Promise<string> {
+export async function generatePrompt(config: PersonaConfig): Promise<string> {
   try {
     // Always build the basic prompt first
     const systemPrompt = buildPromptFromConfig(config);
