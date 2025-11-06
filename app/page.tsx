@@ -23,6 +23,8 @@ export default function Home() {
   const [showToaster, setShowToaster] = useState(false);
   const [toasterMessage, setToasterMessage] = useState('');
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const [editedPrompt, setEditedPrompt] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -201,12 +203,15 @@ export default function Home() {
                         e.stopPropagation();
                         togglePublish(config.id, !config.isPublished);
                       }}
+                      disabled={isSaving && currentConfig.id === config.id}
                       className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
-                        config.isPublished
+                        isSaving && currentConfig.id === config.id
+                          ? 'bg-robinhood-border/30 text-gray-600 cursor-not-allowed'
+                          : config.isPublished
                           ? 'bg-robinhood-green/20 text-robinhood-green hover:bg-robinhood-green/30'
                           : 'bg-robinhood-border/50 text-gray-500 hover:bg-robinhood-border'
                       }`}
-                      title={config.isPublished ? 'Click to unpublish' : 'Click to publish'}
+                      title={isSaving && currentConfig.id === config.id ? 'Wait for generation to complete' : config.isPublished ? 'Click to unpublish' : 'Click to publish'}
                     >
                       {config.isPublished ? (
                         <>
@@ -344,26 +349,31 @@ export default function Home() {
                 ) : hasUnsavedChanges ? '💾 Save' : '💾 Save & Generate'}
               </button>
 
-              {/* View Prompt Button - Enabled when prompt exists */}
+              {/* View Prompt Button - Enabled when prompt exists and not generating */}
               <button
                 onClick={() => setShowViewPromptModal(true)}
-                disabled={!currentConfig.systemPrompt}
+                disabled={!currentConfig.systemPrompt || isSaving}
                 className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  currentConfig.systemPrompt
+                  currentConfig.systemPrompt && !isSaving
                     ? 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green hover:bg-robinhood-green/10'
                     : 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
                 }`}
-                title={currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt first'}
+                title={isSaving ? 'Wait for generation to complete' : currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt first'}
               >
                 👁️ View Prompt
               </button>
 
-              {/* View Endpoints Button - Visible when published */}
+              {/* View Endpoints Button - Visible when published and not generating */}
               {currentConfig.isPublished && (
                 <button
                   onClick={() => setShowEndpointsModal(true)}
-                  className="px-3 py-1.5 text-sm rounded-lg font-medium transition-all bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10"
-                  title="View API endpoints"
+                  disabled={isSaving}
+                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                    isSaving
+                      ? 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
+                      : 'bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10'
+                  }`}
+                  title={isSaving ? 'Wait for generation to complete' : 'View API endpoints'}
                 >
                   🔗 View Endpoints
                 </button>
@@ -495,7 +505,7 @@ export default function Home() {
                 <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
                 <ControlSection title="Response Structure" icon="📋" defaultOpen={true}>
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Examples"
                         checked={currentConfig.useExamples}
@@ -504,7 +514,7 @@ export default function Home() {
                         tooltip="Include concrete examples to illustrate concepts and make ideas more tangible"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Bullets"
                         checked={currentConfig.useBulletPoints}
@@ -513,7 +523,7 @@ export default function Home() {
                         tooltip="Format information as bullet points for easier scanning and readability"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Numbers"
                         checked={currentConfig.useNumberedLists}
@@ -522,7 +532,7 @@ export default function Home() {
                         tooltip="Use numbered lists for sequential steps or ordered information"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Code"
                         checked={currentConfig.includeCodeSamples}
@@ -531,7 +541,7 @@ export default function Home() {
                         tooltip="Include code snippets and programming examples in responses"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Analogies"
                         checked={currentConfig.includeAnalogies}
@@ -540,7 +550,7 @@ export default function Home() {
                         tooltip="Use analogies and metaphors to explain complex concepts through familiar comparisons"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Visual"
                         checked={currentConfig.includeVisualDescriptions}
@@ -549,7 +559,7 @@ export default function Home() {
                         tooltip="Provide visual descriptions and mental imagery to help visualize concepts"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Tables"
                         checked={currentConfig.includeTables}
@@ -558,7 +568,7 @@ export default function Home() {
                         tooltip="Present structured data and comparisons in table format"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Snippets"
                         checked={currentConfig.includeSnippets}
@@ -567,7 +577,7 @@ export default function Home() {
                         tooltip="Extract and highlight key quotes or important snippets from content"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="References"
                         checked={currentConfig.includeExternalReferences}
@@ -576,7 +586,7 @@ export default function Home() {
                         tooltip="Include references to external resources, documentation, and sources"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Thought Process"
                         checked={currentConfig.showThoughtProcess}
@@ -585,7 +595,7 @@ export default function Home() {
                         tooltip="Show internal reasoning and chain of thought before answering (helps with complex problems)"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Step-by-Step"
                         checked={currentConfig.includeStepByStep}
@@ -594,7 +604,7 @@ export default function Home() {
                         tooltip="Break down processes into clear, numbered step-by-step instructions"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Summary"
                         checked={currentConfig.includeSummary}
@@ -618,7 +628,7 @@ export default function Home() {
                       label="Response Length"
                       value={currentConfig.responseLength}
                       onChange={(v: any) => handleUpdate({ responseLength: v })}
-                      tooltip="Control target response length: Auto (context-dependent), Short (1-2 paragraphs), Medium (3-5 paragraphs), Long (5-10 paragraphs), Comprehensive (detailed deep-dive)"
+                      tooltip={<><strong>Control target response length:</strong><br/>• Auto: Context-dependent<br/>• Short: 1-2 paragraphs<br/>• Medium: 3-5 paragraphs<br/>• Long: 5-10 paragraphs<br/>• Comprehensive: Detailed deep-dive</>}
                       options={[
                         { value: 'auto', label: 'Auto' },
                         { value: 'short', label: 'Short' },
@@ -631,7 +641,7 @@ export default function Home() {
                       label="Perspective"
                       value={currentConfig.perspective}
                       onChange={(v: any) => handleUpdate({ perspective: v })}
-                      tooltip="Set grammatical perspective: First Person (I/We), Second Person (You - direct address), Third Person (They - objective), Mixed (context-dependent)"
+                      tooltip={<><strong>Set grammatical perspective:</strong><br/>• 1st Person: I/We<br/>• 2nd Person: You (direct address)<br/>• 3rd Person: They (objective)<br/>• Mixed: Context-dependent</>}
                       options={[
                         { value: '1st-person', label: 'First Person (I/We)' },
                         { value: '2nd-person', label: 'Second Person (You)' },
@@ -643,7 +653,7 @@ export default function Home() {
                       label="Target Generation"
                       value={currentConfig.audience}
                       onChange={(v: any) => handleUpdate({ audience: v })}
-                      tooltip="Tailor language and references to age group: Gen Z (modern slang, digital-native), Millennial (tech-savvy), Gen X (balanced), Boomer (traditional), Senior (accessible)"
+                      tooltip={<><strong>Tailor language to age group:</strong><br/>• Gen Z: Modern slang, digital-native<br/>• Millennial: Tech-savvy<br/>• Gen X: Balanced approach<br/>• Boomer: Traditional<br/>• Senior: Accessible language</>}
                       options={[
                         { value: 'gen-z', label: 'Gen Z (18-27)' },
                         { value: 'millennial', label: 'Millennial (28-43)' },
@@ -657,7 +667,7 @@ export default function Home() {
                       label="Explanation Style"
                       value={currentConfig.explanationStyle}
                       onChange={(v: any) => handleUpdate({ explanationStyle: v })}
-                      tooltip="Choose teaching approach: Direct (straightforward answers), Socratic (learning through questions), Narrative (story-based), Analytical (structured breakdown)"
+                      tooltip={<><strong>Choose teaching approach:</strong><br/>• Direct: Straightforward answers<br/>• Socratic: Learning through questions<br/>• Narrative: Story-based<br/>• Analytical: Structured breakdown</>}
                       options={[
                         { value: 'direct', label: 'Direct' },
                         { value: 'socratic', label: 'Socratic' },
@@ -667,7 +677,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-robinhood-border/30">
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Accuracy"
                         checked={currentConfig.prioritizeAccuracy}
@@ -676,7 +686,7 @@ export default function Home() {
                         tooltip="Prioritize factual correctness and precision over speed or brevity"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Speed"
                         checked={currentConfig.prioritizeSpeed}
@@ -685,7 +695,7 @@ export default function Home() {
                         tooltip="Prioritize quick, concise responses over comprehensive coverage"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Clarity"
                         checked={currentConfig.prioritizeClarity}
@@ -694,7 +704,7 @@ export default function Home() {
                         tooltip="Prioritize clear, understandable explanations using simple language"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                    <div className="flex items-center gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Complete"
                         checked={currentConfig.prioritizeComprehensiveness}
@@ -758,9 +768,14 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="bg-robinhood-card border border-robinhood-green rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-white">Generated System Prompt</h3>
+              <h3 className="text-2xl font-bold text-white">
+                {isEditingPrompt ? 'Edit System Prompt' : 'Generated System Prompt'}
+              </h3>
               <button
-                onClick={() => setShowViewPromptModal(false)}
+                onClick={() => {
+                  setShowViewPromptModal(false);
+                  setIsEditingPrompt(false);
+                }}
                 className="text-gray-400 hover:text-white"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -769,26 +784,78 @@ export default function Home() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
-              <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-robinhood-darker p-6 rounded-lg border border-robinhood-border">
-                {currentConfig.systemPrompt}
-              </pre>
+              {isEditingPrompt ? (
+                <textarea
+                  value={editedPrompt}
+                  onChange={(e) => setEditedPrompt(e.target.value)}
+                  className="w-full h-full min-h-[400px] text-sm text-gray-300 whitespace-pre-wrap font-mono bg-robinhood-darker p-6 rounded-lg border border-robinhood-border focus:outline-none focus:ring-2 focus:ring-robinhood-green resize-none"
+                />
+              ) : (
+                <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-robinhood-darker p-6 rounded-lg border border-robinhood-border">
+                  {currentConfig.systemPrompt}
+                </pre>
+              )}
             </div>
             <div className="px-6 py-4 border-t border-robinhood-border flex items-center justify-between bg-robinhood-darker/50">
               <p className="text-xs text-gray-400">
-                <span className="font-semibold text-robinhood-green">Character Count:</span> {currentConfig.systemPrompt.length.toLocaleString()}
+                <span className="font-semibold text-robinhood-green">Character Count:</span> {(isEditingPrompt ? editedPrompt : currentConfig.systemPrompt).length.toLocaleString()}
               </p>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(currentConfig.systemPrompt || '');
-                  alert('Prompt copied to clipboard!');
-                }}
-                className="px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy to Clipboard
-              </button>
+              <div className="flex items-center gap-2">
+                {isEditingPrompt ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        setIsEditingPrompt(false);
+                        setEditedPrompt('');
+                      }}
+                      className="px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:bg-robinhood-border transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        // Save the edited prompt
+                        updateConfig(currentConfig.id, { systemPrompt: editedPrompt });
+                        setIsEditingPrompt(false);
+                        showToast('✅ Prompt updated!');
+                      }}
+                      className="px-5 py-2 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setEditedPrompt(currentConfig.systemPrompt || '');
+                        setIsEditingPrompt(true);
+                      }}
+                      className="px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green hover:bg-robinhood-green/10 transition-all flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(currentConfig.systemPrompt || '');
+                        showToast('📋 Prompt copied to clipboard!');
+                      }}
+                      className="px-5 py-2 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy to Clipboard
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

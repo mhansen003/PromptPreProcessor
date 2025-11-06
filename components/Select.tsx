@@ -9,7 +9,7 @@ interface SelectProps {
   onChange: (value: string) => void;
   options: { value: string; label: string; description?: string }[];
   description?: string;
-  tooltip?: string;
+  tooltip?: string | React.ReactNode;
 }
 
 export const Select: React.FC<SelectProps> = ({

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface TooltipProps {
-  content: string;
+  content: string | React.ReactNode;
   children: React.ReactNode;
   delay?: number;
 }
@@ -23,7 +23,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     timeoutRef.current = setTimeout(() => {
       if (triggerRef.current) {
         const rect = triggerRef.current.getBoundingClientRect();
-        const tooltipWidth = 280; // max-w-[280px]
+        const tooltipWidth = 320; // max-w-[320px]
 
         // Calculate initial position (centered above element)
         let left = rect.left + rect.width / 2;
@@ -92,10 +92,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
         >
           <div className="relative">
             {/* Tooltip content */}
-            <div className="bg-robinhood-darker border-2 border-robinhood-green rounded-lg px-3 py-2 shadow-2xl max-w-[280px]">
-              <p className="text-xs text-gray-200 leading-snug whitespace-normal break-words font-medium">
+            <div className="bg-robinhood-darker border-2 border-robinhood-green rounded-lg px-3 py-2 shadow-2xl max-w-[320px]">
+              <div className="text-xs text-gray-200 leading-relaxed whitespace-normal break-words">
                 {content}
-              </p>
+              </div>
             </div>
 
             {/* Arrow pointing down */}
