@@ -1050,9 +1050,16 @@ export default function Home() {
                                 <div className="flex items-center gap-2">
                                   <span className="text-[10px] text-gray-500">{record.timestamp}</span>
                                   {record.publishedUrl && (
-                                    <span className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded">
-                                      Published
-                                    </span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPublishedUrl(record.publishedUrl || '');
+                                        setShowPublishSuccess(true);
+                                      }}
+                                      className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded hover:bg-robinhood-green hover:text-robinhood-dark transition-all cursor-pointer"
+                                    >
+                                      📤 Published
+                                    </button>
                                   )}
                                 </div>
                               </div>
@@ -1820,14 +1827,14 @@ export default function Home() {
           <div className="bg-robinhood-card border-2 border-robinhood-green rounded-xl max-w-lg w-full shadow-2xl">
             <div className="px-6 py-5 border-b border-robinhood-green/30">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-robinhood-green/20 rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-12 h-12 bg-robinhood-green/20 rounded-full flex items-center justify-center">
                   <svg className="w-6 h-6 text-robinhood-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Prompt Published Successfully!</h3>
-                  <p className="text-sm text-gray-400">Your prompt is now publicly accessible</p>
+                  <h3 className="text-xl font-bold text-white">Published Prompt</h3>
+                  <p className="text-sm text-gray-400">Share this public URL</p>
                 </div>
               </div>
             </div>
@@ -1864,12 +1871,23 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50">
+            <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50 flex gap-3">
+              <a
+                href={publishedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Visit URL
+              </a>
               <button
                 onClick={() => setShowPublishSuccess(false)}
-                className="w-full px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 transition-all"
+                className="flex-1 px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 transition-all"
               >
-                Got it!
+                Close
               </button>
             </div>
           </div>
