@@ -19,8 +19,8 @@ export const Toggle: React.FC<ToggleProps> = ({
   tooltip,
 }) => {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center gap-1.5">
         <label className="text-xs font-medium text-gray-300 cursor-pointer">
           {label}
         </label>

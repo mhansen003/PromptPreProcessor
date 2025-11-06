@@ -10,6 +10,7 @@ import { Tooltip } from '@/components/Tooltip';
 
 interface GeneratedPromptRecord {
   id: string;
+  templateId: string;
   configName: string;
   promptText: string;
   variation: number;
@@ -126,6 +127,7 @@ export default function Home() {
         const data = await response.json();
         const record: GeneratedPromptRecord = {
           id: `${Date.now()}-${i}`,
+          templateId: currentConfig.id,
           configName: currentConfig.name,
           promptText: data.systemPrompt,
           variation: i + 1,
@@ -422,6 +424,22 @@ export default function Home() {
                 className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
               >
                 📋 Duplicate
+              </button>
+
+              {/* Delete Template Button */}
+              <button
+                onClick={() => {
+                  if (confirm(`⚠️ DELETE TEMPLATE: "${currentConfig.name}"\n\nThis will permanently delete:\n• All template settings and controls\n• This cannot be undone\n\nAre you sure you want to delete this template?`)) {
+                    deleteConfig(currentConfig.id);
+                  }
+                }}
+                disabled={configs.length === 1}
+                className="px-3 py-1.5 text-sm bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Delete template"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
               </button>
 
               {/* User Profile Menu */}
@@ -820,14 +838,16 @@ export default function Home() {
                 <div className="bg-robinhood-card border border-robinhood-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-white">Generated Prompts</h3>
-                    <span className="text-xs text-robinhood-green font-mono">{generatedHistory.length}</span>
+                    <span className="text-xs text-robinhood-green font-mono">
+                      {generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length}
+                    </span>
                   </div>
 
                   <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
-                    {generatedHistory.length === 0 ? (
+                    {generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).length === 0 ? (
                       <p className="text-xs text-gray-500 text-center py-4">No prompts generated yet</p>
                     ) : (
-                      generatedHistory.map((record, index) => (
+                      generatedHistory.filter(r => r.templateId === currentConfig.id || !r.templateId).map((record, index) => (
                         <div
                           key={record.id}
                           className={`relative group p-2 bg-robinhood-darker border-2 rounded transition-all ${
