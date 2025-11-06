@@ -193,7 +193,7 @@ export default function Home() {
                     <span className="text-robinhood-green">●</span>
                   )}
                 </div>
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between mt-2">
                   <div className="text-[10px] text-gray-600">
                     {new Date(config.createdAt).toLocaleDateString()}
                   </div>
@@ -203,57 +203,33 @@ export default function Home() {
                         e.stopPropagation();
                         togglePublish(config.id, !config.isPublished);
                       }}
-                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold transition-all shadow-sm ${
                         config.isPublished
-                          ? 'bg-robinhood-green/20 text-robinhood-green hover:bg-robinhood-green/30'
-                          : 'bg-robinhood-border/50 text-gray-500 hover:bg-robinhood-border'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30 hover:border-blue-500'
+                          : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 hover:border-red-500'
                       }`}
-                      title={config.isPublished ? 'Click to unpublish' : 'Click to publish'}
+                      title={config.isPublished ? 'Published - Click to unpublish' : 'Not Published - Click to publish'}
                     >
                       {config.isPublished ? (
                         <>
-                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
-                          ON
+                          <span>ON</span>
                         </>
                       ) : (
-                        <>OFF</>
+                        <>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span>OFF</span>
+                        </>
                       )}
                     </button>
                   )}
                 </div>
               </button>
 
-              {/* Sidebar action buttons - shown on hover */}
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    duplicateConfig(config.id);
-                  }}
-                  className="p-1.5 rounded hover:bg-blue-500/20 text-blue-400 hover:text-blue-300"
-                  title="Duplicate personality"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setPersonalityToDelete(config.id);
-                    setShowDeletePersonalityModal(true);
-                  }}
-                  disabled={configs.length === 1}
-                  className="p-1.5 rounded hover:bg-red-500/20 text-red-400 hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Delete personality"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
             </div>
           ))}
         </div>
@@ -370,6 +346,32 @@ export default function Home() {
                   🔗 View Endpoints
                 </button>
               )}
+
+              {/* Duplicate Button */}
+              <button
+                onClick={() => duplicateConfig(currentConfig.id)}
+                className="px-3 py-1.5 text-sm bg-robinhood-card border border-blue-500/50 text-blue-400 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-all"
+                title="Duplicate this personality"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => {
+                  setPersonalityToDelete(currentConfig.id);
+                  setShowDeletePersonalityModal(true);
+                }}
+                disabled={configs.length === 1}
+                className="px-3 py-1.5 text-sm bg-robinhood-card border border-red-500/50 text-red-400 rounded-lg hover:border-red-500 hover:bg-red-500/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                title={configs.length === 1 ? 'Cannot delete last personality' : 'Delete this personality'}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
 
               {/* User Menu */}
               <button
