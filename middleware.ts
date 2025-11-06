@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const session = verifyAuthToken(token);
+    const session = await verifyAuthToken(token);
 
     if (!session) {
       const response = NextResponse.redirect(new URL('/signin', request.url));

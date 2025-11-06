@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import * as jose from 'jose';
 
 export interface AuthSession {
   email: string;
@@ -25,10 +25,12 @@ export function isValidCMGEmail(email: string): boolean {
 }
 
 // Create JWT token
-export function createAuthToken(email: string): string {
+export async function createAuthToken(email: string): Promise<string> {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET not configured');
   }
+
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
   const session: AuthSession = {
     email,
@@ -36,20 +38,26 @@ export function createAuthToken(email: string): string {
     expiresAt: Date.now() + AUTH_CONFIG.SESSION_EXPIRY_HOURS * 60 * 60 * 1000,
   };
 
-  return jwt.sign(session, process.env.JWT_SECRET, {
-    expiresIn: `${AUTH_CONFIG.SESSION_EXPIRY_HOURS}h`,
-  });
+  const token = await new jose.SignJWT(session)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(`${AUTH_CONFIG.SESSION_EXPIRY_HOURS}h`)
+    .sign(secret);
+
+  return token;
 }
 
 // Verify JWT token
-export function verifyAuthToken(token: string): AuthSession | null {
+export async function verifyAuthToken(token: string): Promise<AuthSession | null> {
   if (!process.env.JWT_SECRET) {
     console.error('[Auth] JWT_SECRET not configured');
     throw new Error('JWT_SECRET not configured');
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as AuthSession;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const { payload } = await jose.jwtVerify(token, secret);
+
+    const decoded = payload as unknown as AuthSession;
 
     // Check if token is expired
     if (decoded.expiresAt < Date.now()) {

@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     await redis.del(otpKey);
 
     // Create JWT token
-    const token = createAuthToken(emailLower);
+    const token = await createAuthToken(emailLower);
 
     // Create response with httpOnly cookie
     const response = NextResponse.json({
