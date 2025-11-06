@@ -18,17 +18,17 @@ export const ControlSection: React.FC<ControlSectionProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-robinhood-card border border-robinhood-border rounded-xl overflow-hidden">
+    <div className="bg-robinhood-card border border-robinhood-border rounded-lg overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-robinhood-border/30 transition-colors"
+        className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-robinhood-border/30 transition-colors"
       >
-        <div className="flex items-center gap-3">
-          {icon && <span className="text-xl">{icon}</span>}
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <div className="flex items-center gap-2">
+          {icon && <span className="text-base">{icon}</span>}
+          <h3 className="text-sm font-semibold text-white">{title}</h3>
         </div>
         <svg
-          className={`w-5 h-5 text-gray-400 transition-transform ${
+          className={`w-4 h-4 text-gray-400 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
           fill="none"
@@ -45,8 +45,8 @@ export const ControlSection: React.FC<ControlSectionProps> = ({
       </button>
 
       {isOpen && (
-        <div className="px-6 pb-6 space-y-6 border-t border-robinhood-border/50">
-          <div className="pt-6">{children}</div>
+        <div className="px-4 pb-4 border-t border-robinhood-border/50">
+          <div className="pt-4">{children}</div>
         </div>
       )}
     </div>

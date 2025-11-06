@@ -41,6 +41,7 @@ export interface PromptConfig {
 
   // Custom Instructions
   customInstructions: string;
+  customStyle: string;  // Additional style instructions like "output to PDF"
   systemPrompt?: string;  // Generated prompt
 }
 
@@ -90,6 +91,7 @@ const createDefaultConfig = (): PromptConfig => ({
   prioritizeComprehensiveness: false,
 
   customInstructions: '',
+      customStyle: '',
 });
 
 // Pre-configured example templates
@@ -125,6 +127,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Help users learn by guiding them through concepts with questions and examples.',
+      customStyle: '',
     },
     {
       id: 'example-2',
@@ -154,6 +157,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: true,
       customInstructions: 'Provide thorough code reviews focusing on best practices, performance, and maintainability.',
+      customStyle: '',
     },
     {
       id: 'example-3',
@@ -183,6 +187,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Craft engaging narratives with vivid descriptions and creative flair.',
+      customStyle: '',
     },
     {
       id: 'example-4',
@@ -212,6 +217,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Deliver concise, high-level summaries focused on key insights and actionable items.',
+      customStyle: '',
     },
     {
       id: 'example-5',
@@ -241,6 +247,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Be friendly, relatable, and conversational. Like chatting with a knowledgeable friend.',
+      customStyle: '',
     },
     {
       id: 'example-6',
@@ -270,6 +277,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: true,
       customInstructions: 'Provide in-depth analysis with comprehensive coverage of topics, citing sources when possible.',
+      customStyle: '',
     },
     {
       id: 'example-7',
@@ -299,6 +307,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Get straight to the point with brief, actionable answers.',
+      customStyle: '',
     },
     {
       id: 'example-8',
@@ -328,6 +337,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Create engaging, snappy content perfect for social media. Be trendy and relatable.',
+      customStyle: '',
     },
     {
       id: 'example-9',
@@ -357,6 +367,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: true,
       customInstructions: 'Write clear, comprehensive technical documentation with code examples and step-by-step instructions.',
+      customStyle: '',
     },
     {
       id: 'example-10',
@@ -386,6 +397,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeClarity: true,
       prioritizeComprehensiveness: false,
       customInstructions: 'Help identify and fix bugs with clear explanations of what went wrong and how to fix it.',
+      customStyle: '',
     },
   ];
 };

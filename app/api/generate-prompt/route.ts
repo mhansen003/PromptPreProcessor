@@ -118,6 +118,10 @@ function buildPromptFromConfig(config: PromptConfig): string {
     prompt += `\n## Custom Instructions\n${config.customInstructions}\n`;
   }
 
+  if (config.customStyle) {
+    prompt += `\n## Additional Style Requirements\n${config.customStyle}\n`;
+  }
+
   return prompt;
 }
 
