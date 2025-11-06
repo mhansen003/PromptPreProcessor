@@ -10,15 +10,15 @@ function getValueDescription(value: number): string {
 }
 
 export function buildPromptFromConfig(config: PromptConfig): string {
-  const prompt = `## 🧩 Pre-Prompt Configuration Personality
+  const prompt = `## Pre-Prompt Configuration Personality
 
-### 🧠 Summary
+### Summary
 This configuration defines how the AI should construct its responses.
 It specifies the **style, tone, structure, and behavioral settings** for the model that will generate user-facing answers.
 
 ---
 
-### 1. 🎨 Response Style
+### 1. Response Style
 | Setting | Value | Description |
 |----------|--------|-------------|
 | **Detail Level** | ${config.detailLevel}/100 | ${getValueDescription(config.detailLevel)} - ${config.detailLevel < 30 ? 'Concise responses' : config.detailLevel > 70 ? 'Extremely detailed responses' : 'Moderately detailed responses'} |
@@ -30,7 +30,7 @@ It specifies the **style, tone, structure, and behavioral settings** for the mod
 
 ---
 
-### 2. 💬 Tone & Personality
+### 2. Tone & Personality
 | Setting | Value | Description |
 |----------|--------|-------------|
 | **Enthusiasm** | ${config.enthusiasm}/100 | ${getValueDescription(config.enthusiasm)} - ${config.enthusiasm > 60 ? 'Show enthusiasm and energy' : config.enthusiasm < 30 ? 'Neutral tone' : 'Moderate enthusiasm'} |
@@ -40,42 +40,42 @@ It specifies the **style, tone, structure, and behavioral settings** for the mod
 
 ---
 
-### 3. 🧱 Response Structure
+### 3. Response Structure
 | Feature | Enabled | Behavior |
 |----------|----------|-----------|
-| **Examples** | ${config.useExamples ? '✅ Yes' : '❌ No'} | ${config.useExamples ? 'Include relevant examples to illustrate points' : 'Avoid using examples'} |
-| **Bullets** | ${config.useBulletPoints ? '✅ Yes' : '❌ No'} | ${config.useBulletPoints ? 'Use bullet points to organize information' : 'Avoid bullet point formatting'} |
-| **Numbers** | ${config.useNumberedLists ? '✅ Yes' : '❌ No'} | ${config.useNumberedLists ? 'Use numbered lists for sequential information' : 'Avoid numbered lists'} |
-| **Code** | ${config.includeCodeSamples ? '✅ Yes' : '❌ No'} | ${config.includeCodeSamples ? 'Include code samples when relevant' : 'Avoid code samples'} |
-| **Tables** | ${config.includeTables ? '✅ Yes' : '❌ No'} | ${config.includeTables ? 'Use data tables for structured information' : 'Avoid table formatting'} |
-| **Thought Process** | ${config.showThoughtProcess ? '✅ Yes' : '❌ No'} | ${config.showThoughtProcess ? 'Show internal reasoning and thought process (Chain of Thought)' : 'Present final conclusions only'} |
-| **Analogies** | ${config.includeAnalogies ? '✅ Yes' : '❌ No'} | ${config.includeAnalogies ? 'Use analogies to explain complex concepts' : 'Avoid analogies'} |
-| **Snippets** | ${config.includeSnippets ? '✅ Yes' : '❌ No'} | ${config.includeSnippets ? 'Extract and highlight key snippets or quotes' : 'Avoid highlighting snippets'} |
-| **Step-by-Step** | ${config.includeStepByStep ? '✅ Yes' : '❌ No'} | ${config.includeStepByStep ? 'Break down processes into clear step-by-step instructions' : 'Present information holistically'} |
-| **Summary** | ${config.includeSummary ? '✅ Yes' : '❌ No'} | ${config.includeSummary ? 'Include summary sections for key points' : 'Omit summary sections'} |
-| **Visual** | ${config.includeVisualDescriptions ? '✅ Yes' : '❌ No'} | ${config.includeVisualDescriptions ? 'Provide visual descriptions and mental imagery' : 'Avoid visual descriptions'} |
-| **References** | ${config.includeExternalReferences ? '✅ Yes' : '❌ No'} | ${config.includeExternalReferences ? 'Reference external resources and documentation' : 'Avoid external references'} |
+| **Examples** | ${config.useExamples ? 'Yes' : 'No'} | ${config.useExamples ? 'Include relevant examples to illustrate points' : 'Avoid using examples'} |
+| **Bullets** | ${config.useBulletPoints ? 'Yes' : 'No'} | ${config.useBulletPoints ? 'Use bullet points to organize information' : 'Avoid bullet point formatting'} |
+| **Numbers** | ${config.useNumberedLists ? 'Yes' : 'No'} | ${config.useNumberedLists ? 'Use numbered lists for sequential information' : 'Avoid numbered lists'} |
+| **Code** | ${config.includeCodeSamples ? 'Yes' : 'No'} | ${config.includeCodeSamples ? 'Include code samples when relevant' : 'Avoid code samples'} |
+| **Tables** | ${config.includeTables ? 'Yes' : 'No'} | ${config.includeTables ? 'Use data tables for structured information' : 'Avoid table formatting'} |
+| **Thought Process** | ${config.showThoughtProcess ? 'Yes' : 'No'} | ${config.showThoughtProcess ? 'Show internal reasoning and thought process (Chain of Thought)' : 'Present final conclusions only'} |
+| **Analogies** | ${config.includeAnalogies ? 'Yes' : 'No'} | ${config.includeAnalogies ? 'Use analogies to explain complex concepts' : 'Avoid analogies'} |
+| **Snippets** | ${config.includeSnippets ? 'Yes' : 'No'} | ${config.includeSnippets ? 'Extract and highlight key snippets or quotes' : 'Avoid highlighting snippets'} |
+| **Step-by-Step** | ${config.includeStepByStep ? 'Yes' : 'No'} | ${config.includeStepByStep ? 'Break down processes into clear step-by-step instructions' : 'Present information holistically'} |
+| **Summary** | ${config.includeSummary ? 'Yes' : 'No'} | ${config.includeSummary ? 'Include summary sections for key points' : 'Omit summary sections'} |
+| **Visual** | ${config.includeVisualDescriptions ? 'Yes' : 'No'} | ${config.includeVisualDescriptions ? 'Provide visual descriptions and mental imagery' : 'Avoid visual descriptions'} |
+| **References** | ${config.includeExternalReferences ? 'Yes' : 'No'} | ${config.includeExternalReferences ? 'Reference external resources and documentation' : 'Avoid external references'} |
 
 ---
 
-### 4. ⚙️ Advanced Settings
+### 4. Advanced Settings
 | Setting | Value | Description |
 |----------|--------|-------------|
 | **Response Length** | ${config.responseLength} | Preferred length of responses |
 | **Perspective** | ${config.perspective} | Narrative perspective for responses |
 | **Target Generation** | ${config.audience} | Audience demographic and characteristics |
 | **Explanation Style** | ${config.explanationStyle} | Approach to explaining concepts |
-| **Accuracy** | ${config.prioritizeAccuracy ? '✅ High Priority' : '⚪ Standard'} | ${config.prioritizeAccuracy ? 'Prioritize accuracy over speed' : 'Standard accuracy'} |
-| **Speed** | ${config.prioritizeSpeed ? '✅ High Priority' : '⚪ Standard'} | ${config.prioritizeSpeed ? 'Prioritize quick responses' : 'Standard response speed'} |
-| **Clarity** | ${config.prioritizeClarity ? '✅ High Priority' : '⚪ Standard'} | ${config.prioritizeClarity ? 'Prioritize clarity and understandability' : 'Standard clarity'} |
-| **Completeness** | ${config.prioritizeComprehensiveness ? '✅ High Priority' : '⚪ Standard'} | ${config.prioritizeComprehensiveness ? 'Prioritize comprehensive coverage' : 'Standard completeness'} |
+| **Accuracy** | ${config.prioritizeAccuracy ? 'High Priority' : 'Standard'} | ${config.prioritizeAccuracy ? 'Prioritize accuracy over speed' : 'Standard accuracy'} |
+| **Speed** | ${config.prioritizeSpeed ? 'High Priority' : 'Standard'} | ${config.prioritizeSpeed ? 'Prioritize quick responses' : 'Standard response speed'} |
+| **Clarity** | ${config.prioritizeClarity ? 'High Priority' : 'Standard'} | ${config.prioritizeClarity ? 'Prioritize clarity and understandability' : 'Standard clarity'} |
+| **Completeness** | ${config.prioritizeComprehensiveness ? 'High Priority' : 'Standard'} | ${config.prioritizeComprehensiveness ? 'Prioritize comprehensive coverage' : 'Standard completeness'} |
 
 ${config.customInstructions ? `\n**Custom Instructions:**\n${config.customInstructions}\n` : ''}
 ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customStyle}\n` : ''}
 
 ---
 
-### 5. 🧾 Resulting Behavior Summary (Human-Readable)
+### 5. Resulting Behavior Summary (Human-Readable)
 > This AI will respond with **${getValueDescription(config.detailLevel).toLowerCase()} detail** in a **${config.formalityLevel < 30 ? 'casual' : config.formalityLevel > 70 ? 'formal' : 'balanced'}** tone.
 > Technical content will be ${config.technicalDepth < 30 ? 'simplified and accessible' : config.technicalDepth > 70 ? 'technical and in-depth' : 'moderately technical'}.
 > The personality is ${config.enthusiasm > 60 ? 'enthusiastic' : 'measured'}, ${config.empathy > 60 ? 'empathetic' : 'objective'}, and ${config.confidence > 70 ? 'confident' : config.confidence < 30 ? 'cautious' : 'balanced'}${config.humor > 60 ? ' with appropriate humor' : ''}.
@@ -83,7 +83,7 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
 
 ---
 
-### 6. 🧠 Machine-Readable Configuration (JSON)
+### 6. Machine-Readable Configuration (JSON)
 \`\`\`json
 {
   "response_style": {
@@ -125,7 +125,15 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
     "completeness": ${config.prioritizeComprehensiveness}
   }
 }
-\`\`\``;
+\`\`\`
+
+---
+
+### IMPORTANT GLOBAL INSTRUCTIONS:
+- **NEVER use emojis in any responses**
+- Provide clean, professional text output only
+- Use standard punctuation and formatting
+- Keep responses free of decorative characters`;
 
   return prompt;
 }
@@ -155,11 +163,15 @@ export async function generatePrompt(config: PromptConfig): Promise<string> {
 
 The configuration is already formatted in a strict personality structure with:
 - Markdown tables
-- Emoji section headers
+- Clean section headers (NO EMOJIS)
 - Detailed descriptions
 - JSON configuration block
 
-DO NOT modify, rephrase, or restructure the content. Return it verbatim.`,
+CRITICAL RULES:
+- DO NOT modify, rephrase, or restructure the content
+- DO NOT add emojis or decorative characters
+- Return it verbatim with clean, professional formatting
+- Keep all text plain and API-consumable`,
         },
         {
           role: 'user',
