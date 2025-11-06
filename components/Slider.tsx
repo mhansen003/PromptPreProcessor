@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Tooltip } from './Tooltip';
 
 interface SliderProps {
   label: string;
@@ -12,6 +13,7 @@ interface SliderProps {
   leftLabel?: string;
   rightLabel?: string;
   showValue?: boolean;
+  tooltip?: string;
 }
 
 export const Slider: React.FC<SliderProps> = ({
@@ -24,6 +26,7 @@ export const Slider: React.FC<SliderProps> = ({
   leftLabel,
   rightLabel,
   showValue = true,
+  tooltip,
 }) => {
   const percentage = ((value - min) / (max - min)) * 100;
 
@@ -40,9 +43,18 @@ export const Slider: React.FC<SliderProps> = ({
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center">
-        <label className="text-xs font-medium text-gray-300">
-          {label}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-gray-300">
+            {label}
+          </label>
+          {tooltip && (
+            <Tooltip content={tooltip}>
+              <div className="flex items-center justify-center w-4 h-4 rounded-full bg-robinhood-green/20 text-robinhood-green text-[10px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
+                i
+              </div>
+            </Tooltip>
+          )}
+        </div>
         {showValue && (
           <span className="text-xs font-mono" style={{ color: currentColor }}>
             {value}

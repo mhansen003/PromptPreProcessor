@@ -281,113 +281,93 @@ export default function Home() {
               <div className="col-span-8 space-y-3">
                 {/* Response Style */}
                 <ControlSection title="Response Style" icon="🎨" defaultOpen={true}>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                    <div>
-                      <Slider
-                        label="Detail Level"
-                        value={currentConfig.detailLevel}
-                        onChange={(v) => handleUpdate({ detailLevel: v })}
-                        leftLabel="Concise"
-                        rightLabel="Detailed"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "The sky is blue" → High: "Due to Rayleigh scattering..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Formality"
-                        value={currentConfig.formalityLevel}
-                        onChange={(v) => handleUpdate({ formalityLevel: v })}
-                        leftLabel="Casual"
-                        rightLabel="Formal"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Hey! Let's go..." → High: "It is imperative..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Technical Depth"
-                        value={currentConfig.technicalDepth}
-                        onChange={(v) => handleUpdate({ technicalDepth: v })}
-                        leftLabel="Simple"
-                        rightLabel="Advanced"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "It stores data" → High: "B-tree indexing O(log n)"</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Creativity"
-                        value={currentConfig.creativityLevel}
-                        onChange={(v) => handleUpdate({ creativityLevel: v })}
-                        leftLabel="Factual"
-                        rightLabel="Creative"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "The report states..." → High: "Imagine a world..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Verbosity"
-                        value={currentConfig.verbosity}
-                        onChange={(v) => handleUpdate({ verbosity: v })}
-                        leftLabel="Brief"
-                        rightLabel="Lengthy"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Done." → High: "To accomplish this, first..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Industry Terminology"
-                        value={currentConfig.industryKnowledge}
-                        onChange={(v) => handleUpdate({ industryKnowledge: v })}
-                        leftLabel="Explain Terms"
-                        rightLabel="Use Acronyms"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Annual Percentage Rate" → High: "APR, LTV, DTI"</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <Slider
+                      label="Detail Level"
+                      value={currentConfig.detailLevel}
+                      onChange={(v) => handleUpdate({ detailLevel: v })}
+                      leftLabel="Concise"
+                      rightLabel="Detailed"
+                      tooltip='Low: "The sky is blue" → High: "Due to Rayleigh scattering..."'
+                    />
+                    <Slider
+                      label="Formality"
+                      value={currentConfig.formalityLevel}
+                      onChange={(v) => handleUpdate({ formalityLevel: v })}
+                      leftLabel="Casual"
+                      rightLabel="Formal"
+                      tooltip='Low: "Hey! Let\'s go..." → High: "It is imperative..."'
+                    />
+                    <Slider
+                      label="Technical Depth"
+                      value={currentConfig.technicalDepth}
+                      onChange={(v) => handleUpdate({ technicalDepth: v })}
+                      leftLabel="Simple"
+                      rightLabel="Advanced"
+                      tooltip='Low: "It stores data" → High: "B-tree indexing O(log n)"'
+                    />
+                    <Slider
+                      label="Creativity"
+                      value={currentConfig.creativityLevel}
+                      onChange={(v) => handleUpdate({ creativityLevel: v })}
+                      leftLabel="Factual"
+                      rightLabel="Creative"
+                      tooltip='Low: "The report states..." → High: "Imagine a world..."'
+                    />
+                    <Slider
+                      label="Verbosity"
+                      value={currentConfig.verbosity}
+                      onChange={(v) => handleUpdate({ verbosity: v })}
+                      leftLabel="Brief"
+                      rightLabel="Lengthy"
+                      tooltip='Low: "Done." → High: "To accomplish this, first..."'
+                    />
+                    <Slider
+                      label="Industry Terminology"
+                      value={currentConfig.industryKnowledge}
+                      onChange={(v) => handleUpdate({ industryKnowledge: v })}
+                      leftLabel="Explain Terms"
+                      rightLabel="Use Acronyms"
+                      tooltip='Low: "Annual Percentage Rate" → High: "APR, LTV, DTI"'
+                    />
                   </div>
                 </ControlSection>
 
                 {/* Tone */}
                 <ControlSection title="Tone & Personality" icon="💬" defaultOpen={true}>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                    <div>
-                      <Slider
-                        label="Enthusiasm"
-                        value={currentConfig.enthusiasm}
-                        onChange={(v) => handleUpdate({ enthusiasm: v })}
-                        leftLabel="Neutral"
-                        rightLabel="Excited"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "This is correct" → High: "Amazing work!"</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Empathy"
-                        value={currentConfig.empathy}
-                        onChange={(v) => handleUpdate({ empathy: v })}
-                        leftLabel="Objective"
-                        rightLabel="Caring"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Error occurred" → High: "I understand this is frustrating..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Confidence"
-                        value={currentConfig.confidence}
-                        onChange={(v) => handleUpdate({ confidence: v })}
-                        leftLabel="Cautious"
-                        rightLabel="Assertive"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "This might be..." → High: "This is definitively..."</p>
-                    </div>
-                    <div>
-                      <Slider
-                        label="Humor"
-                        value={currentConfig.humor}
-                        onChange={(v) => handleUpdate({ humor: v })}
-                        leftLabel="Serious"
-                        rightLabel="Playful"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Task complete" → High: "Mission accomplished! 🎉"</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <Slider
+                      label="Enthusiasm"
+                      value={currentConfig.enthusiasm}
+                      onChange={(v) => handleUpdate({ enthusiasm: v })}
+                      leftLabel="Neutral"
+                      rightLabel="Excited"
+                      tooltip='Low: "This is correct" → High: "Amazing work!"'
+                    />
+                    <Slider
+                      label="Empathy"
+                      value={currentConfig.empathy}
+                      onChange={(v) => handleUpdate({ empathy: v })}
+                      leftLabel="Objective"
+                      rightLabel="Caring"
+                      tooltip='Low: "Error occurred" → High: "I understand this is frustrating..."'
+                    />
+                    <Slider
+                      label="Confidence"
+                      value={currentConfig.confidence}
+                      onChange={(v) => handleUpdate({ confidence: v })}
+                      leftLabel="Cautious"
+                      rightLabel="Assertive"
+                      tooltip='Low: "This might be..." → High: "This is definitively..."'
+                    />
+                    <Slider
+                      label="Humor"
+                      value={currentConfig.humor}
+                      onChange={(v) => handleUpdate({ humor: v })}
+                      leftLabel="Serious"
+                      rightLabel="Playful"
+                      tooltip='Low: "Task complete" → High: "Mission accomplished! 🎉"'
+                    />
                   </div>
                 </ControlSection>
 
