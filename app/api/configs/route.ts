@@ -3,15 +3,16 @@ import { getUserConfigs, saveConfig, deleteConfig } from '@/lib/redis';
 import { createExampleConfigs } from '@/lib/store';
 
 // GET /api/configs - Get all user configurations
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    let configs = await getUserConfigs();
+    const userEmail = request.headers.get('x-user-email') || 'default-user';
+    let configs = await getUserConfigs(userEmail);
 
     // If no configs exist, initialize with examples
     if (configs.length === 0) {
       const examples = createExampleConfigs();
       for (const config of examples) {
-        await saveConfig(config);
+        await saveConfig(config, userEmail);
       }
       configs = examples;
     }
@@ -29,8 +30,9 @@ export async function GET() {
 // POST /api/configs - Create new configuration
 export async function POST(request: NextRequest) {
   try {
+    const userEmail = request.headers.get('x-user-email') || 'default-user';
     const config = await request.json();
-    const success = await saveConfig(config);
+    const success = await saveConfig(config, userEmail);
 
     if (success) {
       return NextResponse.json({ success: true, config });
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/configs?id=xxx - Delete configuration
 export async function DELETE(request: NextRequest) {
   try {
+    const userEmail = request.headers.get('x-user-email') || 'default-user';
     const { searchParams } = new URL(request.url);
     const configId = searchParams.get('id');
 
@@ -62,7 +65,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const success = await deleteConfig(configId);
+    const success = await deleteConfig(configId, userEmail);
 
     if (success) {
       return NextResponse.json({ success: true });
