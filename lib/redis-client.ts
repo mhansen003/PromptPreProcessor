@@ -23,11 +23,9 @@ export const redis = {
     const client = await getRedisClient();
     const value = await client.get(key);
     if (!value) return null;
-    try {
-      return JSON.parse(value) as T;
-    } catch {
-      return value as T;
-    }
+    // Return raw value - let the application decide how to parse
+    // If it's a JSON string that was stored, it will be returned as-is
+    return value as T;
   },
 
   async set(key: string, value: any, options?: { ex?: number }): Promise<string> {
