@@ -103,6 +103,10 @@ export default function Home() {
     try {
       await saveConfig(currentConfig);
       setHasUnsavedChanges(false);
+
+      // The store is automatically updated with the generated prompt
+      // No manual update needed - component will re-render with updated config
+
       showToast('✅ Personality saved and prompt generated!');
     } catch (error) {
       console.error('Failed to save changes:', error);
@@ -168,20 +172,36 @@ export default function Home() {
                   </div>
                 )}
               </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPersonalityToDelete(config.id);
-                  setShowDeletePersonalityModal(true);
-                }}
-                disabled={configs.length === 1}
-                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-red-500/20 text-red-400 hover:text-red-300 disabled:opacity-0 disabled:cursor-not-allowed"
-                title="Delete personality"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+
+              {/* Sidebar action buttons - shown on hover */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    duplicateConfig(config.id);
+                  }}
+                  className="p-1.5 rounded hover:bg-blue-500/20 text-blue-400 hover:text-blue-300"
+                  title="Duplicate personality"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPersonalityToDelete(config.id);
+                    setShowDeletePersonalityModal(true);
+                  }}
+                  disabled={configs.length === 1}
+                  className="p-1.5 rounded hover:bg-red-500/20 text-red-400 hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Delete personality"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -251,35 +271,36 @@ export default function Home() {
               />
             </div>
             <div className="flex items-center gap-2">
+              {/* Save Button - Always Enabled */}
               <button
                 onClick={handleSaveChanges}
-                disabled={!hasUnsavedChanges || isSaving}
+                disabled={isSaving}
                 className={`px-4 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  hasUnsavedChanges && !isSaving
+                  isSaving
+                    ? 'bg-robinhood-card border border-robinhood-border text-gray-500'
+                    : hasUnsavedChanges
                     ? 'bg-robinhood-green text-robinhood-dark hover:bg-robinhood-green/90 shadow-lg shadow-robinhood-green/20'
-                    : 'bg-robinhood-card border border-robinhood-border text-gray-500 cursor-not-allowed'
+                    : 'bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10'
                 }`}
               >
-                {isSaving ? '💾 Saving...' : hasUnsavedChanges ? '💾 Save Changes' : '✓ Saved'}
-              </button>
-              <button
-                onClick={() => duplicateConfig(currentConfig.id)}
-                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
-              >
-                📋 Duplicate
+                {isSaving ? '💾 Saving...' : hasUnsavedChanges ? '💾 Save' : '💾 Save & Generate'}
               </button>
 
-              {/* View Prompt Button */}
+              {/* View Prompt Button - Enabled when prompt exists */}
               <button
                 onClick={() => setShowViewPromptModal(true)}
                 disabled={!currentConfig.systemPrompt}
-                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green disabled:opacity-30 disabled:cursor-not-allowed"
-                title={currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt'}
+                className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                  currentConfig.systemPrompt
+                    ? 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green hover:bg-robinhood-green/10'
+                    : 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
+                }`}
+                title={currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt first'}
               >
                 👁️ View Prompt
               </button>
 
-              {/* Publish Button */}
+              {/* Publish Button - Enabled when prompt exists */}
               <button
                 onClick={async () => {
                   if (!currentConfig.systemPrompt) {
@@ -313,26 +334,29 @@ export default function Home() {
                 disabled={isPublishing || !currentConfig.systemPrompt}
                 className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
                   currentConfig.isPublished
-                    ? 'bg-robinhood-green/20 border border-robinhood-green text-robinhood-green'
-                    : 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green'
-                } disabled:opacity-30 disabled:cursor-not-allowed`}
-                title={!currentConfig.systemPrompt ? 'Save to generate prompt before publishing' : currentConfig.isPublished ? 'Already published' : 'Publish personality'}
+                    ? 'bg-robinhood-green/20 border border-robinhood-green text-robinhood-green cursor-default'
+                    : currentConfig.systemPrompt
+                    ? 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green hover:bg-robinhood-green/10'
+                    : 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
+                }`}
+                title={!currentConfig.systemPrompt ? 'Save to generate prompt first' : currentConfig.isPublished ? 'Already published' : 'Publish personality'}
               >
                 {isPublishing ? '🚀 Publishing...' : currentConfig.isPublished ? '✅ Published' : '🌐 Publish'}
               </button>
 
-              {/* Delete Personality Button */}
+              {/* User Menu */}
               <button
                 onClick={() => {
-                  setPersonalityToDelete(currentConfig.id);
-                  setShowDeletePersonalityModal(true);
+                  if (confirm('Are you sure you want to logout?')) {
+                    document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                    window.location.href = '/signin';
+                  }
                 }}
-                disabled={configs.length === 1}
-                className="px-3 py-1.5 text-sm bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Delete personality"
+                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green hover:bg-robinhood-green/10"
+                title="Logout"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </button>
 

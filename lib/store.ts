@@ -64,7 +64,7 @@ interface StoreState {
   // Actions
   addConfig: (config: PromptConfig) => void;
   updateConfig: (id: string, updates: Partial<PromptConfig>) => void;
-  saveConfig: (config: PromptConfig) => Promise<void>; // Manual save to Redis
+  saveConfig: (config: PromptConfig) => Promise<PromptConfig | undefined>; // Manual save to Redis with auto-generation
   deleteConfig: (id: string) => void;
   setActiveConfig: (config: PromptConfig) => void;
   duplicateConfig: (id: string) => void;
@@ -535,13 +535,25 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 
   saveConfig: async (config) => {
-    // Manual save to Redis
+    // Manual save to Redis with auto-generation
     try {
-      await fetch('/api/configs', {
+      const response = await fetch('/api/configs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
       });
+
+      const data = await response.json();
+
+      if (data.success && data.config) {
+        // Update the config in the store with the returned data (includes generated prompt)
+        set((state) => ({
+          configs: state.configs.map(c => c.id === data.config.id ? data.config : c),
+          activeConfig: state.activeConfig?.id === data.config.id ? data.config : state.activeConfig,
+        }));
+
+        return data.config;
+      }
     } catch (err) {
       console.error('Error saving config to Redis:', err);
       throw err;
