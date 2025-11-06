@@ -576,6 +576,7 @@ export const useStore = create<StoreState>()((set, get) => ({
 
       set((state) => ({
         configs: [...state.configs, newConfig],
+        activeConfig: newConfig, // Automatically focus on the duplicated config
       }));
     }
   },

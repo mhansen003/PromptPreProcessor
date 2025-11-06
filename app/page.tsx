@@ -58,6 +58,9 @@ export default function Home() {
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [selectedPromptsForBulkDelete, setSelectedPromptsForBulkDelete] = useState<Set<string>>(new Set());
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showPublishSuccess, setShowPublishSuccess] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string>('');
+  const [currentlyPublishingId, setCurrentlyPublishingId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -121,53 +124,99 @@ export default function Home() {
 
   const handleGeneratePrompts = async () => {
     setIsGenerating(true);
-    const prompts: GeneratedPromptRecord[] = [];
 
-    for (let i = 0; i < generateCount; i++) {
-      try {
-        const response = await fetch('/api/generate-prompt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...currentConfig, variationIndex: i }),
-        });
+    try {
+      const response = await fetch('/api/generate-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentConfig),
+      });
 
-        const data = await response.json();
-        const record: GeneratedPromptRecord = {
-          id: `${Date.now()}-${i}`,
-          templateId: currentConfig.id,
-          configName: currentConfig.name,
-          promptText: data.systemPrompt,
-          variation: i + 1,
-          totalVariations: generateCount,
-          timestamp: new Date().toLocaleTimeString(),
-        };
-        prompts.push(record);
-      } catch (error) {
-        console.error('Error generating prompt:', error);
-      }
-    }
+      const data = await response.json();
+      const record: GeneratedPromptRecord = {
+        id: `${Date.now()}`,
+        templateId: currentConfig.id,
+        configName: currentConfig.name,
+        promptText: data.systemPrompt,
+        variation: 1,
+        totalVariations: 1,
+        timestamp: new Date().toLocaleTimeString(),
+      };
 
-    setCurrentGeneratedPrompts(prompts);
-    setSelectedGeneratedIndex(0);
-    if (prompts.length > 0) {
-      setGeneratedPrompt(prompts[0].promptText);
-    }
+      setCurrentGeneratedPrompts([record]);
+      setSelectedGeneratedIndex(0);
+      setGeneratedPrompt(record.promptText);
 
-    // Save prompts to Redis and update local state (limit to 10 most recent)
-    for (const prompt of prompts) {
+      // Save prompt to Redis
       await fetch('/api/generated', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(prompt),
+        body: JSON.stringify(record),
       });
+
+      // Update local state (add to beginning)
+      const updated = [record, ...generatedHistory];
+      setGeneratedHistory(updated);
+
+      setIsGenerating(false);
+      setShowGenerateModal(false);
+      setShowPrompt(true);
+    } catch (error) {
+      console.error('Error generating prompt:', error);
+      setIsGenerating(false);
+      alert('Failed to generate prompt. Please try again.');
     }
+  };
 
-    const updated = [...prompts, ...generatedHistory].slice(0, 10);
-    setGeneratedHistory(updated);
+  const handlePublishFromView = async () => {
+    if (!currentGeneratedPrompts[0]) return;
 
-    setIsGenerating(false);
-    setShowGenerateModal(false);
-    setShowPrompt(true);
+    const promptRecord = currentGeneratedPrompts[0];
+    setCurrentlyPublishingId(promptRecord.id);
+
+    try {
+      // Call publish API endpoint
+      const response = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promptId: promptRecord.id,
+          promptText: promptRecord.promptText,
+          configName: promptRecord.configName
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Update the prompt record with published URL
+        const updatedRecord = { ...promptRecord, publishedUrl: data.url };
+
+        // Update local state
+        const updatedHistory = generatedHistory.map(r =>
+          r.id === promptRecord.id ? updatedRecord : r
+        );
+        setGeneratedHistory(updatedHistory);
+        setCurrentGeneratedPrompts([updatedRecord]);
+
+        // Save updated record to Redis
+        await fetch('/api/generated', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedRecord),
+        });
+
+        // Show success modal
+        setPublishedUrl(data.url);
+        setShowPublishSuccess(true);
+        setShowPrompt(false);
+      }
+    } catch (error) {
+      console.error('Error publishing prompt:', error);
+      alert('Failed to publish prompt. Please try again.');
+    } finally {
+      setCurrentlyPublishingId(null);
+    }
   };
 
   const handleRunTests = async () => {
@@ -876,8 +925,8 @@ export default function Home() {
                         );
 
                         // Check if there's space for new prompts (limit is 10 per template)
-                        if (currentTemplatePrompts.length + generateCount > 10) {
-                          setPendingGenerateCount(generateCount);
+                        if (currentTemplatePrompts.length >= 10) {
+                          setPendingGenerateCount(1);
                           setPromptsToDelete(new Set());
                           setShowDeletePromptsModal(true);
                         } else {
@@ -887,7 +936,7 @@ export default function Home() {
                       disabled={isGenerating}
                       className="w-full px-4 py-2.5 text-sm bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50 glow-green"
                     >
-                      {isGenerating ? 'Generating...' : '⚡ Generate Prompts'}
+                      {isGenerating ? 'Generating...' : '⚡ Generate Prompt'}
                     </button>
                   </div>
                 </div>
@@ -1023,21 +1072,34 @@ export default function Home() {
                                 copyToClipboard(record.promptText);
                               }}
                               className="p-1 bg-robinhood-card border border-robinhood-border text-robinhood-green hover:bg-robinhood-green hover:text-robinhood-dark rounded text-xs"
-                              title="Copy"
+                              title="Copy Prompt"
                             >
                               📋
                             </button>
                             {record.publishedUrl && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleUnpublishPrompt(record);
-                                }}
-                                className="p-1 bg-robinhood-card border border-robinhood-border text-yellow-400 hover:bg-yellow-600 hover:text-white rounded text-xs"
-                                title="Unpublish"
-                              >
-                                🔒
-                              </button>
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(record.publishedUrl);
+                                    alert('Published URL copied to clipboard!');
+                                  }}
+                                  className="p-1 bg-robinhood-card border border-robinhood-border text-blue-400 hover:bg-blue-600 hover:text-white rounded text-xs"
+                                  title="Copy Published URL"
+                                >
+                                  🔗
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUnpublishPrompt(record);
+                                  }}
+                                  className="p-1 bg-robinhood-card border border-robinhood-border text-yellow-400 hover:bg-yellow-600 hover:text-white rounded text-xs"
+                                  title="Unpublish"
+                                >
+                                  🔒
+                                </button>
+                              </>
                             )}
                             <button
                               onClick={(e) => {
@@ -1061,53 +1123,51 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Generate Modal */}
+      {/* Generate Modal - Loading State */}
       {showGenerateModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-xl w-full">
-            <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-white">Generate System Prompts</h3>
-              <button onClick={() => setShowGenerateModal(false)} className="text-gray-400 hover:text-white">✕</button>
-            </div>
-
-            <div className="px-6 py-6 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-300 mb-3 block">How many variations? (1-10)</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {[1, 2, 3, 5, 10].map((num) => (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border border-robinhood-green rounded-xl max-w-md w-full">
+            <div className="px-6 py-8 text-center">
+              {!isGenerating ? (
+                <>
+                  <div className="w-16 h-16 bg-robinhood-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-robinhood-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Generate Prompt</h3>
+                  <p className="text-sm text-gray-400 mb-6">
+                    Generate a structured system prompt using your current template configuration
+                  </p>
+                  <div className="flex gap-3">
                     <button
-                      key={num}
-                      onClick={() => setGenerateCount(num)}
-                      className={`px-4 py-3 rounded-lg font-semibold transition-all ${
-                        generateCount === num
-                          ? 'bg-robinhood-green text-robinhood-dark'
-                          : 'bg-robinhood-darker border border-robinhood-border text-gray-400 hover:border-robinhood-green'
-                      }`}
+                      onClick={handleGeneratePrompts}
+                      className="flex-1 px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 transition-all"
                     >
-                      {num}
+                      🎨 Generate Prompt
                     </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  Generate multiple variations to compare phrasings and select the best one for your needs
-                </p>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-robinhood-border flex gap-3">
-              <button
-                onClick={handleGeneratePrompts}
-                disabled={isGenerating}
-                className="flex-1 px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50"
-              >
-                {isGenerating ? `Generating ${generateCount} variation${generateCount > 1 ? 's' : ''}...` : `🎨 Generate ${generateCount} Variation${generateCount > 1 ? 's' : ''}`}
-              </button>
-              <button
-                onClick={() => setShowGenerateModal(false)}
-                className="px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
-              >
-                Cancel
-              </button>
+                    <button
+                      onClick={() => setShowGenerateModal(false)}
+                      className="flex-1 px-4 py-2.5 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-robinhood-green/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <svg className="w-8 h-8 text-robinhood-green animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Generating Prompt...</h3>
+                  <p className="text-sm text-gray-400">
+                    Processing your template configuration with AI
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1364,6 +1424,13 @@ export default function Home() {
                 className="flex-1 px-4 py-2 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90"
               >
                 📋 Copy to Clipboard
+              </button>
+              <button
+                onClick={handlePublishFromView}
+                disabled={currentlyPublishingId === currentGeneratedPrompts[0]?.id}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {currentlyPublishingId === currentGeneratedPrompts[0]?.id ? '🔄 Publishing...' : '🌐 Publish'}
               </button>
               <button
                 onClick={() => setShowPrompt(false)}
@@ -1740,6 +1807,68 @@ export default function Home() {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Success Modal */}
+      {showPublishSuccess && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border-2 border-robinhood-green rounded-xl max-w-lg w-full shadow-2xl">
+            <div className="px-6 py-5 border-b border-robinhood-green/30">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-robinhood-green/20 rounded-full flex items-center justify-center animate-pulse">
+                  <svg className="w-6 h-6 text-robinhood-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Prompt Published Successfully!</h3>
+                  <p className="text-sm text-gray-400">Your prompt is now publicly accessible</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="bg-robinhood-darker border border-robinhood-green/30 rounded-lg p-4 mb-4">
+                <p className="text-xs text-gray-400 mb-2 font-medium">Published URL:</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm text-robinhood-green font-mono bg-robinhood-dark px-3 py-2 rounded border border-robinhood-green/20">
+                    {publishedUrl}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(publishedUrl);
+                      alert('URL copied to clipboard!');
+                    }}
+                    className="px-3 py-2 bg-robinhood-green/20 hover:bg-robinhood-green/30 text-robinhood-green rounded transition-all"
+                    title="Copy URL"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                <p className="text-xs text-blue-300 flex items-start gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Anyone with this URL can access your prompt template. The URL is also saved in your prompt card for easy access.</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50">
+              <button
+                onClick={() => setShowPublishSuccess(false)}
+                className="w-full px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 transition-all"
+              >
+                Got it!
+              </button>
             </div>
           </div>
         </div>

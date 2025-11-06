@@ -72,3 +72,35 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+// PUT /api/generated - Update an existing generated prompt (e.g., add published URL)
+export async function PUT(request: NextRequest) {
+  try {
+    const userEmail = request.headers.get('x-user-email') || 'default-user';
+    const promptData = await request.json();
+
+    if (!promptData.id) {
+      return NextResponse.json(
+        { error: 'Prompt ID required' },
+        { status: 400 }
+      );
+    }
+
+    const success = await saveGeneratedPrompt(promptData, userEmail);
+
+    if (success) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { error: 'Failed to update generated prompt' },
+        { status: 500 }
+      );
+    }
+  } catch (error: any) {
+    console.error('Error updating generated prompt:', error);
+    return NextResponse.json(
+      { error: 'Failed to update generated prompt', details: error.message },
+      { status: 500 }
+    );
+  }
+}
