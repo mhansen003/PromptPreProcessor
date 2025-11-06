@@ -34,9 +34,11 @@ export const redis = {
     const client = await getRedisClient();
     const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
     if (options?.ex) {
-      return await client.setEx(key, options.ex, stringValue);
+      const result = await client.setEx(key, options.ex, stringValue);
+      return result || 'OK';
     }
-    return await client.set(key, stringValue);
+    const result = await client.set(key, stringValue);
+    return result || 'OK';
   },
 
   async del(key: string): Promise<number> {
