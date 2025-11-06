@@ -7,6 +7,15 @@ import { Toggle } from '@/components/Toggle';
 import { Select } from '@/components/Select';
 import { ControlSection } from '@/components/ControlSection';
 
+interface GeneratedPromptRecord {
+  id: string;
+  configName: string;
+  promptText: string;
+  variation: number;
+  totalVariations: number;
+  timestamp: string;
+}
+
 interface TestResult {
   id: string;
   prompt: string;
@@ -21,6 +30,8 @@ export default function Home() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showTestModal, setShowTestModal] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [generateCount, setGenerateCount] = useState(3);
   const [testCount, setTestCount] = useState(3);
   const [testPromptText, setTestPromptText] = useState('');
   const [testResults, setTestResults] = useState<TestResult[]>([]);
@@ -28,11 +39,19 @@ export default function Home() {
   const [selectedResultIndex, setSelectedResultIndex] = useState(0);
   const [isTesting, setIsTesting] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [generatedHistory, setGeneratedHistory] = useState<GeneratedPromptRecord[]>([]);
+  const [currentGeneratedPrompts, setCurrentGeneratedPrompts] = useState<GeneratedPromptRecord[]>([]);
+  const [selectedGeneratedIndex, setSelectedGeneratedIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
     if (!activeConfig && configs.length > 0) {
       setActiveConfig(configs[0]);
+    }
+    // Load generated prompts from localStorage
+    const saved = localStorage.getItem('generated-prompts-history');
+    if (saved) {
+      setGeneratedHistory(JSON.parse(saved));
     }
   }, [activeConfig, configs, setActiveConfig]);
 
@@ -50,25 +69,47 @@ export default function Home() {
     updateConfig(currentConfig.id, updates);
   };
 
-  const handleGeneratePrompt = async () => {
+  const handleGeneratePrompts = async () => {
     setIsGenerating(true);
-    try {
-      const response = await fetch('/api/generate-prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentConfig),
-      });
+    const prompts: GeneratedPromptRecord[] = [];
 
-      const data = await response.json();
-      setGeneratedPrompt(data.systemPrompt);
-      setShowPrompt(true);
-      handleUpdate({ systemPrompt: data.systemPrompt });
-    } catch (error) {
-      console.error('Error generating prompt:', error);
-      setGeneratedPrompt('Error generating prompt. Please try again.');
-    } finally {
-      setIsGenerating(false);
+    for (let i = 0; i < generateCount; i++) {
+      try {
+        const response = await fetch('/api/generate-prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...currentConfig, variationIndex: i }),
+        });
+
+        const data = await response.json();
+        const record: GeneratedPromptRecord = {
+          id: `${Date.now()}-${i}`,
+          configName: currentConfig.name,
+          promptText: data.systemPrompt,
+          variation: i + 1,
+          totalVariations: generateCount,
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        prompts.push(record);
+      } catch (error) {
+        console.error('Error generating prompt:', error);
+      }
     }
+
+    setCurrentGeneratedPrompts(prompts);
+    setSelectedGeneratedIndex(0);
+    if (prompts.length > 0) {
+      setGeneratedPrompt(prompts[0].promptText);
+    }
+
+    // Add to history (keep last 50)
+    const updated = [...prompts, ...generatedHistory].slice(0, 50);
+    setGeneratedHistory(updated);
+    localStorage.setItem('generated-prompts-history', JSON.stringify(updated));
+
+    setIsGenerating(false);
+    setShowGenerateModal(false);
+    setShowPrompt(true);
   };
 
   const handleRunTests = async () => {
@@ -139,7 +180,7 @@ export default function Home() {
               onClick={() => setActiveConfig(config)}
               className={`w-full text-left px-3 py-2.5 mb-1 rounded-lg text-sm transition-colors ${
                 currentConfig.id === config.id
-                  ? 'bg-robinhood-border text-white'
+                  ? 'bg-robinhood-border text-white border-l-2 border-robinhood-green'
                   : 'text-gray-400 hover:bg-robinhood-card'
               }`}
             >
@@ -159,14 +200,14 @@ export default function Home() {
         <div className="p-3 border-t border-robinhood-border">
           <button
             onClick={() => {
-              if (confirm('Delete this prompt?')) {
+              if (confirm(`Delete "${currentConfig.name}"?`)) {
                 deleteConfig(currentConfig.id);
               }
             }}
-            className="w-full px-3 py-2 text-xs bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500"
+            className="w-full px-3 py-2 text-xs bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30"
             disabled={configs.length === 1}
           >
-            🗑️ Delete Current
+            🗑️ Delete
           </button>
         </div>
       </div>
@@ -186,35 +227,32 @@ export default function Home() {
                 </svg>
               </button>
               <span className="text-robinhood-green text-xl">⚡</span>
-              <h1 className="text-lg font-bold text-white">PromptPreProcessor</h1>
-            </div>
-            <div className="flex items-center gap-3">
               <input
                 type="text"
                 value={currentConfig.name}
                 onChange={(e) => handleUpdate({ name: e.target.value })}
-                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-robinhood-green"
+                className="text-lg font-bold bg-transparent border-none outline-none text-white focus:ring-1 focus:ring-robinhood-green rounded px-2 py-1"
                 placeholder="Configuration Name"
               />
-              <button
-                onClick={() => duplicateConfig(currentConfig.id)}
-                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
-              >
-                📋 Duplicate
-              </button>
             </div>
+            <button
+              onClick={() => duplicateConfig(currentConfig.id)}
+              className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+            >
+              📋 Duplicate
+            </button>
           </div>
         </header>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto px-4 py-4">
+          <div className="max-w-[1600px] mx-auto px-4 py-4">
             <div className="grid grid-cols-12 gap-4">
               {/* Controls Column */}
-              <div className="col-span-9 space-y-3">
+              <div className="col-span-8 space-y-3">
                 {/* Response Style */}
                 <ControlSection title="Response Style" icon="🎨" defaultOpen={true}>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     <div>
                       <Slider
                         label="Detail Level"
@@ -223,7 +261,7 @@ export default function Home() {
                         leftLabel="Concise"
                         rightLabel="Detailed"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "The sky is blue" → High: "Due to Rayleigh scattering..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "The sky is blue" → High: "Due to Rayleigh scattering..."</p>
                     </div>
                     <div>
                       <Slider
@@ -233,7 +271,7 @@ export default function Home() {
                         leftLabel="Casual"
                         rightLabel="Formal"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "Hey! Let's go..." → High: "It is imperative..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Hey! Let's go..." → High: "It is imperative..."</p>
                     </div>
                     <div>
                       <Slider
@@ -243,7 +281,7 @@ export default function Home() {
                         leftLabel="Simple"
                         rightLabel="Advanced"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "It stores data" → High: "B-tree indexing O(log n)"</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "It stores data" → High: "B-tree indexing O(log n)"</p>
                     </div>
                     <div>
                       <Slider
@@ -253,7 +291,7 @@ export default function Home() {
                         leftLabel="Factual"
                         rightLabel="Creative"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "The report states..." → High: "Imagine a world..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "The report states..." → High: "Imagine a world..."</p>
                     </div>
                     <div>
                       <Slider
@@ -263,14 +301,24 @@ export default function Home() {
                         leftLabel="Brief"
                         rightLabel="Lengthy"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "Done." → High: "To accomplish this, first..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Done." → High: "To accomplish this, first..."</p>
+                    </div>
+                    <div>
+                      <Slider
+                        label="Industry Terminology"
+                        value={currentConfig.industryKnowledge}
+                        onChange={(v) => handleUpdate({ industryKnowledge: v })}
+                        leftLabel="Explain Terms"
+                        rightLabel="Use Acronyms"
+                      />
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Annual Percentage Rate" → High: "APR, LTV, DTI"</p>
                     </div>
                   </div>
                 </ControlSection>
 
                 {/* Tone */}
                 <ControlSection title="Tone & Personality" icon="💬" defaultOpen={true}>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     <div>
                       <Slider
                         label="Enthusiasm"
@@ -279,7 +327,7 @@ export default function Home() {
                         leftLabel="Neutral"
                         rightLabel="Excited"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "This is correct" → High: "Amazing work!"</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "This is correct" → High: "Amazing work!"</p>
                     </div>
                     <div>
                       <Slider
@@ -289,7 +337,7 @@ export default function Home() {
                         leftLabel="Objective"
                         rightLabel="Caring"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "Error occurred" → High: "I understand this is frustrating..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Error occurred" → High: "I understand this is frustrating..."</p>
                     </div>
                     <div>
                       <Slider
@@ -299,7 +347,7 @@ export default function Home() {
                         leftLabel="Cautious"
                         rightLabel="Assertive"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "This might be..." → High: "This is definitively..."</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "This might be..." → High: "This is definitively..."</p>
                     </div>
                     <div>
                       <Slider
@@ -309,20 +357,62 @@ export default function Home() {
                         leftLabel="Serious"
                         rightLabel="Playful"
                       />
-                      <p className="text-[10px] text-gray-500 mt-1 italic">Low: "Task complete" → High: "Mission accomplished! 🎉"</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 italic">Low: "Task complete" → High: "Mission accomplished! 🎉"</p>
                     </div>
                   </div>
                 </ControlSection>
 
                 {/* Structure */}
-                <ControlSection title="Structure" icon="📋" defaultOpen={true}>
-                  <div className="grid grid-cols-3 gap-x-4 gap-y-2">
-                    <Toggle label="Examples" checked={currentConfig.useExamples} onChange={(v) => handleUpdate({ useExamples: v })} description="Include examples" />
-                    <Toggle label="Bullets" checked={currentConfig.useBulletPoints} onChange={(v) => handleUpdate({ useBulletPoints: v })} description="Use bullet points" />
-                    <Toggle label="Numbers" checked={currentConfig.useNumberedLists} onChange={(v) => handleUpdate({ useNumberedLists: v })} description="Numbered lists" />
-                    <Toggle label="Code" checked={currentConfig.includeCodeSamples} onChange={(v) => handleUpdate({ includeCodeSamples: v })} description="Code examples" />
-                    <Toggle label="Analogies" checked={currentConfig.includeAnalogies} onChange={(v) => handleUpdate({ includeAnalogies: v })} description="Use analogies" />
-                    <Toggle label="Visual" checked={currentConfig.includeVisualDescriptions} onChange={(v) => handleUpdate({ includeVisualDescriptions: v })} description="Visual descriptions" />
+                <ControlSection title="Response Structure" icon="📋" defaultOpen={true}>
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Examples</span>
+                      <Toggle label="" checked={currentConfig.useExamples} onChange={(v) => handleUpdate({ useExamples: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Bullets</span>
+                      <Toggle label="" checked={currentConfig.useBulletPoints} onChange={(v) => handleUpdate({ useBulletPoints: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Numbers</span>
+                      <Toggle label="" checked={currentConfig.useNumberedLists} onChange={(v) => handleUpdate({ useNumberedLists: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Code</span>
+                      <Toggle label="" checked={currentConfig.includeCodeSamples} onChange={(v) => handleUpdate({ includeCodeSamples: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Analogies</span>
+                      <Toggle label="" checked={currentConfig.includeAnalogies} onChange={(v) => handleUpdate({ includeAnalogies: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Visual</span>
+                      <Toggle label="" checked={currentConfig.includeVisualDescriptions} onChange={(v) => handleUpdate({ includeVisualDescriptions: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Tables</span>
+                      <Toggle label="" checked={currentConfig.includeTables} onChange={(v) => handleUpdate({ includeTables: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Snippets</span>
+                      <Toggle label="" checked={currentConfig.includeSnippets} onChange={(v) => handleUpdate({ includeSnippets: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">References</span>
+                      <Toggle label="" checked={currentConfig.includeExternalReferences} onChange={(v) => handleUpdate({ includeExternalReferences: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Thought Process</span>
+                      <Toggle label="" checked={currentConfig.showThoughtProcess} onChange={(v) => handleUpdate({ showThoughtProcess: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Step-by-Step</span>
+                      <Toggle label="" checked={currentConfig.includeStepByStep} onChange={(v) => handleUpdate({ includeStepByStep: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Summary</span>
+                      <Toggle label="" checked={currentConfig.includeSummary} onChange={(v) => handleUpdate({ includeSummary: v })} description="" />
+                    </div>
                   </div>
                 </ControlSection>
 
@@ -346,13 +436,14 @@ export default function Home() {
                         { value: 'mixed', label: 'Mixed' },
                       ]}
                     />
-                    <Select label="Target Audience" value={currentConfig.audience} onChange={(v: any) => handleUpdate({ audience: v })}
+                    <Select label="Target Generation" value={currentConfig.audience} onChange={(v: any) => handleUpdate({ audience: v })}
                       options={[
-                        { value: 'general', label: 'General' },
-                        { value: 'technical', label: 'Technical' },
-                        { value: 'executive', label: 'Executive' },
-                        { value: 'beginner', label: 'Beginner' },
-                        { value: 'expert', label: 'Expert' },
+                        { value: 'gen-z', label: 'Gen Z (18-27)' },
+                        { value: 'millennial', label: 'Millennial (28-43)' },
+                        { value: 'gen-x', label: 'Gen X (44-59)' },
+                        { value: 'boomer', label: 'Boomer (60-78)' },
+                        { value: 'senior', label: 'Senior (79+)' },
+                        { value: 'mixed', label: 'Mixed Audience' },
                       ]}
                     />
                     <Select label="Explanation Style" value={currentConfig.explanationStyle} onChange={(v: any) => handleUpdate({ explanationStyle: v })}
@@ -364,11 +455,23 @@ export default function Home() {
                       ]}
                     />
                   </div>
-                  <div className="grid grid-cols-4 gap-3 mt-3 pt-3 border-t border-robinhood-border">
-                    <Toggle label="Accuracy" checked={currentConfig.prioritizeAccuracy} onChange={(v) => handleUpdate({ prioritizeAccuracy: v })} />
-                    <Toggle label="Speed" checked={currentConfig.prioritizeSpeed} onChange={(v) => handleUpdate({ prioritizeSpeed: v })} />
-                    <Toggle label="Clarity" checked={currentConfig.prioritizeClarity} onChange={(v) => handleUpdate({ prioritizeClarity: v })} />
-                    <Toggle label="Complete" checked={currentConfig.prioritizeComprehensiveness} onChange={(v) => handleUpdate({ prioritizeComprehensiveness: v })} />
+                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-robinhood-border">
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Accuracy</span>
+                      <Toggle label="" checked={currentConfig.prioritizeAccuracy} onChange={(v) => handleUpdate({ prioritizeAccuracy: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Speed</span>
+                      <Toggle label="" checked={currentConfig.prioritizeSpeed} onChange={(v) => handleUpdate({ prioritizeSpeed: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Clarity</span>
+                      <Toggle label="" checked={currentConfig.prioritizeClarity} onChange={(v) => handleUpdate({ prioritizeClarity: v })} description="" />
+                    </div>
+                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
+                      <span className="text-xs text-gray-300">Complete</span>
+                      <Toggle label="" checked={currentConfig.prioritizeComprehensiveness} onChange={(v) => handleUpdate({ prioritizeComprehensiveness: v })} description="" />
+                    </div>
                   </div>
                 </ControlSection>
 
@@ -381,7 +484,7 @@ export default function Home() {
                         type="text"
                         value={currentConfig.customStyle}
                         onChange={(e) => handleUpdate({ customStyle: e.target.value })}
-                        placeholder="e.g., 'Also include option to output as PDF'"
+                        placeholder="e.g., 'Also include option to output as PDF' or 'Use emojis'"
                         className="w-full px-3 py-2 text-sm bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-robinhood-green"
                       />
                     </div>
@@ -390,7 +493,7 @@ export default function Home() {
                       <textarea
                         value={currentConfig.customInstructions}
                         onChange={(e) => handleUpdate({ customInstructions: e.target.value })}
-                        placeholder="Add specific requirements..."
+                        placeholder="Add specific requirements for financial/mortgage context..."
                         className="w-full h-20 px-3 py-2 text-sm bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-robinhood-green resize-none"
                       />
                     </div>
@@ -398,69 +501,69 @@ export default function Home() {
                 </ControlSection>
               </div>
 
-              {/* Actions Column */}
-              <div className="col-span-3 space-y-3">
-                <div className="bg-robinhood-card border border-robinhood-border rounded-lg p-4 sticky top-4">
+              {/* Right Column - History Panel */}
+              <div className="col-span-4 space-y-3">
+                {/* Actions */}
+                <div className="bg-robinhood-card border border-robinhood-border rounded-lg p-4">
                   <h3 className="text-sm font-semibold text-white mb-3">Actions</h3>
                   <div className="space-y-2">
                     <button
-                      onClick={handleGeneratePrompt}
+                      onClick={() => setShowGenerateModal(true)}
                       disabled={isGenerating}
                       className="w-full px-4 py-2.5 text-sm bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50 glow-green"
                     >
-                      {isGenerating ? 'Generating...' : '⚡ Generate Prompt'}
+                      {isGenerating ? 'Generating...' : '⚡ Generate Prompts'}
                     </button>
 
                     {generatedPrompt && (
-                      <button
-                        onClick={() => setShowTestModal(true)}
-                        className="w-full px-4 py-2.5 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
-                      >
-                        🧪 Test Prompt
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setShowTestModal(true)}
+                          className="w-full px-4 py-2 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                        >
+                          🧪 Test Prompt
+                        </button>
+                        <button
+                          onClick={() => setShowPrompt(true)}
+                          className="w-full px-3 py-2 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+                        >
+                          👁️ View Current
+                        </button>
+                      </>
                     )}
+                  </div>
+                </div>
 
-                    <button
-                      onClick={() => setShowPrompt(true)}
-                      disabled={!generatedPrompt}
-                      className="w-full px-3 py-2 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green disabled:opacity-50"
-                    >
-                      👁️ View Prompt
-                    </button>
+                {/* Generated Prompts History */}
+                <div className="bg-robinhood-card border border-robinhood-border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-white">Generated Prompts</h3>
+                    <span className="text-xs text-robinhood-green font-mono">{generatedHistory.length}</span>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-robinhood-border">
-                    <h4 className="text-xs font-semibold text-gray-400 mb-2">Stats</h4>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Total Prompts</span>
-                        <span className="text-robinhood-green font-mono">{configs.length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Active Toggles</span>
-                        <span className="text-robinhood-green font-mono">
-                          {[
-                            currentConfig.useExamples,
-                            currentConfig.useBulletPoints,
-                            currentConfig.useNumberedLists,
-                            currentConfig.includeCodeSamples,
-                            currentConfig.includeAnalogies,
-                            currentConfig.includeVisualDescriptions,
-                          ].filter(Boolean).length}
-                        </span>
-                      </div>
-                      {testResults.length > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Test Results</span>
-                          <button
-                            onClick={() => setShowResultsModal(true)}
-                            className="text-robinhood-green font-mono hover:underline"
-                          >
-                            {testResults.length} →
-                          </button>
+                  <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
+                    {generatedHistory.length === 0 ? (
+                      <p className="text-xs text-gray-500 text-center py-4">No prompts generated yet</p>
+                    ) : (
+                      generatedHistory.map((record, index) => (
+                        <div key={record.id} className="p-2 bg-robinhood-darker border border-robinhood-border rounded hover:border-robinhood-green/50 transition-colors">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] text-gray-500">{record.timestamp}</span>
+                            <button
+                              onClick={() => copyToClipboard(record.promptText)}
+                              className="text-xs text-robinhood-green hover:text-robinhood-green/80"
+                            >
+                              📋
+                            </button>
+                          </div>
+                          <p className="text-xs font-medium text-gray-300 truncate">{record.configName}</p>
+                          <p className="text-[10px] text-gray-600">
+                            {record.totalVariations > 1 ? `${record.variation}/${record.totalVariations}` : 'Single'}
+                          </p>
+                          <p className="text-[10px] text-gray-500 truncate mt-1">{record.promptText.substring(0, 60)}...</p>
                         </div>
-                      )}
-                    </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -468,6 +571,58 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Generate Modal */}
+      {showGenerateModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-xl w-full">
+            <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-white">Generate System Prompts</h3>
+              <button onClick={() => setShowGenerateModal(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="px-6 py-6 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-3 block">How many variations? (1-10)</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[1, 2, 3, 5, 10].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setGenerateCount(num)}
+                      className={`px-4 py-3 rounded-lg font-semibold transition-all ${
+                        generateCount === num
+                          ? 'bg-robinhood-green text-robinhood-dark'
+                          : 'bg-robinhood-darker border border-robinhood-border text-gray-400 hover:border-robinhood-green'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-3">
+                  Generate multiple variations to compare phrasings and select the best one for your needs
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border flex gap-3">
+              <button
+                onClick={handleGeneratePrompts}
+                disabled={isGenerating}
+                className="flex-1 px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50"
+              >
+                {isGenerating ? `Generating ${generateCount} variation${generateCount > 1 ? 's' : ''}...` : `🎨 Generate ${generateCount} Variation${generateCount > 1 ? 's' : ''}`}
+              </button>
+              <button
+                onClick={() => setShowGenerateModal(false)}
+                className="px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Test Modal */}
       {showTestModal && (
@@ -619,8 +774,90 @@ export default function Home() {
         </div>
       )}
 
-      {/* View Prompt Modal */}
-      {showPrompt && (
+      {/* View Generated Prompts Modal (after multi-generate) */}
+      {showPrompt && currentGeneratedPrompts.length > 1 && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-5xl w-full max-h-[85vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-white">Generated Prompts</h3>
+                <p className="text-sm text-gray-400 mt-1">Viewing {selectedGeneratedIndex + 1} of {currentGeneratedPrompts.length}</p>
+              </div>
+              <button onClick={() => setShowPrompt(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-300">{currentGeneratedPrompts[selectedGeneratedIndex].configName}</p>
+                    <p className="text-xs text-gray-500">Variation {currentGeneratedPrompts[selectedGeneratedIndex].variation} of {currentGeneratedPrompts[selectedGeneratedIndex].totalVariations}</p>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(currentGeneratedPrompts[selectedGeneratedIndex].promptText)}
+                    className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 text-sm"
+                  >
+                    📋 Copy
+                  </button>
+                </div>
+                <div className="p-4 bg-robinhood-darker border border-robinhood-border rounded-lg max-h-[500px] overflow-y-auto">
+                  <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono">{currentGeneratedPrompts[selectedGeneratedIndex].promptText}</pre>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Character count: {currentGeneratedPrompts[selectedGeneratedIndex].promptText.length}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border flex items-center justify-between">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedGeneratedIndex(Math.max(0, selectedGeneratedIndex - 1))}
+                  disabled={selectedGeneratedIndex === 0}
+                  className="px-4 py-2 bg-robinhood-darker border border-robinhood-border text-white rounded-lg hover:border-robinhood-green disabled:opacity-30"
+                >
+                  ← Previous
+                </button>
+                <button
+                  onClick={() => setSelectedGeneratedIndex(Math.min(currentGeneratedPrompts.length - 1, selectedGeneratedIndex + 1))}
+                  disabled={selectedGeneratedIndex === currentGeneratedPrompts.length - 1}
+                  className="px-4 py-2 bg-robinhood-darker border border-robinhood-border text-white rounded-lg hover:border-robinhood-green disabled:opacity-30"
+                >
+                  Next →
+                </button>
+              </div>
+
+              <div className="flex gap-1">
+                {currentGeneratedPrompts.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedGeneratedIndex(index)}
+                    className={`w-8 h-8 rounded-lg font-semibold text-xs transition-all ${
+                      selectedGeneratedIndex === index
+                        ? 'bg-robinhood-green text-robinhood-dark'
+                        : 'bg-robinhood-darker border border-robinhood-border text-gray-400 hover:border-robinhood-green'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  copyToClipboard(currentGeneratedPrompts.map(p => p.promptText).join('\n\n---\n\n'));
+                }}
+                className="px-4 py-2 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90"
+              >
+                📋 Copy All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Single Prompt View Modal */}
+      {showPrompt && currentGeneratedPrompts.length <= 1 && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
