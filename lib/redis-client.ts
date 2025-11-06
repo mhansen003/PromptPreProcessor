@@ -84,6 +84,11 @@ export const redis = {
     const client = await getRedisClient();
     return await client.lTrim(key, start, stop);
   },
+
+  async lrem(key: string, count: number, value: string): Promise<number> {
+    const client = await getRedisClient();
+    return await client.lRem(key, count, value);
+  },
 };
 
 // Graceful shutdown
