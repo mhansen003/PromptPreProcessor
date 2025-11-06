@@ -212,8 +212,8 @@ export default function Home() {
                   </div>
                   {config.systemPrompt && (
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[9px] font-medium ${config.isPublished ? 'text-blue-400' : 'text-gray-500'}`}>
-                        Publish
+                      <span className={`text-[9px] font-medium whitespace-nowrap ${config.isPublished ? 'text-blue-400' : 'text-red-400'}`}>
+                        {config.isPublished ? 'Published' : 'Not Published'}
                       </span>
                       <button
                         onClick={(e) => {
