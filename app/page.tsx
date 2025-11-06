@@ -68,10 +68,40 @@ export default function Home() {
     // Load configs from Redis - this is the single source of truth
     fetch('/api/configs')
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
         if (data.configs && data.configs.length > 0) {
           // Replace all configs with those from Redis (user-specific)
           setConfigs(data.configs);
+        } else {
+          // New user - initialize with default templates from mhansen's current templates
+          // Request default templates from API
+          const defaultsRes = await fetch('/api/configs/defaults');
+          const defaultsData = await defaultsRes.json();
+
+          if (defaultsData.templates && defaultsData.templates.length > 0) {
+            // Save default templates for this user
+            for (const template of defaultsData.templates) {
+              // Create new IDs for each template
+              const newTemplate = {
+                ...template,
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                createdAt: new Date().toISOString(),
+              };
+
+              await fetch('/api/configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTemplate),
+              });
+            }
+
+            // Reload configs after initialization
+            const reloadRes = await fetch('/api/configs');
+            const reloadData = await reloadRes.json();
+            if (reloadData.configs && reloadData.configs.length > 0) {
+              setConfigs(reloadData.configs);
+            }
+          }
         }
       })
       .catch(err => console.error('Error loading configs from Redis:', err));
@@ -432,6 +462,16 @@ export default function Home() {
                 <div className="text-[10px] text-gray-600 mt-0.5">
                   {new Date(config.createdAt).toLocaleDateString()}
                 </div>
+                <div className="text-[9px] text-gray-500 mt-0.5">
+                  {(() => {
+                    const publishedCount = generatedHistory.filter(
+                      r => r.templateId === config.id && r.publishedUrl
+                    ).length;
+                    return publishedCount > 0
+                      ? `${publishedCount} published prompt${publishedCount !== 1 ? 's' : ''}`
+                      : 'Nothing published';
+                  })()}
+                </div>
               </button>
               <button
                 onClick={(e) => {
@@ -496,7 +536,21 @@ export default function Home() {
               <input
                 type="text"
                 value={currentConfig.name}
-                onChange={(e) => handleUpdate({ name: e.target.value })}
+                onChange={(e) => {
+                  handleUpdate({ name: e.target.value });
+                  // Auto-save name change after typing stops
+                  if (window.renameSaveTimeout) {
+                    clearTimeout(window.renameSaveTimeout);
+                  }
+                  (window as any).renameSaveTimeout = setTimeout(async () => {
+                    try {
+                      await saveConfig(currentConfig);
+                      setHasUnsavedChanges(false);
+                    } catch (err) {
+                      console.error('Failed to auto-save name:', err);
+                    }
+                  }, 1000); // Auto-save after 1 second of no typing
+                }}
                 className="text-lg font-bold bg-transparent border-none outline-none text-white focus:ring-1 focus:ring-robinhood-green rounded px-2 py-1"
                 placeholder="Template Name"
               />
@@ -936,7 +990,7 @@ export default function Home() {
                       disabled={isGenerating}
                       className="w-full px-4 py-2.5 text-sm bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 disabled:opacity-50 glow-green"
                     >
-                      {isGenerating ? 'Generating...' : '⚡ Generate Prompt'}
+                      {isGenerating ? 'Generating...' : '⚡ Generate A Prompt'}
                     </button>
                   </div>
                 </div>
@@ -1144,7 +1198,7 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Generate Prompt</h3>
+                  <h3 className="text-xl font-bold text-white mb-2">Generate A Prompt</h3>
                   <p className="text-sm text-gray-400 mb-6">
                     Generate a structured system prompt using your current template configuration
                   </p>
@@ -1153,7 +1207,7 @@ export default function Home() {
                       onClick={handleGeneratePrompts}
                       className="flex-1 px-4 py-2.5 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 transition-all"
                     >
-                      🎨 Generate Prompt
+                      🎨 Generate A Prompt
                     </button>
                     <button
                       onClick={() => setShowGenerateModal(false)}
