@@ -24,7 +24,7 @@ interface TestResult {
 }
 
 export default function Home() {
-  const { configs, activeConfig, addConfig, updateConfig, setActiveConfig, deleteConfig, duplicateConfig } = useStore();
+  const { configs, activeConfig, addConfig, updateConfig, setActiveConfig, deleteConfig, duplicateConfig, setConfigs } = useStore();
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -46,22 +46,13 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
 
-    // Load configs from Redis
+    // Load configs from Redis - this is the single source of truth
     fetch('/api/configs')
       .then(res => res.json())
       .then(data => {
         if (data.configs && data.configs.length > 0) {
-          // Update store with Redis configs
-          data.configs.forEach((config: any) => {
-            const exists = configs.find(c => c.id === config.id);
-            if (!exists) {
-              addConfig(config);
-            }
-          });
-
-          if (!activeConfig) {
-            setActiveConfig(data.configs[0]);
-          }
+          // Replace all configs with those from Redis (user-specific)
+          setConfigs(data.configs);
         }
       })
       .catch(err => console.error('Error loading configs from Redis:', err));

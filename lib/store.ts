@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export interface PromptConfig {
   id: string;
@@ -62,6 +61,8 @@ interface StoreState {
   deleteConfig: (id: string) => void;
   setActiveConfig: (config: PromptConfig) => void;
   duplicateConfig: (id: string) => void;
+  setConfigs: (configs: PromptConfig[]) => void; // Replace all configs
+  clearStore: () => void; // Clear everything
 }
 
 const createDefaultConfig = (): PromptConfig => ({
@@ -486,51 +487,92 @@ const createExampleConfigs = (): PromptConfig[] => {
   ];
 };
 
-export const useStore = create<StoreState>()(
-  persist(
-    (set, get) => ({
-      configs: createExampleConfigs(),
-      activeConfig: null,
+export const useStore = create<StoreState>()((set, get) => ({
+  configs: [], // Start with empty configs - will be loaded from Redis per user
+  activeConfig: null,
 
-      addConfig: (config) => set((state) => ({
-        configs: [...state.configs, config],
-      })),
+  addConfig: (config) => {
+    // Save to Redis via API
+    fetch('/api/configs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    }).catch(err => console.error('Error saving config to Redis:', err));
 
-      updateConfig: (id, updates) => set((state) => ({
-        configs: state.configs.map((config) =>
-          config.id === id ? { ...config, ...updates } : config
-        ),
-        activeConfig: state.activeConfig?.id === id
-          ? { ...state.activeConfig, ...updates }
-          : state.activeConfig,
-      })),
+    set((state) => ({
+      configs: [...state.configs, config],
+    }));
+  },
 
-      deleteConfig: (id) => set((state) => ({
-        configs: state.configs.filter((config) => config.id !== id),
-        activeConfig: state.activeConfig?.id === id ? null : state.activeConfig,
-      })),
-
-      setActiveConfig: (config) => set({ activeConfig: config }),
-
-      duplicateConfig: (id) => {
-        const config = get().configs.find((c) => c.id === id);
-        if (config) {
-          const newConfig = {
-            ...config,
-            id: Date.now().toString(),
-            name: `${config.name} (Copy)`,
-            createdAt: new Date().toISOString(),
-          };
-          set((state) => ({
-            configs: [...state.configs, newConfig],
-          }));
-        }
-      },
-    }),
-    {
-      name: 'prompt-preprocessor-storage',
+  updateConfig: (id, updates) => {
+    // Get the updated config
+    const state = get();
+    const updatedConfig = state.configs.find(c => c.id === id);
+    if (updatedConfig) {
+      const configToSave = { ...updatedConfig, ...updates };
+      // Save to Redis via API
+      fetch('/api/configs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(configToSave),
+      }).catch(err => console.error('Error updating config in Redis:', err));
     }
-  )
-);
+
+    set((state) => ({
+      configs: state.configs.map((config) =>
+        config.id === id ? { ...config, ...updates } : config
+      ),
+      activeConfig: state.activeConfig?.id === id
+        ? { ...state.activeConfig, ...updates }
+        : state.activeConfig,
+    }));
+  },
+
+  deleteConfig: (id) => {
+    // Delete from Redis via API
+    fetch(`/api/configs?id=${id}`, {
+      method: 'DELETE',
+    }).catch(err => console.error('Error deleting config from Redis:', err));
+
+    set((state) => ({
+      configs: state.configs.filter((config) => config.id !== id),
+      activeConfig: state.activeConfig?.id === id ? null : state.activeConfig,
+    }));
+  },
+
+  setActiveConfig: (config) => set({ activeConfig: config }),
+
+  duplicateConfig: (id) => {
+    const config = get().configs.find((c) => c.id === id);
+    if (config) {
+      const newConfig = {
+        ...config,
+        id: Date.now().toString(),
+        name: `${config.name} (Copy)`,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Save to Redis via API
+      fetch('/api/configs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConfig),
+      }).catch(err => console.error('Error saving duplicated config to Redis:', err));
+
+      set((state) => ({
+        configs: [...state.configs, newConfig],
+      }));
+    }
+  },
+
+  setConfigs: (configs) => set({ configs, activeConfig: configs[0] || null }),
+
+  clearStore: () => set({ configs: [], activeConfig: null }),
+}));
 
 export { createDefaultConfig, createExampleConfigs };
+
+// Export a helper to clear store from outside components (e.g., on logout)
+export const clearUserSession = () => {
+  useStore.getState().clearStore();
+};
