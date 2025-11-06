@@ -15,6 +15,7 @@ interface GeneratedPromptRecord {
   variation: number;
   totalVariations: number;
   timestamp: string;
+  publishedUrl?: string;
 }
 
 interface TestResult {
@@ -45,6 +46,10 @@ export default function Home() {
   const [selectedGeneratedIndex, setSelectedGeneratedIndex] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [selectedPromptRecord, setSelectedPromptRecord] = useState<GeneratedPromptRecord | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -139,7 +144,7 @@ export default function Home() {
       setGeneratedPrompt(prompts[0].promptText);
     }
 
-    // Save prompts to Redis and update local state
+    // Save prompts to Redis and update local state (limit to 10 most recent)
     for (const prompt of prompts) {
       await fetch('/api/generated', {
         method: 'POST',
@@ -148,7 +153,7 @@ export default function Home() {
       });
     }
 
-    const updated = [...prompts, ...generatedHistory].slice(0, 50);
+    const updated = [...prompts, ...generatedHistory].slice(0, 10);
     setGeneratedHistory(updated);
 
     setIsGenerating(false);
@@ -204,6 +209,95 @@ export default function Home() {
     navigator.clipboard.writeText(text);
   };
 
+  const handlePublishPrompt = async () => {
+    if (!selectedPromptRecord) return;
+
+    setIsPublishing(true);
+    try {
+      const response = await fetch('/api/publish-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promptText: selectedPromptRecord.promptText }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the selected prompt record with the published URL
+        const updatedRecord = { ...selectedPromptRecord, publishedUrl: data.publicUrl };
+        setSelectedPromptRecord(updatedRecord);
+
+        // Update in history as well
+        const updatedHistory = generatedHistory.map((record) =>
+          record.id === selectedPromptRecord.id ? updatedRecord : record
+        );
+        setGeneratedHistory(updatedHistory);
+
+        // Save to Redis
+        await fetch('/api/generated', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedRecord),
+        });
+      }
+    } catch (error) {
+      console.error('Error publishing prompt:', error);
+      alert('Failed to publish prompt. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear auth cookie and redirect to login
+    document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    window.location.href = '/login';
+  };
+
+  const handleUnpublishPrompt = async (promptRecord: GeneratedPromptRecord) => {
+    if (!promptRecord.publishedUrl) return;
+
+    // Update the prompt record to remove published URL
+    const updatedRecord = { ...promptRecord, publishedUrl: undefined };
+
+    // Update in history
+    const updatedHistory = generatedHistory.map((record) =>
+      record.id === promptRecord.id ? updatedRecord : record
+    );
+    setGeneratedHistory(updatedHistory);
+
+    // Update in modal if it's open
+    if (selectedPromptRecord?.id === promptRecord.id) {
+      setSelectedPromptRecord(updatedRecord);
+    }
+
+    // Save to Redis
+    await fetch('/api/generated', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedRecord),
+    });
+  };
+
+  const handleDeletePrompt = async (promptRecord: GeneratedPromptRecord) => {
+    if (!confirm('Delete this generated prompt?')) return;
+
+    // Remove from history
+    const updatedHistory = generatedHistory.filter((record) => record.id !== promptRecord.id);
+    setGeneratedHistory(updatedHistory);
+
+    // Close modal if this prompt is currently selected
+    if (selectedPromptRecord?.id === promptRecord.id) {
+      setShowPromptModal(false);
+      setSelectedPromptRecord(null);
+    }
+
+    // Delete from Redis
+    await fetch(`/api/generated?id=${promptRecord.id}`, {
+      method: 'DELETE',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-robinhood-dark flex">
       {/* Left Sidebar - Prompt Templates List */}
@@ -232,6 +326,7 @@ export default function Home() {
                 className="w-full text-left"
               >
                 <div className="flex items-center gap-2">
+                  <span className="text-base">{config.emoji}</span>
                   <span className="truncate flex-1">{config.name}</span>
                   {currentConfig.id === config.id && (
                     <span className="text-robinhood-green">●</span>
@@ -244,7 +339,7 @@ export default function Home() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm(`Delete prompt template "${config.name}"?`)) {
+                  if (confirm(`⚠️ DELETE TEMPLATE: "${config.name}"\n\nThis will permanently delete:\n• All template settings and controls\n• This cannot be undone\n\nAre you sure you want to delete this template?`)) {
                     deleteConfig(config.id);
                   }
                 }}
@@ -258,20 +353,6 @@ export default function Home() {
               </button>
             </div>
           ))}
-        </div>
-
-        <div className="p-3 border-t border-robinhood-border">
-          <button
-            onClick={() => {
-              if (confirm(`Delete template "${currentConfig.name}"?`)) {
-                deleteConfig(currentConfig.id);
-              }
-            }}
-            className="w-full px-3 py-2 text-xs bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30"
-            disabled={configs.length === 1}
-          >
-            🗑️ Delete Template
-          </button>
         </div>
       </div>
 
@@ -289,7 +370,33 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <span className="text-robinhood-green text-xl">⚡</span>
+              <select
+                value={currentConfig.emoji}
+                onChange={(e) => handleUpdate({ emoji: e.target.value })}
+                className="text-xl bg-transparent border-none outline-none cursor-pointer hover:bg-robinhood-card rounded px-1 transition-colors"
+                title="Select emoji"
+              >
+                <option value="⚙️">⚙️</option>
+                <option value="🎓">🎓</option>
+                <option value="💻">💻</option>
+                <option value="✨">✨</option>
+                <option value="📊">📊</option>
+                <option value="💬">💬</option>
+                <option value="🔬">🔬</option>
+                <option value="⚡">⚡</option>
+                <option value="📚">📚</option>
+                <option value="🐛">🐛</option>
+                <option value="📱">📱</option>
+                <option value="🎯">🎯</option>
+                <option value="🚀">🚀</option>
+                <option value="💡">💡</option>
+                <option value="🔧">🔧</option>
+                <option value="📝">📝</option>
+                <option value="🎨">🎨</option>
+                <option value="🌟">🌟</option>
+                <option value="🔥">🔥</option>
+                <option value="💪">💪</option>
+              </select>
               <input
                 type="text"
                 value={currentConfig.name}
@@ -316,6 +423,32 @@ export default function Home() {
               >
                 📋 Duplicate
               </button>
+
+              {/* User Profile Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-robinhood-card border border-robinhood-border rounded-lg shadow-xl z-50">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-2.5 text-sm text-left text-red-400 hover:bg-robinhood-darker rounded-lg flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -680,23 +813,6 @@ export default function Home() {
                     >
                       {isGenerating ? 'Generating...' : '⚡ Generate Prompts'}
                     </button>
-
-                    {generatedPrompt && (
-                      <>
-                        <button
-                          onClick={() => setShowTestModal(true)}
-                          className="w-full px-4 py-2 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
-                        >
-                          🧪 Test Prompt
-                        </button>
-                        <button
-                          onClick={() => setShowPrompt(true)}
-                          className="w-full px-3 py-2 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
-                        >
-                          👁️ View Current
-                        </button>
-                      </>
-                    )}
                   </div>
                 </div>
 
@@ -712,21 +828,73 @@ export default function Home() {
                       <p className="text-xs text-gray-500 text-center py-4">No prompts generated yet</p>
                     ) : (
                       generatedHistory.map((record, index) => (
-                        <div key={record.id} className="p-2 bg-robinhood-darker border border-robinhood-border rounded hover:border-robinhood-green/50 transition-colors">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] text-gray-500">{record.timestamp}</span>
+                        <div
+                          key={record.id}
+                          className={`relative group p-2 bg-robinhood-darker border-2 rounded transition-all ${
+                            record.publishedUrl
+                              ? 'border-robinhood-green shadow-lg shadow-robinhood-green/20'
+                              : 'border-robinhood-border hover:border-robinhood-green/50'
+                          }`}
+                        >
+                          <div
+                            onClick={() => {
+                              setSelectedPromptRecord(record);
+                              setShowPromptModal(true);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-gray-500">{record.timestamp}</span>
+                                {record.publishedUrl && (
+                                  <span className="text-[9px] bg-robinhood-green/20 text-robinhood-green px-1.5 py-0.5 rounded">
+                                    Published
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-xs font-medium text-gray-300 truncate">{record.configName}</p>
+                            <p className="text-[10px] text-gray-600">
+                              {record.totalVariations > 1 ? `${record.variation}/${record.totalVariations}` : 'Single'}
+                            </p>
+                            <p className="text-[10px] text-gray-500 truncate mt-1">{record.promptText.substring(0, 60)}...</p>
+                          </div>
+
+                          {/* Action buttons */}
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                             <button
-                              onClick={() => copyToClipboard(record.promptText)}
-                              className="text-xs text-robinhood-green hover:text-robinhood-green/80"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(record.promptText);
+                              }}
+                              className="p-1 bg-robinhood-card border border-robinhood-border text-robinhood-green hover:bg-robinhood-green hover:text-robinhood-dark rounded text-xs"
+                              title="Copy"
                             >
                               📋
                             </button>
+                            {record.publishedUrl && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnpublishPrompt(record);
+                                }}
+                                className="p-1 bg-robinhood-card border border-robinhood-border text-yellow-400 hover:bg-yellow-600 hover:text-white rounded text-xs"
+                                title="Unpublish"
+                              >
+                                🔒
+                              </button>
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePrompt(record);
+                              }}
+                              className="p-1 bg-robinhood-card border border-robinhood-border text-red-400 hover:bg-red-600 hover:text-white rounded text-xs"
+                              title="Delete"
+                            >
+                              🗑️
+                            </button>
                           </div>
-                          <p className="text-xs font-medium text-gray-300 truncate">{record.configName}</p>
-                          <p className="text-[10px] text-gray-600">
-                            {record.totalVariations > 1 ? `${record.variation}/${record.totalVariations}` : 'Single'}
-                          </p>
-                          <p className="text-[10px] text-gray-500 truncate mt-1">{record.promptText.substring(0, 60)}...</p>
                         </div>
                       ))
                     )}
@@ -1048,6 +1216,101 @@ export default function Home() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prompt Details Modal */}
+      {showPromptModal && selectedPromptRecord && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border border-robinhood-border rounded-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-robinhood-border flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-white">{selectedPromptRecord.configName}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedPromptRecord.timestamp} • {selectedPromptRecord.totalVariations > 1 ? `Variation ${selectedPromptRecord.variation}/${selectedPromptRecord.totalVariations}` : 'Single Prompt'}
+                </p>
+              </div>
+              <button onClick={() => setShowPromptModal(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="px-6 py-6 overflow-y-auto flex-1">
+              <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-robinhood-darker p-4 rounded-lg border border-robinhood-border">
+                {selectedPromptRecord.promptText}
+              </pre>
+              <div className="mt-4 p-3 bg-robinhood-darker/50 rounded-lg border border-robinhood-border">
+                <p className="text-xs text-gray-400">
+                  <span className="font-semibold text-robinhood-green">Character Count:</span> {selectedPromptRecord.promptText.length.toLocaleString()}
+                </p>
+              </div>
+
+              {selectedPromptRecord.publishedUrl && (
+                <div className="mt-4 p-4 bg-robinhood-green/10 rounded-lg border border-robinhood-green/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-robinhood-green">🌐 Published URL</p>
+                    <button
+                      onClick={() => copyToClipboard(selectedPromptRecord.publishedUrl!)}
+                      className="px-3 py-1 text-xs bg-robinhood-green text-robinhood-dark rounded hover:bg-robinhood-green/90"
+                    >
+                      📋 Copy URL
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-300 font-mono break-all bg-robinhood-darker/50 p-2 rounded">
+                    {selectedPromptRecord.publishedUrl}
+                  </p>
+                  <p className="text-[10px] text-gray-500 mt-2">
+                    This URL returns the prompt text as plain text. You can use it in MCP servers or other applications.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border">
+              <div className="flex gap-3 mb-3">
+                <button
+                  onClick={() => {
+                    copyToClipboard(selectedPromptRecord.promptText);
+                  }}
+                  className="flex-1 px-4 py-2 bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90"
+                >
+                  📋 Copy Text
+                </button>
+                {!selectedPromptRecord.publishedUrl ? (
+                  <button
+                    onClick={handlePublishPrompt}
+                    disabled={isPublishing}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPublishing ? '🌐 Publishing...' : '🌐 Publish'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleUnpublishPrompt(selectedPromptRecord);
+                    }}
+                    className="flex-1 px-4 py-2 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700"
+                  >
+                    🔒 Unpublish
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    handleDeletePrompt(selectedPromptRecord);
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700"
+                >
+                  🗑️ Delete
+                </button>
+                <button
+                  onClick={() => setShowPromptModal(false)}
+                  className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

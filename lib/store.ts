@@ -3,6 +3,7 @@ import { create } from 'zustand';
 export interface PromptConfig {
   id: string;
   name: string;
+  emoji: string;  // Decorative emoji for aesthetics
   createdAt: string;
 
   // Response Style Controls
@@ -69,6 +70,7 @@ interface StoreState {
 const createDefaultConfig = (): PromptConfig => ({
   id: Date.now().toString(),
   name: 'New Configuration',
+  emoji: '⚙️',  // Default emoji
   createdAt: new Date().toISOString(),
 
   detailLevel: 50,
@@ -117,7 +119,8 @@ const createExampleConfigs = (): PromptConfig[] => {
   return [
     {
       id: 'example-1',
-      name: '🎓 Teaching Assistant',
+      name: 'Teaching Assistant',
+      emoji: '🎓',
       createdAt: baseDate,
       detailLevel: 70,
       formalityLevel: 40,
@@ -154,7 +157,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-2',
-      name: '💻 Code Review Expert',
+      name: 'Code Review Expert',
+      emoji: '💻',
       createdAt: baseDate,
       detailLevel: 80,
       formalityLevel: 60,
@@ -191,7 +195,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-3',
-      name: '✨ Creative Storyteller',
+      name: 'Creative Storyteller',
+      emoji: '✨',
       createdAt: baseDate,
       detailLevel: 75,
       formalityLevel: 30,
@@ -228,7 +233,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-4',
-      name: '📊 Executive Briefing',
+      name: 'Executive Briefing',
+      emoji: '📊',
       createdAt: baseDate,
       detailLevel: 40,
       formalityLevel: 85,
@@ -265,7 +271,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-5',
-      name: '💬 Casual Chat Friend',
+      name: 'Casual Chat Friend',
+      emoji: '💬',
       createdAt: baseDate,
       detailLevel: 45,
       formalityLevel: 15,
@@ -302,7 +309,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-6',
-      name: '🔬 Research Analyst',
+      name: 'Research Analyst',
+      emoji: '🔬',
       createdAt: baseDate,
       detailLevel: 95,
       formalityLevel: 75,
@@ -339,7 +347,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-7',
-      name: '⚡ Quick Helper',
+      name: 'Quick Helper',
+      emoji: '⚡',
       createdAt: baseDate,
       detailLevel: 25,
       formalityLevel: 40,
@@ -376,7 +385,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-8',
-      name: '📱 Social Media Writer',
+      name: 'Social Media Writer',
+      emoji: '📱',
       createdAt: baseDate,
       detailLevel: 30,
       formalityLevel: 20,
@@ -413,7 +423,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-9',
-      name: '📚 Technical Documentation',
+      name: 'Technical Documentation',
+      emoji: '📚',
       createdAt: baseDate,
       detailLevel: 85,
       formalityLevel: 70,
@@ -450,7 +461,8 @@ const createExampleConfigs = (): PromptConfig[] => {
     },
     {
       id: 'example-10',
-      name: '🐛 Debug Assistant',
+      name: 'Debug Assistant',
+      emoji: '🐛',
       createdAt: baseDate,
       detailLevel: 75,
       formalityLevel: 45,

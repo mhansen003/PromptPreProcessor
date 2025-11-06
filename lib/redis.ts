@@ -93,16 +93,29 @@ export async function getGeneratedPrompts(userId: string = DEFAULT_USER_ID, limi
 
 export async function saveGeneratedPrompt(promptData: any, userId: string = DEFAULT_USER_ID): Promise<boolean> {
   try {
-    const promptId = `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const promptId = promptData.id || `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Store prompt as JSON string in a single hash field
     await redis.hset(KEYS.generated(promptId), { data: JSON.stringify(promptData) });
     await redis.lpush(KEYS.userGenerated(userId), promptId);
-    await redis.ltrim(KEYS.userGenerated(userId), 0, 49); // Keep only last 50
+    await redis.ltrim(KEYS.userGenerated(userId), 0, 9); // Keep only last 10
 
     return true;
   } catch (error) {
     console.error('Error saving generated prompt to Redis:', error);
+    return false;
+  }
+}
+
+export async function deleteGeneratedPrompt(promptId: string, userId: string = DEFAULT_USER_ID): Promise<boolean> {
+  try {
+    // Delete the prompt data
+    await redis.del(KEYS.generated(promptId));
+    // Remove from user's list
+    await redis.lrem(KEYS.userGenerated(userId), 0, promptId);
+    return true;
+  } catch (error) {
+    console.error('Error deleting generated prompt from Redis:', error);
     return false;
   }
 }

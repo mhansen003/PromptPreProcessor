@@ -3,10 +3,77 @@ import OpenAI from 'openai';
 import type { PromptConfig } from '@/lib/store';
 
 function buildPromptFromConfig(config: PromptConfig): string {
-  let prompt = 'You are an AI assistant with the following configuration:\n\n';
+  let prompt = `# Pre-Prompt Builder - Meta-Instruction Generator
 
-  // Response Style
-  prompt += '## Response Style\n';
+This tool is a **Pre-Prompt Builder**. Its purpose is to generate meta-instructions — a "prompt about how to make prompts." The output from this tool is not meant to answer a question directly; instead, it defines how another AI should behave when generating responses for users.
+
+When a user interacts with this tool, their selections (like tone, formality, creativity, empathy, etc.) should be interpreted as **behavioral parameters** — instructions that describe the personality, structure, and communication style of the AI that will later use this configuration.
+
+The output of this tool should be a clear, structured description (in text or JSON form) of how the next AI should construct its responses. It should summarize the intended **response style**, **tone and personality**, **response structure**, and **advanced settings**.
+
+For example:
+
+* The pre-prompt might describe whether responses should be formal or casual, brief or detailed, factual or creative.
+* It might specify if the AI should include examples, analogies, humor, summaries, or visual descriptions.
+* It might define the AI's empathy, confidence, and enthusiasm levels, or the preferred perspective (first-person, third-person, etc.).
+
+The tool's output should include both:
+
+1. A **human-readable summary** (for the user to understand the personality and tone being configured).
+2. A **machine-readable version** (so another AI can interpret and apply these behaviors automatically).
+
+In short, this tool's job is to **generate a pre-prompt that tells another AI how to think, write, and respond** — not to generate those responses itself.
+
+---
+
+## Configuration Parameters (0-100 scales)
+
+### Response Style Controls
+- Detail Level: ${config.detailLevel}/100 (0=Concise, 100=Extremely Detailed)
+- Formality Level: ${config.formalityLevel}/100 (0=Casual, 100=Formal)
+- Technical Depth: ${config.technicalDepth}/100 (0=Simple, 100=Highly Technical)
+- Creativity Level: ${config.creativityLevel}/100 (0=Factual, 100=Creative)
+- Verbosity: ${config.verbosity}/100 (0=Brief, 100=Lengthy)
+
+### Tone Controls
+- Enthusiasm: ${config.enthusiasm}/100 (0=Neutral, 100=Enthusiastic)
+- Empathy: ${config.empathy}/100 (0=Objective, 100=Empathetic)
+- Confidence: ${config.confidence}/100 (0=Cautious, 100=Assertive)
+- Humor: ${config.humor}/100 (0=Serious, 100=Humorous)
+
+### Industry Knowledge
+- Industry Knowledge: ${config.industryKnowledge}/100 (0=Explain All Terms, 100=Use Acronyms Freely)
+
+### Structure Controls (Enabled/Disabled)
+- Use Examples: ${config.useExamples ? 'Yes' : 'No'}
+- Use Bullet Points: ${config.useBulletPoints ? 'Yes' : 'No'}
+- Use Numbered Lists: ${config.useNumberedLists ? 'Yes' : 'No'}
+- Include Code Samples: ${config.includeCodeSamples ? 'Yes' : 'No'}
+- Include Analogies: ${config.includeAnalogies ? 'Yes' : 'No'}
+- Include Visual Descriptions: ${config.includeVisualDescriptions ? 'Yes' : 'No'}
+- Include Tables: ${config.includeTables ? 'Yes' : 'No'}
+- Include Snippets: ${config.includeSnippets ? 'Yes' : 'No'}
+- Include External References: ${config.includeExternalReferences ? 'Yes' : 'No'}
+- Show Thought Process: ${config.showThoughtProcess ? 'Yes' : 'No'}
+- Include Step-by-Step: ${config.includeStepByStep ? 'Yes' : 'No'}
+- Include Summary: ${config.includeSummary ? 'Yes' : 'No'}
+
+### Advanced Settings
+- Response Length: ${config.responseLength}
+- Perspective: ${config.perspective}
+- Target Audience: ${config.audience}
+- Explanation Style: ${config.explanationStyle}
+- Prioritize Accuracy: ${config.prioritizeAccuracy ? 'Yes' : 'No'}
+- Prioritize Speed: ${config.prioritizeSpeed ? 'Yes' : 'No'}
+- Prioritize Clarity: ${config.prioritizeClarity ? 'Yes' : 'No'}
+- Prioritize Comprehensiveness: ${config.prioritizeComprehensiveness ? 'Yes' : 'No'}
+
+${config.customInstructions ? `### Custom Instructions\n${config.customInstructions}\n` : ''}
+${config.customStyle ? `### Additional Style Requirements\n${config.customStyle}\n` : ''}
+
+---
+
+## Response Style Interpretation\n`;
 
   if (config.detailLevel < 30) {
     prompt += '- Keep responses concise and to the point\n';
@@ -17,11 +84,11 @@ function buildPromptFromConfig(config: PromptConfig): string {
   }
 
   if (config.formalityLevel < 30) {
-    prompt += '- Use a casual, conversational tone\n';
+    prompt += '- Use casual, conversational tone\n';
   } else if (config.formalityLevel > 70) {
-    prompt += '- Use a formal, professional tone\n';
+    prompt += '- Use formal, professional tone\n';
   } else {
-    prompt += '- Use a balanced, semi-formal tone\n';
+    prompt += '- Use balanced, semi-formal tone\n';
   }
 
   if (config.technicalDepth < 30) {
@@ -33,7 +100,7 @@ function buildPromptFromConfig(config: PromptConfig): string {
   }
 
   if (config.creativityLevel > 60) {
-    prompt += '- Feel free to be creative and explore novel perspectives\n';
+    prompt += '- Be creative and explore novel perspectives\n';
   } else if (config.creativityLevel < 40) {
     prompt += '- Stick to factual, straightforward information\n';
   }
@@ -48,7 +115,7 @@ function buildPromptFromConfig(config: PromptConfig): string {
   prompt += '\n## Tone and Personality\n';
 
   if (config.enthusiasm > 60) {
-    prompt += '- Show enthusiasm and energy in responses\n';
+    prompt += '- Show enthusiasm and energy\n';
   }
 
   if (config.empathy > 60) {
@@ -58,13 +125,13 @@ function buildPromptFromConfig(config: PromptConfig): string {
   if (config.confidence < 30) {
     prompt += '- Express uncertainty when appropriate and hedge statements\n';
   } else if (config.confidence > 70) {
-    prompt += '- Be confident and assertive in your responses\n';
+    prompt += '- Be confident and assertive\n';
   }
 
   if (config.humor > 60) {
     prompt += '- Include appropriate humor when suitable\n';
   } else if (config.humor < 30) {
-    prompt += '- Maintain a serious, professional demeanor\n';
+    prompt += '- Maintain serious, professional demeanor\n';
   }
 
   // Structure
@@ -183,15 +250,29 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert at crafting system prompts for AI assistants. Your task is to refine and optimize the provided prompt configuration into a clear, effective system prompt.',
+          content: `You are an expert at crafting meta-instructions and behavioral guidelines. Your role is to convert configuration parameters into a comprehensive pre-prompt that defines communication behaviors.
+
+Remember: You are NOT generating responses to user questions. You are generating instructions that define HOW responses should be structured and delivered.
+
+Your output should include:
+1. Direct behavioral guidelines (avoid phrases like "you are" or "as an assistant")
+2. Specific instructions based on the numeric parameters provided
+3. Clear guidelines about structure, tone, and content approach
+
+Transform the configuration into well-structured behavioral guidelines. Use imperative language (e.g., "Use formal tone", "Include examples") rather than second-person descriptions (e.g., "You should use formal tone").`,
         },
         {
           role: 'user',
-          content: `Please refine this system prompt configuration into a clear, well-structured system prompt:\n\n${systemPrompt}`,
+          content: `Based on the configuration parameters below, generate comprehensive behavioral guidelines that define communication style and approach. Use direct, imperative language without "you are" or "as an assistant" framing.
+
+Configuration:
+${systemPrompt}
+
+Please create refined, professional behavioral guidelines that capture all these parameters. Focus on WHAT to do, not WHO is doing it.`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 2000,
     });
 
     const refinedPrompt = completion.choices[0].message.content || systemPrompt;
