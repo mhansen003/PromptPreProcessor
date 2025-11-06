@@ -165,7 +165,8 @@ export async function POST(request: NextRequest) {
     // Always build the basic prompt first
     const systemPrompt = buildPromptFromConfig(config);
 
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey) {
       // If no API key, just return the built prompt
       return NextResponse.json({ systemPrompt });
     }
@@ -174,7 +175,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize OpenAI client only when API key is available
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: apiKey,
     });
 
     const completion = await openai.chat.completions.create({

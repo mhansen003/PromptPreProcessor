@@ -58,6 +58,7 @@ interface StoreState {
   // Actions
   addConfig: (config: PromptConfig) => void;
   updateConfig: (id: string, updates: Partial<PromptConfig>) => void;
+  saveConfig: (config: PromptConfig) => Promise<void>; // Manual save to Redis
   deleteConfig: (id: string) => void;
   setActiveConfig: (config: PromptConfig) => void;
   duplicateConfig: (id: string) => void;
@@ -505,19 +506,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 
   updateConfig: (id, updates) => {
-    // Get the updated config
-    const state = get();
-    const updatedConfig = state.configs.find(c => c.id === id);
-    if (updatedConfig) {
-      const configToSave = { ...updatedConfig, ...updates };
-      // Save to Redis via API
-      fetch('/api/configs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(configToSave),
-      }).catch(err => console.error('Error updating config in Redis:', err));
-    }
-
+    // Update in local state only (no auto-save)
     set((state) => ({
       configs: state.configs.map((config) =>
         config.id === id ? { ...config, ...updates } : config
@@ -526,6 +515,20 @@ export const useStore = create<StoreState>()((set, get) => ({
         ? { ...state.activeConfig, ...updates }
         : state.activeConfig,
     }));
+  },
+
+  saveConfig: async (config) => {
+    // Manual save to Redis
+    try {
+      await fetch('/api/configs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+    } catch (err) {
+      console.error('Error saving config to Redis:', err);
+      throw err;
+    }
   },
 
   deleteConfig: (id) => {

@@ -44,7 +44,7 @@ export const Slider: React.FC<SliderProps> = ({
     <div className="space-y-1">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1.5">
-          <label className="text-xs font-medium text-gray-300">
+          <label className="text-sm font-medium text-gray-300">
             {label}
           </label>
           {tooltip && (
@@ -56,7 +56,7 @@ export const Slider: React.FC<SliderProps> = ({
           )}
         </div>
         {showValue && (
-          <span className="text-xs font-mono" style={{ color: currentColor }}>
+          <span className="text-sm font-mono" style={{ color: currentColor }}>
             {value}
           </span>
         )}
@@ -73,8 +73,7 @@ export const Slider: React.FC<SliderProps> = ({
           className="slider-input w-full h-1.5 rounded-lg appearance-none cursor-pointer"
           style={{
             background: `linear-gradient(to right,
-              rgb(59, 130, 246) 0%,
-              rgb(147, 99, 178) ${percentage / 2}%,
+              ${currentColor} 0%,
               ${currentColor} ${percentage}%,
               #2A2A2A ${percentage}%,
               #2A2A2A 100%)`,

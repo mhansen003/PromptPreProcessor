@@ -24,7 +24,7 @@ interface TestResult {
 }
 
 export default function Home() {
-  const { configs, activeConfig, addConfig, updateConfig, setActiveConfig, deleteConfig, duplicateConfig, setConfigs } = useStore();
+  const { configs, activeConfig, addConfig, updateConfig, saveConfig, setActiveConfig, deleteConfig, duplicateConfig, setConfigs } = useStore();
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -42,6 +42,8 @@ export default function Home() {
   const [generatedHistory, setGeneratedHistory] = useState<GeneratedPromptRecord[]>([]);
   const [currentGeneratedPrompts, setCurrentGeneratedPrompts] = useState<GeneratedPromptRecord[]>([]);
   const [selectedGeneratedIndex, setSelectedGeneratedIndex] = useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -68,6 +70,11 @@ export default function Home() {
       .catch(err => console.error('Error loading generated prompts:', err));
   }, []);
 
+  // Reset unsaved changes when switching configs
+  useEffect(() => {
+    setHasUnsavedChanges(false);
+  }, [currentConfig?.id]);
+
   if (!mounted) {
     return null;
   }
@@ -80,6 +87,22 @@ export default function Home() {
 
   const handleUpdate = (updates: any) => {
     updateConfig(currentConfig.id, updates);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!currentConfig) return;
+
+    setIsSaving(true);
+    try {
+      await saveConfig(currentConfig);
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleGeneratePrompts = async () => {
@@ -255,12 +278,25 @@ export default function Home() {
                 placeholder="Configuration Name"
               />
             </div>
-            <button
-              onClick={() => duplicateConfig(currentConfig.id)}
-              className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
-            >
-              📋 Duplicate
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveChanges}
+                disabled={!hasUnsavedChanges || isSaving}
+                className={`px-4 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                  hasUnsavedChanges && !isSaving
+                    ? 'bg-robinhood-green text-robinhood-dark hover:bg-robinhood-green/90 shadow-lg shadow-robinhood-green/20'
+                    : 'bg-robinhood-card border border-robinhood-border text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                {isSaving ? '💾 Saving...' : hasUnsavedChanges ? '💾 Save Changes' : '✓ Saved'}
+              </button>
+              <button
+                onClick={() => duplicateConfig(currentConfig.id)}
+                className="px-3 py-1.5 text-sm bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green"
+              >
+                📋 Duplicate
+              </button>
+            </div>
           </div>
         </header>
 
@@ -364,53 +400,53 @@ export default function Home() {
 
                 {/* Structure */}
                 <ControlSection title="Response Structure" icon="📋" defaultOpen={true}>
-                  <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Examples</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Examples</span>
                       <Toggle label="" checked={currentConfig.useExamples} onChange={(v) => handleUpdate({ useExamples: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Bullets</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Bullets</span>
                       <Toggle label="" checked={currentConfig.useBulletPoints} onChange={(v) => handleUpdate({ useBulletPoints: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Numbers</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Numbers</span>
                       <Toggle label="" checked={currentConfig.useNumberedLists} onChange={(v) => handleUpdate({ useNumberedLists: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Code</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Code</span>
                       <Toggle label="" checked={currentConfig.includeCodeSamples} onChange={(v) => handleUpdate({ includeCodeSamples: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Analogies</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Analogies</span>
                       <Toggle label="" checked={currentConfig.includeAnalogies} onChange={(v) => handleUpdate({ includeAnalogies: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Visual</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Visual</span>
                       <Toggle label="" checked={currentConfig.includeVisualDescriptions} onChange={(v) => handleUpdate({ includeVisualDescriptions: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Tables</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Tables</span>
                       <Toggle label="" checked={currentConfig.includeTables} onChange={(v) => handleUpdate({ includeTables: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Snippets</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Snippets</span>
                       <Toggle label="" checked={currentConfig.includeSnippets} onChange={(v) => handleUpdate({ includeSnippets: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">References</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">References</span>
                       <Toggle label="" checked={currentConfig.includeExternalReferences} onChange={(v) => handleUpdate({ includeExternalReferences: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Thought Process</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Thought Process</span>
                       <Toggle label="" checked={currentConfig.showThoughtProcess} onChange={(v) => handleUpdate({ showThoughtProcess: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Step-by-Step</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Step-by-Step</span>
                       <Toggle label="" checked={currentConfig.includeStepByStep} onChange={(v) => handleUpdate({ includeStepByStep: v })} description="" />
                     </div>
-                    <div className="flex items-center justify-between bg-robinhood-darker/50 rounded px-2 py-1.5">
-                      <span className="text-xs text-gray-300">Summary</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
+                      <span className="text-xs text-gray-300 font-medium">Summary</span>
                       <Toggle label="" checked={currentConfig.includeSummary} onChange={(v) => handleUpdate({ includeSummary: v })} description="" />
                     </div>
                   </div>
