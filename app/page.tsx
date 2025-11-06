@@ -206,52 +206,71 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-robinhood-dark flex">
-      {/* Left Sidebar - Prompts List */}
+      {/* Left Sidebar - Prompt Templates List */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-robinhood-darker border-r border-robinhood-border flex flex-col overflow-hidden`}>
         <div className="p-4 border-b border-robinhood-border">
           <button
             onClick={handleNewConfig}
             className="w-full px-4 py-2 text-sm bg-robinhood-green text-robinhood-dark font-semibold rounded-lg hover:bg-robinhood-green/90 flex items-center justify-center gap-2"
           >
-            <span className="text-lg">+</span> New Prompt
+            <span className="text-lg">+</span> New Template
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
           {configs.map((config) => (
-            <button
+            <div
               key={config.id}
-              onClick={() => setActiveConfig(config)}
-              className={`w-full text-left px-3 py-2.5 mb-1 rounded-lg text-sm transition-colors ${
+              className={`relative group w-full text-left px-3 py-2.5 mb-1 rounded-lg text-sm transition-colors ${
                 currentConfig.id === config.id
                   ? 'bg-robinhood-border text-white border-l-2 border-robinhood-green'
                   : 'text-gray-400 hover:bg-robinhood-card'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="truncate flex-1">{config.name}</span>
-                {currentConfig.id === config.id && (
-                  <span className="text-robinhood-green">●</span>
-                )}
-              </div>
-              <div className="text-[10px] text-gray-600 mt-0.5">
-                {new Date(config.createdAt).toLocaleDateString()}
-              </div>
-            </button>
+              <button
+                onClick={() => setActiveConfig(config)}
+                className="w-full text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="truncate flex-1">{config.name}</span>
+                  {currentConfig.id === config.id && (
+                    <span className="text-robinhood-green">●</span>
+                  )}
+                </div>
+                <div className="text-[10px] text-gray-600 mt-0.5">
+                  {new Date(config.createdAt).toLocaleDateString()}
+                </div>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(`Delete prompt template "${config.name}"?`)) {
+                    deleteConfig(config.id);
+                  }
+                }}
+                disabled={configs.length === 1}
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-red-500/20 text-red-400 hover:text-red-300 disabled:opacity-0 disabled:cursor-not-allowed"
+                title="Delete template"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           ))}
         </div>
 
         <div className="p-3 border-t border-robinhood-border">
           <button
             onClick={() => {
-              if (confirm(`Delete "${currentConfig.name}"?`)) {
+              if (confirm(`Delete template "${currentConfig.name}"?`)) {
                 deleteConfig(currentConfig.id);
               }
             }}
             className="w-full px-3 py-2 text-xs bg-robinhood-card border border-red-900/50 text-red-400 rounded-lg hover:border-red-500 disabled:opacity-30"
             disabled={configs.length === 1}
           >
-            🗑️ Delete
+            🗑️ Delete Template
           </button>
         </div>
       </div>
@@ -276,7 +295,7 @@ export default function Home() {
                 value={currentConfig.name}
                 onChange={(e) => handleUpdate({ name: e.target.value })}
                 className="text-lg font-bold bg-transparent border-none outline-none text-white focus:ring-1 focus:ring-robinhood-green rounded px-2 py-1"
-                placeholder="Configuration Name"
+                placeholder="Template Name"
               />
             </div>
             <div className="flex items-center gap-2">

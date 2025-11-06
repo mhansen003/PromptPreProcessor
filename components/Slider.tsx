@@ -82,7 +82,7 @@ export const Slider: React.FC<SliderProps> = ({
       </div>
 
       {(leftLabel || rightLabel) && (
-        <div className="flex justify-between text-[10px] text-gray-500">
+        <div className="flex justify-between text-xs text-gray-500">
           <span className="text-blue-400">{leftLabel}</span>
           <span className="text-red-400">{rightLabel}</span>
         </div>
