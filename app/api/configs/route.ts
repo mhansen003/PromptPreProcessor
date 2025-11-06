@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserConfigs, saveConfig, deleteConfig } from '@/lib/redis';
 import { createExampleConfigs } from '@/lib/store';
 import type { PromptConfig } from '@/lib/store';
+import { generatePrompt } from '@/lib/prompt-generator';
 
 // Helper function to generate URL-friendly slug from name
 function generateSlug(name: string): string {
@@ -11,24 +12,6 @@ function generateSlug(name: string): string {
     .replace(/[^\w\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-')      // Replace spaces with hyphens
     .replace(/-+/g, '-');      // Replace multiple hyphens with single hyphen
-}
-
-// Helper function to generate prompt from config (extracted from generate-prompt route)
-async function generatePromptForConfig(config: PromptConfig): Promise<string> {
-  try {
-    // Call the generate-prompt API internally
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/generate-prompt`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config),
-    });
-
-    const data = await response.json();
-    return data.systemPrompt || '';
-  } catch (error) {
-    console.error('Error generating prompt:', error);
-    return '';
-  }
 }
 
 // GET /api/configs - Get all user configurations
@@ -66,7 +49,7 @@ export async function POST(request: NextRequest) {
     config.slug = generateSlug(config.name);
 
     // Auto-generate the system prompt
-    const systemPrompt = await generatePromptForConfig(config);
+    const systemPrompt = await generatePrompt(config);
     config.systemPrompt = systemPrompt;
 
     // Save the updated config with generated prompt
