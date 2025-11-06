@@ -131,6 +131,8 @@ export default function Home() {
 
   const togglePublish = async (personalityId: string, newPublishStatus: boolean) => {
     try {
+      console.log('Toggle publish:', { personalityId, newPublishStatus });
+
       const response = await fetch('/api/personalities/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -138,8 +140,9 @@ export default function Home() {
       });
 
       const data = await response.json();
+      console.log('Publish response:', data);
 
-      if (data.success) {
+      if (response.ok && data.success) {
         // Update the config in the store
         if (data.personality) {
           updateConfig(personalityId, {
@@ -151,11 +154,21 @@ export default function Home() {
 
         showToast(newPublishStatus ? '✅ Personality published!' : '🔒 Personality unpublished');
       } else {
-        showToast('❌ ' + (data.error || 'Failed to update publish status'));
+        // Show specific error message
+        const errorMsg = data.error || 'Failed to update publish status';
+        console.error('Publish failed:', errorMsg, data);
+        showToast('❌ ' + errorMsg);
+
+        // If personality not found, suggest saving first
+        if (errorMsg.includes('not found')) {
+          setTimeout(() => {
+            showToast('💡 Try clicking "Save & Generate" first to sync this personality');
+          }, 3000);
+        }
       }
     } catch (error) {
       console.error('Error toggling publish:', error);
-      showToast('❌ Failed to update publish status');
+      showToast('❌ Network error - please try again');
     }
   };
 
@@ -198,34 +211,29 @@ export default function Home() {
                     {new Date(config.createdAt).toLocaleDateString()}
                   </div>
                   {config.systemPrompt && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePublish(config.id, !config.isPublished);
-                      }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold transition-all shadow-sm ${
-                        config.isPublished
-                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30 hover:border-blue-500'
-                          : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 hover:border-red-500'
-                      }`}
-                      title={config.isPublished ? 'Published - Click to unpublish' : 'Not Published - Click to publish'}
-                    >
-                      {config.isPublished ? (
-                        <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span>ON</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          <span>OFF</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[9px] font-medium ${config.isPublished ? 'text-blue-400' : 'text-gray-500'}`}>
+                        Publish
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePublish(config.id, !config.isPublished);
+                        }}
+                        className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
+                          config.isPublished
+                            ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
+                            : 'bg-red-500/30 shadow-sm'
+                        }`}
+                        title={config.isPublished ? 'Published - Click to unpublish' : 'Not Published - Click to publish'}
+                      >
+                        <div
+                          className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                            config.isPublished ? 'left-5' : 'left-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
                   )}
                 </div>
               </button>
