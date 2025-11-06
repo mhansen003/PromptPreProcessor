@@ -539,8 +539,8 @@ export default function Home() {
                 onChange={(e) => {
                   handleUpdate({ name: e.target.value });
                   // Auto-save name change after typing stops
-                  if (window.renameSaveTimeout) {
-                    clearTimeout(window.renameSaveTimeout);
+                  if ((window as any).renameSaveTimeout) {
+                    clearTimeout((window as any).renameSaveTimeout);
                   }
                   (window as any).renameSaveTimeout = setTimeout(async () => {
                     try {
