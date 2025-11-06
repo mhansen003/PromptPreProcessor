@@ -203,15 +203,12 @@ export default function Home() {
                         e.stopPropagation();
                         togglePublish(config.id, !config.isPublished);
                       }}
-                      disabled={isSaving && currentConfig.id === config.id}
                       className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
-                        isSaving && currentConfig.id === config.id
-                          ? 'bg-robinhood-border/30 text-gray-600 cursor-not-allowed'
-                          : config.isPublished
+                        config.isPublished
                           ? 'bg-robinhood-green/20 text-robinhood-green hover:bg-robinhood-green/30'
                           : 'bg-robinhood-border/50 text-gray-500 hover:bg-robinhood-border'
                       }`}
-                      title={isSaving && currentConfig.id === config.id ? 'Wait for generation to complete' : config.isPublished ? 'Click to unpublish' : 'Click to publish'}
+                      title={config.isPublished ? 'Click to unpublish' : 'Click to publish'}
                     >
                       {config.isPublished ? (
                         <>
@@ -349,31 +346,26 @@ export default function Home() {
                 ) : hasUnsavedChanges ? '💾 Save' : '💾 Save & Generate'}
               </button>
 
-              {/* View Prompt Button - Enabled when prompt exists and not generating */}
+              {/* View Prompt Button - Enabled when prompt exists (per-personality) */}
               <button
                 onClick={() => setShowViewPromptModal(true)}
-                disabled={!currentConfig.systemPrompt || isSaving}
+                disabled={!currentConfig.systemPrompt}
                 className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  currentConfig.systemPrompt && !isSaving
+                  currentConfig.systemPrompt
                     ? 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green hover:bg-robinhood-green/10'
                     : 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
                 }`}
-                title={isSaving ? 'Wait for generation to complete' : currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt first'}
+                title={currentConfig.systemPrompt ? 'View generated prompt' : 'Save to generate prompt first'}
               >
                 👁️ View Prompt
               </button>
 
-              {/* View Endpoints Button - Visible when published and not generating */}
+              {/* View Endpoints Button - Visible when published (per-personality) */}
               {currentConfig.isPublished && (
                 <button
                   onClick={() => setShowEndpointsModal(true)}
-                  disabled={isSaving}
-                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                    isSaving
-                      ? 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
-                      : 'bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10'
-                  }`}
-                  title={isSaving ? 'Wait for generation to complete' : 'View API endpoints'}
+                  className="px-3 py-1.5 text-sm rounded-lg font-medium transition-all bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10"
+                  title="View API endpoints"
                 >
                   🔗 View Endpoints
                 </button>
