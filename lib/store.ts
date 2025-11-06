@@ -533,4 +533,4 @@ export const useStore = create<StoreState>()(
   )
 );
 
-export { createDefaultConfig };
+export { createDefaultConfig, createExampleConfigs };

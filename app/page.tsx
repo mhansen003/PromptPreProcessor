@@ -45,15 +45,37 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    if (!activeConfig && configs.length > 0) {
-      setActiveConfig(configs[0]);
-    }
-    // Load generated prompts from localStorage
-    const saved = localStorage.getItem('generated-prompts-history');
-    if (saved) {
-      setGeneratedHistory(JSON.parse(saved));
-    }
-  }, [activeConfig, configs, setActiveConfig]);
+
+    // Load configs from Redis
+    fetch('/api/configs')
+      .then(res => res.json())
+      .then(data => {
+        if (data.configs && data.configs.length > 0) {
+          // Update store with Redis configs
+          data.configs.forEach((config: any) => {
+            const exists = configs.find(c => c.id === config.id);
+            if (!exists) {
+              addConfig(config);
+            }
+          });
+
+          if (!activeConfig) {
+            setActiveConfig(data.configs[0]);
+          }
+        }
+      })
+      .catch(err => console.error('Error loading configs from Redis:', err));
+
+    // Load generated prompts from Redis
+    fetch('/api/generated')
+      .then(res => res.json())
+      .then(data => {
+        if (data.prompts) {
+          setGeneratedHistory(data.prompts);
+        }
+      })
+      .catch(err => console.error('Error loading generated prompts:', err));
+  }, []);
 
   if (!mounted) {
     return null;
@@ -102,10 +124,17 @@ export default function Home() {
       setGeneratedPrompt(prompts[0].promptText);
     }
 
-    // Add to history (keep last 50)
+    // Save prompts to Redis and update local state
+    for (const prompt of prompts) {
+      await fetch('/api/generated', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prompt),
+      });
+    }
+
     const updated = [...prompts, ...generatedHistory].slice(0, 50);
     setGeneratedHistory(updated);
-    localStorage.setItem('generated-prompts-history', JSON.stringify(updated));
 
     setIsGenerating(false);
     setShowGenerateModal(false);

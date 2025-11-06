@@ -1,14 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Tooltip } from './Tooltip';
 
 interface ToggleProps {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
   description?: string;
-  tooltip?: string;
 }
 
 export const Toggle: React.FC<ToggleProps> = ({
@@ -16,17 +14,13 @@ export const Toggle: React.FC<ToggleProps> = ({
   checked,
   onChange,
   description,
-  tooltip,
 }) => {
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-center justify-between">
       <div className="flex-1">
-        <Tooltip content={tooltip || description || label}>
-          <label className="text-xs font-medium text-gray-300 cursor-pointer flex items-center gap-1">
-            {label}
-            <span className="text-gray-500 text-[10px]">ⓘ</span>
-          </label>
-        </Tooltip>
+        <label className="text-xs font-medium text-gray-300 cursor-pointer">
+          {label}
+        </label>
         {description && (
           <p className="text-[10px] text-gray-500 mt-0.5">{description}</p>
         )}

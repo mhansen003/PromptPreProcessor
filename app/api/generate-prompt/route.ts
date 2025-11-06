@@ -94,6 +94,39 @@ function buildPromptFromConfig(config: PromptConfig): string {
     prompt += '- Provide visual descriptions and mental imagery\n';
   }
 
+  if (config.includeTables) {
+    prompt += '- Include data tables when presenting structured information\n';
+  }
+
+  if (config.includeSnippets) {
+    prompt += '- Extract and highlight key snippets or quotes\n';
+  }
+
+  if (config.includeExternalReferences) {
+    prompt += '- Reference external resources and documentation when relevant\n';
+  }
+
+  if (config.showThoughtProcess) {
+    prompt += '- Show internal reasoning and thought process (Chain of Thought)\n';
+  }
+
+  if (config.includeStepByStep) {
+    prompt += '- Break down processes into clear step-by-step instructions\n';
+  }
+
+  if (config.includeSummary) {
+    prompt += '- Include summary sections for key points\n';
+  }
+
+  // Industry Knowledge
+  if (config.industryKnowledge < 30) {
+    prompt += '- Explain all industry terms and acronyms in full (e.g., "Annual Percentage Rate" not "APR")\n';
+  } else if (config.industryKnowledge > 70) {
+    prompt += '- Use industry acronyms and terminology freely (e.g., "APR", "LTV", "DTI", "ARM")\n';
+  } else {
+    prompt += '- Balance industry terminology with explanations\n';
+  }
+
   // Advanced settings
   prompt += '\n## Additional Guidelines\n';
 
@@ -129,14 +162,15 @@ export async function POST(request: NextRequest) {
   try {
     const config: PromptConfig = await request.json();
 
+    // Always build the basic prompt first
+    const systemPrompt = buildPromptFromConfig(config);
+
     if (!process.env.OPENAI_API_KEY) {
       // If no API key, just return the built prompt
-      const systemPrompt = buildPromptFromConfig(config);
       return NextResponse.json({ systemPrompt });
     }
 
     // Use OpenAI to enhance and optimize the prompt
-    const systemPrompt = buildPromptFromConfig(config);
 
     // Initialize OpenAI client only when API key is available
     const openai = new OpenAI({
@@ -162,16 +196,17 @@ export async function POST(request: NextRequest) {
     const refinedPrompt = completion.choices[0].message.content || systemPrompt;
 
     return NextResponse.json({ systemPrompt: refinedPrompt });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating prompt:', error);
 
-    // Fallback to basic prompt building if OpenAI fails
-    const config: PromptConfig = await request.json();
-    const systemPrompt = buildPromptFromConfig(config);
-
-    return NextResponse.json({
-      systemPrompt,
-      warning: 'OpenAI enhancement unavailable, using basic prompt generation'
-    });
+    // Return error details for debugging
+    return NextResponse.json(
+      {
+        error: 'Failed to generate prompt',
+        details: error.message,
+        systemPrompt: ''
+      },
+      { status: 500 }
+    );
   }
 }
