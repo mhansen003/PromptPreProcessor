@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserConfigs, saveConfig } from '@/lib/redis';
 
-// POST /api/personalities/publish - Publish a personality
+// POST /api/personalities/publish - Toggle publish status of a personality
 export async function POST(request: NextRequest) {
   try {
     const userEmail = request.headers.get('x-user-email') || 'default-user';
-    const { personalityId } = await request.json();
+    const { personalityId, isPublished } = await request.json();
 
     if (!personalityId) {
       return NextResponse.json(
@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!personality.systemPrompt) {
+    // If publishing (turning on), require a prompt
+    if (isPublished && !personality.systemPrompt) {
       return NextResponse.json(
         { error: 'Personality must have a generated prompt before publishing' },
         { status: 400 }
@@ -40,8 +41,8 @@ export async function POST(request: NextRequest) {
     // Update the personality with published status
     const updatedPersonality = {
       ...personality,
-      isPublished: true,
-      publishedUrl: publicUrl,
+      isPublished: isPublished,
+      publishedUrl: isPublished ? publicUrl : undefined,
       slug,
     };
 
@@ -50,13 +51,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
+      isPublished: isPublished,
+      url: isPublished ? publicUrl : null,
       personality: updatedPersonality,
     });
   } catch (error: any) {
-    console.error('Error publishing personality:', error);
+    console.error('Error toggling publish status:', error);
     return NextResponse.json(
-      { error: 'Failed to publish personality', details: error.message },
+      { error: 'Failed to update publish status', details: error.message },
       { status: 500 }
     );
   }

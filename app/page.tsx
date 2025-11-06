@@ -22,6 +22,7 @@ export default function Home() {
   const [publishedUrl, setPublishedUrl] = useState<string>('');
   const [showToaster, setShowToaster] = useState(false);
   const [toasterMessage, setToasterMessage] = useState('');
+  const [showEndpointsModal, setShowEndpointsModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -126,6 +127,36 @@ export default function Home() {
     navigator.clipboard.writeText(text);
   };
 
+  const togglePublish = async (personalityId: string, newPublishStatus: boolean) => {
+    try {
+      const response = await fetch('/api/personalities/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ personalityId, isPublished: newPublishStatus }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the config in the store
+        if (data.personality) {
+          updateConfig(personalityId, {
+            isPublished: data.personality.isPublished,
+            publishedUrl: data.personality.publishedUrl,
+            slug: data.personality.slug,
+          });
+        }
+
+        showToast(newPublishStatus ? '✅ Personality published!' : '🔒 Personality unpublished');
+      } else {
+        showToast('❌ ' + (data.error || 'Failed to update publish status'));
+      }
+    } catch (error) {
+      console.error('Error toggling publish:', error);
+      showToast('❌ Failed to update publish status');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-robinhood-dark flex">
       {/* Left Sidebar - Prompt Personalities List */}
@@ -160,17 +191,36 @@ export default function Home() {
                     <span className="text-robinhood-green">●</span>
                   )}
                 </div>
-                <div className="text-[10px] text-gray-600 mt-0.5">
-                  {new Date(config.createdAt).toLocaleDateString()}
-                </div>
-                {config.isPublished && (
-                  <div className="text-[9px] text-robinhood-green mt-0.5 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Published
+                <div className="flex items-center justify-between mt-1">
+                  <div className="text-[10px] text-gray-600">
+                    {new Date(config.createdAt).toLocaleDateString()}
                   </div>
-                )}
+                  {config.systemPrompt && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePublish(config.id, !config.isPublished);
+                      }}
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
+                        config.isPublished
+                          ? 'bg-robinhood-green/20 text-robinhood-green hover:bg-robinhood-green/30'
+                          : 'bg-robinhood-border/50 text-gray-500 hover:bg-robinhood-border'
+                      }`}
+                      title={config.isPublished ? 'Click to unpublish' : 'Click to publish'}
+                    >
+                      {config.isPublished ? (
+                        <>
+                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                          ON
+                        </>
+                      ) : (
+                        <>OFF</>
+                      )}
+                    </button>
+                  )}
+                </div>
               </button>
 
               {/* Sidebar action buttons - shown on hover */}
@@ -308,49 +358,16 @@ export default function Home() {
                 👁️ View Prompt
               </button>
 
-              {/* Publish Button - Enabled when prompt exists */}
-              <button
-                onClick={async () => {
-                  if (!currentConfig.systemPrompt) {
-                    showToast('⚠️ Save first to generate prompt before publishing');
-                    return;
-                  }
-                  setIsPublishing(true);
-                  showToast('🚀 Publishing personality...');
-                  try {
-                    const response = await fetch('/api/personalities/publish', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ personalityId: currentConfig.id }),
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                      updateConfig(currentConfig.id, { isPublished: true, publishedUrl: data.url });
-                      setPublishedUrl(data.url);
-                      setShowPublishSuccess(true);
-                      showToast('✅ Personality published successfully!');
-                    } else {
-                      showToast('❌ Failed to publish. Please try again.');
-                    }
-                  } catch (error) {
-                    console.error('Error publishing:', error);
-                    showToast('❌ Failed to publish. Please try again.');
-                  } finally {
-                    setIsPublishing(false);
-                  }
-                }}
-                disabled={isPublishing || !currentConfig.systemPrompt}
-                className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  currentConfig.isPublished
-                    ? 'bg-robinhood-green/20 border border-robinhood-green text-robinhood-green cursor-default'
-                    : currentConfig.systemPrompt
-                    ? 'bg-robinhood-card border border-robinhood-border text-white hover:border-robinhood-green hover:bg-robinhood-green/10'
-                    : 'bg-robinhood-card border border-robinhood-border/30 text-gray-600 cursor-not-allowed'
-                }`}
-                title={!currentConfig.systemPrompt ? 'Save to generate prompt first' : currentConfig.isPublished ? 'Already published' : 'Publish personality'}
-              >
-                {isPublishing ? '🚀 Publishing...' : currentConfig.isPublished ? '✅ Published' : '🌐 Publish'}
-              </button>
+              {/* View Endpoints Button - Visible when published */}
+              {currentConfig.isPublished && (
+                <button
+                  onClick={() => setShowEndpointsModal(true)}
+                  className="px-3 py-1.5 text-sm rounded-lg font-medium transition-all bg-robinhood-card border border-robinhood-green text-robinhood-green hover:bg-robinhood-green/10"
+                  title="View API endpoints"
+                >
+                  🔗 View Endpoints
+                </button>
+              )}
 
               {/* User Menu */}
               <button
@@ -861,6 +878,119 @@ export default function Home() {
         </div>
       )}
 
+      {/* Endpoints Modal */}
+      {showEndpointsModal && currentConfig && currentConfig.isPublished && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border-2 border-robinhood-green rounded-xl max-w-3xl w-full shadow-2xl">
+            <div className="px-6 py-5 border-b border-robinhood-green/30 flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-white">API Endpoints</h3>
+                <p className="text-sm text-gray-400 mt-1">Use these URLs to integrate this personality into your tools</p>
+              </div>
+              <button
+                onClick={() => setShowEndpointsModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-6 space-y-6">
+              {/* List All Personalities Endpoint */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-semibold text-white">List All Your Published Personalities</h4>
+                    <p className="text-xs text-gray-400">Returns metadata for all published personalities (name, emoji, slug)</p>
+                  </div>
+                </div>
+                <div className="bg-robinhood-darker border border-robinhood-border rounded-lg p-3 flex items-center justify-between gap-3">
+                  <code className="text-sm text-robinhood-green flex-1 truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/default-user` : '/api/personalities/default-user'}
+                  </code>
+                  <button
+                    onClick={() => {
+                      copyToClipboard(typeof window !== 'undefined' ? `${window.location.origin}/api/personalities/default-user` : '/api/personalities/default-user');
+                      showToast('📋 List endpoint copied!');
+                    }}
+                    className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              {/* Get Individual Personality Endpoint */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-semibold text-white">Get This Personality's Full Prompt</h4>
+                    <p className="text-xs text-gray-400">Returns the complete system prompt for this specific personality</p>
+                  </div>
+                </div>
+                <div className="bg-robinhood-darker border border-robinhood-border rounded-lg p-3 flex items-center justify-between gap-3">
+                  <code className="text-sm text-robinhood-green flex-1 truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl}
+                  </code>
+                  <button
+                    onClick={() => {
+                      copyToClipboard(typeof window !== 'undefined' ? `${window.location.origin}${currentConfig.publishedUrl}` : currentConfig.publishedUrl || '');
+                      showToast('📋 Personality endpoint copied!');
+                    }}
+                    className="px-3 py-1.5 bg-robinhood-green/20 text-robinhood-green rounded hover:bg-robinhood-green/30 transition-all flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              {/* Usage Info */}
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="text-sm text-blue-200">
+                    <p className="font-semibold mb-1">Integration Instructions:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>• Use the <span className="font-mono text-blue-300">list endpoint</span> to let users select from your published personalities</li>
+                      <li>• Use the <span className="font-mono text-blue-300">individual endpoint</span> to fetch the full system prompt for AI configuration</li>
+                      <li>• Both endpoints are public GET requests - no authentication required</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50 flex justify-end">
+              <button
+                onClick={() => setShowEndpointsModal(false)}
+                className="px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toaster Notification */}
       {showToaster && (
