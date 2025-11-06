@@ -375,10 +375,11 @@ export default function Home() {
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[1600px] mx-auto px-4 py-4">
-            <div className="grid grid-cols-12 gap-4">
-              {/* Controls Column */}
-              <div className="col-span-8 space-y-3">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Left Column - Main Controls */}
+              <div className="col-span-7 space-y-4">
                 {/* Response Style */}
+                <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
                 <ControlSection title="Response Style" icon="🎨" defaultOpen={true}>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                     <Slider
@@ -431,8 +432,10 @@ export default function Home() {
                     />
                   </div>
                 </ControlSection>
+                </div>
 
                 {/* Tone */}
+                <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
                 <ControlSection title="Tone & Personality" icon="💬" defaultOpen={true}>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                     <Slider
@@ -469,8 +472,10 @@ export default function Home() {
                     />
                   </div>
                 </ControlSection>
+                </div>
 
                 {/* Structure */}
+                <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
                 <ControlSection title="Response Structure" icon="📋" defaultOpen={true}>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
@@ -583,10 +588,15 @@ export default function Home() {
                     </div>
                   </div>
                 </ControlSection>
+                </div>
+              </div>
 
+              {/* Right Column - Advanced & Custom */}
+              <div className="col-span-5 space-y-4">
                 {/* Advanced */}
-                <ControlSection title="Advanced Settings" icon="⚙️" defaultOpen={false}>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
+                <ControlSection title="Advanced Settings" icon="⚙️" defaultOpen={true}>
+                  <div className="grid grid-cols-1 gap-4">
                     <Select
                       label="Response Length"
                       value={currentConfig.responseLength}
@@ -639,7 +649,7 @@ export default function Home() {
                       ]}
                     />
                   </div>
-                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-robinhood-border/30">
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-robinhood-border/30">
                     <div className="flex items-center justify-between gap-1.5 bg-robinhood-darker/50 rounded px-2.5 py-1.5 border border-robinhood-border/30">
                       <Toggle
                         label="Accuracy"
@@ -678,9 +688,11 @@ export default function Home() {
                     </div>
                   </div>
                 </ControlSection>
+                </div>
 
                 {/* Custom */}
-                <ControlSection title="Custom Instructions" icon="✍️" defaultOpen={false}>
+                <div className="border-2 border-robinhood-border/50 rounded-xl p-4 bg-robinhood-card/50">
+                <ControlSection title="Custom Instructions" icon="✍️" defaultOpen={true}>
                   <div className="space-y-3">
                     <div>
                       <div className="flex items-center gap-1.5 mb-1">
@@ -712,11 +724,12 @@ export default function Home() {
                         value={currentConfig.customInstructions}
                         onChange={(e) => handleUpdate({ customInstructions: e.target.value })}
                         placeholder="Add specific requirements for financial/mortgage context..."
-                        className="w-full h-20 px-3 py-2 text-sm bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-robinhood-green resize-none"
+                        className="w-full h-32 px-3 py-2 text-sm bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-robinhood-green resize-none"
                       />
                     </div>
                   </div>
                 </ControlSection>
+                </div>
               </div>
             </div>
           </div>
