@@ -71,16 +71,16 @@ export default function Home() {
       .catch(err => console.error('Error loading generated prompts:', err));
   }, []);
 
-  // Reset unsaved changes when switching configs
-  useEffect(() => {
-    setHasUnsavedChanges(false);
-  }, [currentConfig?.id]);
-
   if (!mounted) {
     return null;
   }
 
   const currentConfig = activeConfig || configs[0];
+
+  // Reset unsaved changes when switching configs
+  useEffect(() => {
+    setHasUnsavedChanges(false);
+  }, [currentConfig?.id]);
 
   if (!currentConfig) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
