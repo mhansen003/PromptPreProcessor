@@ -27,6 +27,12 @@ export default function Home() {
   const [editedPrompt, setEditedPrompt] = useState('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [username, setUsername] = useState<string>('default-user');
+  const [showNewPersonalityModal, setShowNewPersonalityModal] = useState(false);
+  const [creationFlow, setCreationFlow] = useState<'choose' | 'scratch' | 'interview'>('choose');
+  const [newPersonalityName, setNewPersonalityName] = useState('');
+  const [interviewStep, setInterviewStep] = useState(0);
+  const [interviewAnswers, setInterviewAnswers] = useState<string[]>(['', '', '', '', '']);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -135,9 +141,60 @@ export default function Home() {
   };
 
   const handleNewConfig = () => {
+    setShowNewPersonalityModal(true);
+    setCreationFlow('choose');
+    setNewPersonalityName('');
+    setInterviewStep(0);
+    setInterviewAnswers(['', '', '', '', '']);
+  };
+
+  const createFromScratch = () => {
     const newConfig = createDefaultConfig();
+    newConfig.name = newPersonalityName || 'New Personality';
     addConfig(newConfig);
     setActiveConfig(newConfig);
+    setShowNewPersonalityModal(false);
+    showToast('✨ New personality created!');
+  };
+
+  const interviewQuestions = [
+    "What's the primary purpose of this AI personality? (e.g., customer support, technical documentation, creative writing, general assistance)",
+    "Who is your target audience? Describe their background and expertise level.",
+    "What tone and style should this personality use? (e.g., formal, casual, friendly, professional, enthusiastic)",
+    "What kind of responses do you prefer? (e.g., brief and direct, detailed explanations, step-by-step guides, conversational)",
+    "Any specific requirements, constraints, or preferences for this personality?"
+  ];
+
+  const analyzeInterviewAndCreate = async () => {
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/analyze-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPersonalityName || 'Custom Personality',
+          answers: interviewAnswers,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.config) {
+        addConfig(data.config);
+        setActiveConfig(data.config);
+        setShowNewPersonalityModal(false);
+        showToast('🎯 AI-configured personality created!');
+      } else {
+        showToast('❌ Failed to analyze interview. Creating default instead.');
+        createFromScratch();
+      }
+    } catch (error) {
+      console.error('Error analyzing interview:', error);
+      showToast('❌ Error analyzing interview. Creating default instead.');
+      createFromScratch();
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -1185,6 +1242,200 @@ export default function Home() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Personality Creation Modal */}
+      {showNewPersonalityModal && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-robinhood-card border-2 border-robinhood-green rounded-xl max-w-2xl w-full shadow-2xl">
+            {/* Choose Flow */}
+            {creationFlow === 'choose' && (
+              <>
+                <div className="px-6 py-5 border-b border-robinhood-green/30">
+                  <h3 className="text-2xl font-bold text-white">Create New Personality</h3>
+                  <p className="text-sm text-gray-400 mt-1">Choose how you'd like to create your AI personality</p>
+                </div>
+
+                <div className="px-6 py-6 grid grid-cols-2 gap-4">
+                  {/* From Scratch Option */}
+                  <button
+                    onClick={() => setCreationFlow('scratch')}
+                    className="group p-6 bg-robinhood-darker border-2 border-robinhood-border rounded-xl hover:border-robinhood-green transition-all text-left"
+                  >
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-all">
+                      <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-bold text-white mb-2">From Scratch</h4>
+                    <p className="text-sm text-gray-400">Start with neutral settings and manually configure all options yourself.</p>
+                  </button>
+
+                  {/* Interview Option */}
+                  <button
+                    onClick={() => setCreationFlow('interview')}
+                    className="group p-6 bg-robinhood-darker border-2 border-robinhood-border rounded-xl hover:border-robinhood-green transition-all text-left"
+                  >
+                    <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-500/30 transition-all">
+                      <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-bold text-white mb-2">Interview Style</h4>
+                    <p className="text-sm text-gray-400">Answer 5 questions and let AI automatically configure the perfect settings.</p>
+                  </button>
+                </div>
+
+                <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50 flex justify-end">
+                  <button
+                    onClick={() => setShowNewPersonalityModal(false)}
+                    className="px-5 py-2.5 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green hover:bg-robinhood-green/10 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* From Scratch Flow */}
+            {creationFlow === 'scratch' && (
+              <>
+                <div className="px-6 py-5 border-b border-robinhood-green/30">
+                  <h3 className="text-2xl font-bold text-white">Create From Scratch</h3>
+                  <p className="text-sm text-gray-400 mt-1">Give your personality a name to get started</p>
+                </div>
+
+                <div className="px-6 py-6">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Personality Name</label>
+                  <input
+                    type="text"
+                    value={newPersonalityName}
+                    onChange={(e) => setNewPersonalityName(e.target.value)}
+                    placeholder="e.g., Customer Support Bot, Technical Writer, Friendly Assistant"
+                    className="w-full px-4 py-3 bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+                    autoFocus
+                  />
+                  <p className="text-xs text-gray-500 mt-2">All settings will start with neutral/balanced defaults that you can customize later.</p>
+                </div>
+
+                <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50 flex justify-end gap-3">
+                  <button
+                    onClick={() => setCreationFlow('choose')}
+                    className="px-5 py-2.5 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green hover:bg-robinhood-green/10 transition-all"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={createFromScratch}
+                    className="px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all"
+                  >
+                    Create Personality
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Interview Flow */}
+            {creationFlow === 'interview' && (
+              <>
+                <div className="px-6 py-5 border-b border-robinhood-green/30">
+                  <h3 className="text-2xl font-bold text-white">
+                    {interviewStep === 0 ? 'Name Your Personality' : `Question ${interviewStep} of 5`}
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {interviewStep === 0 ? 'What would you like to call this personality?' : interviewQuestions[interviewStep - 1]}
+                  </p>
+                </div>
+
+                <div className="px-6 py-6">
+                  {interviewStep === 0 ? (
+                    <>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Personality Name</label>
+                      <input
+                        type="text"
+                        value={newPersonalityName}
+                        onChange={(e) => setNewPersonalityName(e.target.value)}
+                        placeholder="e.g., Customer Support Bot, Technical Writer"
+                        className="w-full px-4 py-3 bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+                        autoFocus
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Your Answer</label>
+                      <textarea
+                        value={interviewAnswers[interviewStep - 1]}
+                        onChange={(e) => {
+                          const newAnswers = [...interviewAnswers];
+                          newAnswers[interviewStep - 1] = e.target.value;
+                          setInterviewAnswers(newAnswers);
+                        }}
+                        placeholder="Be as detailed as you'd like..."
+                        className="w-full h-32 px-4 py-3 bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green resize-none"
+                        autoFocus
+                      />
+                    </>
+                  )}
+
+                  {/* Progress Indicator */}
+                  <div className="mt-4 flex items-center gap-1">
+                    {[0, 1, 2, 3, 4, 5].map((step) => (
+                      <div
+                        key={step}
+                        className={`h-1 flex-1 rounded-full transition-all ${
+                          step <= interviewStep ? 'bg-robinhood-green' : 'bg-robinhood-border'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-6 py-4 border-t border-robinhood-border bg-robinhood-darker/50 flex justify-between">
+                  <button
+                    onClick={() => {
+                      if (interviewStep === 0) {
+                        setCreationFlow('choose');
+                      } else {
+                        setInterviewStep(interviewStep - 1);
+                      }
+                    }}
+                    className="px-5 py-2.5 bg-robinhood-card border border-robinhood-border text-white rounded-lg hover:border-robinhood-green hover:bg-robinhood-green/10 transition-all"
+                  >
+                    Back
+                  </button>
+
+                  {interviewStep < 5 ? (
+                    <button
+                      onClick={() => setInterviewStep(interviewStep + 1)}
+                      disabled={interviewStep === 0 ? !newPersonalityName : !interviewAnswers[interviewStep - 1]}
+                      className="px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  ) : (
+                    <button
+                      onClick={analyzeInterviewAndCreate}
+                      disabled={isAnalyzing || !interviewAnswers[4]}
+                      className="px-5 py-2.5 bg-robinhood-green text-robinhood-dark font-bold rounded-lg hover:bg-robinhood-green/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Analyzing...
+                        </>
+                      ) : (
+                        'Create Personality'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
