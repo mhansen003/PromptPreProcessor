@@ -54,5 +54,7 @@ export const config = {
     '/api/generate-prompt',
     '/api/test-prompt',
     '/api/generated/:path*',
+    '/api/personalities/publish', // Protect publish endpoint (requires auth)
+    // Note: /api/personalities/[username] routes are intentionally public for external tools
   ],
 };
