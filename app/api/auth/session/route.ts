@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const session = verifyAuthToken(token);
+    const session = await verifyAuthToken(token);
 
     if (!session) {
       return NextResponse.json({
