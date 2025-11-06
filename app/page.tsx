@@ -288,7 +288,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ detailLevel: v })}
                       leftLabel="Concise"
                       rightLabel="Detailed"
-                      tooltip='Low: "The sky is blue" → High: "Due to Rayleigh scattering..."'
+                      tooltip={`Low: "The sky is blue" → High: "Due to Rayleigh scattering..."`}
                     />
                     <Slider
                       label="Formality"
@@ -296,7 +296,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ formalityLevel: v })}
                       leftLabel="Casual"
                       rightLabel="Formal"
-                      tooltip="Low: \"Hey! Let's go...\" → High: \"It is imperative...\""
+                      tooltip={`Low: "Hey! Let's go..." → High: "It is imperative..."`}
                     />
                     <Slider
                       label="Technical Depth"
@@ -304,7 +304,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ technicalDepth: v })}
                       leftLabel="Simple"
                       rightLabel="Advanced"
-                      tooltip='Low: "It stores data" → High: "B-tree indexing O(log n)"'
+                      tooltip={`Low: "It stores data" → High: "B-tree indexing O(log n)"`}
                     />
                     <Slider
                       label="Creativity"
@@ -312,7 +312,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ creativityLevel: v })}
                       leftLabel="Factual"
                       rightLabel="Creative"
-                      tooltip='Low: "The report states..." → High: "Imagine a world..."'
+                      tooltip={`Low: "The report states..." → High: "Imagine a world..."`}
                     />
                     <Slider
                       label="Verbosity"
@@ -320,7 +320,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ verbosity: v })}
                       leftLabel="Brief"
                       rightLabel="Lengthy"
-                      tooltip='Low: "Done." → High: "To accomplish this, first..."'
+                      tooltip={`Low: "Done." → High: "To accomplish this, first..."`}
                     />
                     <Slider
                       label="Industry Terminology"
@@ -328,7 +328,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ industryKnowledge: v })}
                       leftLabel="Explain Terms"
                       rightLabel="Use Acronyms"
-                      tooltip='Low: "Annual Percentage Rate" → High: "APR, LTV, DTI"'
+                      tooltip={`Low: "Annual Percentage Rate" → High: "APR, LTV, DTI"`}
                     />
                   </div>
                 </ControlSection>
@@ -342,7 +342,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ enthusiasm: v })}
                       leftLabel="Neutral"
                       rightLabel="Excited"
-                      tooltip='Low: "This is correct" → High: "Amazing work!"'
+                      tooltip={`Low: "This is correct" → High: "Amazing work!"`}
                     />
                     <Slider
                       label="Empathy"
@@ -350,7 +350,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ empathy: v })}
                       leftLabel="Objective"
                       rightLabel="Caring"
-                      tooltip='Low: "Error occurred" → High: "I understand this is frustrating..."'
+                      tooltip={`Low: "Error occurred" → High: "I understand this is frustrating..."`}
                     />
                     <Slider
                       label="Confidence"
@@ -358,7 +358,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ confidence: v })}
                       leftLabel="Cautious"
                       rightLabel="Assertive"
-                      tooltip='Low: "This might be..." → High: "This is definitively..."'
+                      tooltip={`Low: "This might be..." → High: "This is definitively..."`}
                     />
                     <Slider
                       label="Humor"
@@ -366,7 +366,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ humor: v })}
                       leftLabel="Serious"
                       rightLabel="Playful"
-                      tooltip='Low: "Task complete" → High: "Mission accomplished! 🎉"'
+                      tooltip={`Low: "Task complete" → High: "Mission accomplished! 🎉"`}
                     />
                   </div>
                 </ControlSection>
