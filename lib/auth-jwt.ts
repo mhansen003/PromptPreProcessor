@@ -4,6 +4,7 @@ export interface AuthSession {
   email: string;
   issuedAt: number;
   expiresAt: number;
+  [key: string]: any; // Index signature for jose compatibility
 }
 
 // Configuration (shared across all auth modules)
