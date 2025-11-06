@@ -3,10 +3,10 @@ import { redis } from '@/lib/redis-client';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { urlId: string } }
+  context: { params: Promise<{ urlId: string }> }
 ) {
   try {
-    const { urlId } = params;
+    const { urlId } = await context.params;
 
     if (!urlId) {
       return NextResponse.json(
