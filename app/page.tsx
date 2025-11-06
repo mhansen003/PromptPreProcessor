@@ -296,7 +296,7 @@ export default function Home() {
                       onChange={(v) => handleUpdate({ formalityLevel: v })}
                       leftLabel="Casual"
                       rightLabel="Formal"
-                      tooltip='Low: "Hey! Let\'s go..." → High: "It is imperative..."'
+                      tooltip="Low: \"Hey! Let's go...\" → High: \"It is imperative...\""
                     />
                     <Slider
                       label="Technical Depth"
