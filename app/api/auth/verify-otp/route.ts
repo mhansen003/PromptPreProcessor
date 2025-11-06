@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { redis } from '@/lib/redis-client';
 import {
   getOTPKey,
   createAuthToken,
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Get OTP from Redis
     const otpKey = getOTPKey(emailLower);
-    const otpDataStr = await kv.get<string>(otpKey);
+    const otpDataStr = await redis.get<string>(otpKey);
 
     if (!otpDataStr) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Check if expired
     if (new Date(otpData.expiresAt) < new Date()) {
-      await kv.del(otpKey);
+      await redis.del(otpKey);
       return NextResponse.json(
         { success: false, error: 'Verification code has expired. Please request a new code.' },
         { status: 410 }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Check attempts
     if (otpData.attempts >= AUTH_CONFIG.MAX_ATTEMPTS) {
-      await kv.del(otpKey);
+      await redis.del(otpKey);
       return NextResponse.json(
         {
           success: false,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (otpData.code !== codeClean) {
       // Increment attempts
       otpData.attempts += 1;
-      await kv.set(otpKey, JSON.stringify(otpData), {
+      await redis.set(otpKey, JSON.stringify(otpData), {
         ex: AUTH_CONFIG.OTP_EXPIRY_MINUTES * 60
       });
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Code is valid! Delete OTP and create session
-    await kv.del(otpKey);
+    await redis.del(otpKey);
 
     // Create JWT token
     const token = createAuthToken(emailLower);

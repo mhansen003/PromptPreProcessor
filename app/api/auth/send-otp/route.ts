@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { redis } from '@/lib/redis-client';
 import {
   isValidCMGEmail,
   getOTPKey,
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Check rate limiting
     const rateLimitKey = getRateLimitKey(emailLower);
-    const requestCount = await kv.get<number>(rateLimitKey);
+    const requestCount = await redis.get<number>(rateLimitKey);
 
     if (requestCount && requestCount >= AUTH_CONFIG.MAX_REQUESTS_PER_WINDOW) {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Increment rate limit counter
     const newCount = requestCount ? requestCount + 1 : 1;
-    await kv.set(rateLimitKey, newCount, {
+    await redis.set(rateLimitKey, newCount, {
       ex: AUTH_CONFIG.RATE_LIMIT_WINDOW_MINUTES * 60
     });
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Store OTP in Redis with TTL
     const otpKey = getOTPKey(emailLower);
-    await kv.set(otpKey, JSON.stringify(otpData), {
+    await redis.set(otpKey, JSON.stringify(otpData), {
       ex: AUTH_CONFIG.OTP_EXPIRY_MINUTES * 60
     });
 

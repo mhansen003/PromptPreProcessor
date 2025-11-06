@@ -1,4 +1,4 @@
-import { kv } from '@vercel/kv';
+import { redis } from './redis-client';
 import type { PromptConfig } from './store';
 
 // Redis key patterns
@@ -14,7 +14,7 @@ const DEFAULT_USER_ID = 'default-user';
 
 export async function getUserConfigs(userId: string = DEFAULT_USER_ID): Promise<PromptConfig[]> {
   try {
-    const configIds = await kv.smembers(KEYS.userConfigs(userId));
+    const configIds = await redis.smembers(KEYS.userConfigs(userId));
 
     if (!configIds || configIds.length === 0) {
       return [];
@@ -22,7 +22,7 @@ export async function getUserConfigs(userId: string = DEFAULT_USER_ID): Promise<
 
     const configs: PromptConfig[] = [];
     for (const id of configIds) {
-      const config = await kv.hgetall(KEYS.config(id as string));
+      const config = await redis.hgetall(KEYS.config(id as string));
       if (config) {
         configs.push(config as unknown as PromptConfig);
       }
@@ -37,8 +37,8 @@ export async function getUserConfigs(userId: string = DEFAULT_USER_ID): Promise<
 
 export async function saveConfig(config: PromptConfig, userId: string = DEFAULT_USER_ID): Promise<boolean> {
   try {
-    await kv.hset(KEYS.config(config.id), config as any);
-    await kv.sadd(KEYS.userConfigs(userId), config.id);
+    await redis.hset(KEYS.config(config.id), config as any);
+    await redis.sadd(KEYS.userConfigs(userId), config.id);
     return true;
   } catch (error) {
     console.error('Error saving config to Redis:', error);
@@ -48,8 +48,8 @@ export async function saveConfig(config: PromptConfig, userId: string = DEFAULT_
 
 export async function deleteConfig(configId: string, userId: string = DEFAULT_USER_ID): Promise<boolean> {
   try {
-    await kv.del(KEYS.config(configId));
-    await kv.srem(KEYS.userConfigs(userId), configId);
+    await redis.del(KEYS.config(configId));
+    await redis.srem(KEYS.userConfigs(userId), configId);
     return true;
   } catch (error) {
     console.error('Error deleting config from Redis:', error);
@@ -59,7 +59,7 @@ export async function deleteConfig(configId: string, userId: string = DEFAULT_US
 
 export async function getGeneratedPrompts(userId: string = DEFAULT_USER_ID, limit: number = 50): Promise<any[]> {
   try {
-    const promptIds = await kv.lrange(KEYS.userGenerated(userId), 0, limit - 1);
+    const promptIds = await redis.lrange(KEYS.userGenerated(userId), 0, limit - 1);
 
     if (!promptIds || promptIds.length === 0) {
       return [];
@@ -67,7 +67,7 @@ export async function getGeneratedPrompts(userId: string = DEFAULT_USER_ID, limi
 
     const prompts: any[] = [];
     for (const id of promptIds) {
-      const prompt = await kv.hgetall(KEYS.generated(id as string));
+      const prompt = await redis.hgetall(KEYS.generated(id as string));
       if (prompt) {
         prompts.push(prompt);
       }
@@ -84,9 +84,9 @@ export async function saveGeneratedPrompt(promptData: any, userId: string = DEFA
   try {
     const promptId = `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    await kv.hset(KEYS.generated(promptId), promptData);
-    await kv.lpush(KEYS.userGenerated(userId), promptId);
-    await kv.ltrim(KEYS.userGenerated(userId), 0, 49); // Keep only last 50
+    await redis.hset(KEYS.generated(promptId), promptData);
+    await redis.lpush(KEYS.userGenerated(userId), promptId);
+    await redis.ltrim(KEYS.userGenerated(userId), 0, 49); // Keep only last 50
 
     return true;
   } catch (error) {
