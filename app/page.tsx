@@ -1081,8 +1081,10 @@ export default function Home() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigator.clipboard.writeText(record.publishedUrl);
-                                    alert('Published URL copied to clipboard!');
+                                    if (record.publishedUrl) {
+                                      navigator.clipboard.writeText(record.publishedUrl);
+                                      alert('Published URL copied to clipboard!');
+                                    }
                                   }}
                                   className="p-1 bg-robinhood-card border border-robinhood-border text-blue-400 hover:bg-blue-600 hover:text-white rounded text-xs"
                                   title="Copy Published URL"
