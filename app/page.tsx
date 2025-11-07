@@ -952,12 +952,27 @@ export default function Home() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Delete Persona?</h3>
-            <p className="text-gray-300 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-white">"{configs.find(c => c.id === personaToDelete)?.name}"</span>? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
+          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-md w-full">
+            <div className="p-6 border-b border-robinhood-card-border flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Delete Persona?</h2>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setPersonaToDelete(null);
+                }}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              <p className="text-gray-300">
+                Are you sure you want to delete <span className="font-semibold text-white">"{configs.find(c => c.id === personaToDelete)?.name}"</span>? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="p-6 border-t border-robinhood-card-border flex gap-3">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
