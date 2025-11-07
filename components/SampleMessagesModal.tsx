@@ -12,9 +12,10 @@ interface SampleMessagesModalProps {
   isOpen: boolean;
   onClose: () => void;
   config: PersonaConfig | null;
+  scenario: 'loan-product' | 'borrower-pitch' | 'document-request';
 }
 
-export default function SampleMessagesModal({ isOpen, onClose, config }: SampleMessagesModalProps) {
+export default function SampleMessagesModal({ isOpen, onClose, config, scenario }: SampleMessagesModalProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [samples, setSamples] = useState<Sample[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export default function SampleMessagesModal({ isOpen, onClose, config }: SampleM
     if (isOpen && config) {
       generateSamples();
     }
-  }, [isOpen, config]);
+  }, [isOpen, config, scenario]);
 
   const generateSamples = async () => {
     if (!config) return;
@@ -36,7 +37,7 @@ export default function SampleMessagesModal({ isOpen, onClose, config }: SampleM
       const response = await fetch('/api/generate-samples', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify({ config, scenario }),
       });
 
       const data = await response.json();

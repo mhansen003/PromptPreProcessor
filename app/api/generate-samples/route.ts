@@ -5,7 +5,7 @@ import type { PersonaConfig } from '@/lib/store';
 // POST /api/generate-samples - Generate 3 sample mortgage messages using persona config
 export async function POST(request: NextRequest) {
   try {
-    const config: PersonaConfig = await request.json();
+    const { config, scenario } = await request.json();
 
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) {
@@ -20,21 +20,55 @@ export async function POST(request: NextRequest) {
     // Build a persona description from the config
     const personaPrompt = buildPersonaPrompt(config);
 
-    // Define 3 different mortgage scenarios
-    const scenarios = [
-      {
-        title: "First-Time Homebuyer Consultation",
-        context: "A young couple in their late 20s is looking to buy their first home. They're nervous about the process and have many questions about down payments, closing costs, and what they can afford."
-      },
-      {
-        title: "Refinance Analysis",
-        context: "A homeowner who bought 3 years ago wants to refinance to get a better rate. They're wondering if it makes financial sense given current market conditions and their remaining balance."
-      },
-      {
-        title: "Investment Property Financing",
-        context: "An experienced real estate investor is looking to purchase their 4th rental property. They want to understand loan options, cash flow requirements, and strategies to maximize returns."
-      }
-    ];
+    // Define 3 scenarios based on the selected type
+    let scenarios: Array<{ title: string; context: string }> = [];
+
+    if (scenario === 'loan-product') {
+      scenarios = [
+        {
+          title: "FHA 30-Year Fixed Rate Product",
+          context: "Pitch your FHA 30-year fixed rate loan product. Highlight benefits like low down payment (3.5%), competitive rates, and how it helps first-time buyers. Make it compelling."
+        },
+        {
+          title: "VA Loan Benefits Pitch",
+          context: "Pitch your VA loan product to a veteran. Emphasize zero down payment, no PMI, competitive rates, and the respect we have for their service. Make them feel valued."
+        },
+        {
+          title: "Jumbo Loan for Luxury Properties",
+          context: "Pitch your jumbo loan product to a high-net-worth client looking at luxury properties. Highlight flexibility, competitive jumbo rates, and white-glove service."
+        }
+      ];
+    } else if (scenario === 'borrower-pitch') {
+      scenarios = [
+        {
+          title: "First-Time Homebuyer Prospect",
+          context: "A potential borrower in their late 20s reached out asking about buying their first home. Pitch your services - explain why they should work with you, your expertise, and how you'll guide them through the process."
+        },
+        {
+          title: "Refinance Prospect Outreach",
+          context: "A homeowner expressed interest in refinancing. Pitch your services - explain your refinance expertise, how you'll analyze their situation, and find them the best rate and terms."
+        },
+        {
+          title: "Real Estate Agent Referral Introduction",
+          context: "A real estate agent referred a client to you. Introduce yourself and pitch your services - explain your process, responsiveness, track record, and why you're the right loan officer for their client."
+        }
+      ];
+    } else { // document-request
+      scenarios = [
+        {
+          title: "Initial Documentation Package Request",
+          context: "The borrower just got pre-approved but needs to upload their initial documentation package (pay stubs, W2s, bank statements). Request the documents in a friendly but professional way, explaining what you need and why."
+        },
+        {
+          title: "Missing Bank Statement Follow-up",
+          context: "The borrower uploaded most documents but you're missing 2 months of bank statements needed for underwriting. Follow up to request the missing statements, explaining the urgency as you're trying to keep the process moving."
+        },
+        {
+          title: "Conditional Approval - Final Documents",
+          context: "Great news! The borrower is conditionally approved but underwriting needs a few final documents (updated pay stub, homeowners insurance quote, gift letter). Request these final items to move to clear-to-close."
+        }
+      ];
+    }
 
     // Generate all 3 samples concurrently
     const samplePromises = scenarios.map(async (scenario) => {
