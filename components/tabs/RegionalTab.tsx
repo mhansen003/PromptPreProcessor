@@ -23,9 +23,9 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
   return (
     <div className="space-y-8">
       {/* Info Box */}
-      <div className="p-4 bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg">
+      <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
         <p className="text-sm text-gray-300">
-          <span className="font-semibold text-robinhood-green">Regional Settings</span> help tailor responses to specific geographic contexts, local markets, and cultural considerations. This is particularly useful for location-specific mortgage and real estate discussions.
+          <span className="font-semibold text-orange-400">Regional Settings</span> help tailor responses to specific geographic contexts, local markets, and cultural considerations. This is particularly useful for location-specific mortgage and real estate discussions.
         </p>
       </div>
 

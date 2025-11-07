@@ -30,7 +30,6 @@ export default function Home() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState('');
   const [editingEmoji, setEditingEmoji] = useState('');
-  const [expandedActionsId, setExpandedActionsId] = useState<string | null>(null);
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -371,7 +370,7 @@ export default function Home() {
                   disabled={isSaving}
                   className={`px-6 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 ${
                     isSaving
-                      ? 'bg-robinhood-card border-2 border-robinhood-green text-white animate-pulse shadow-lg shadow-robinhood-green/50'
+                      ? 'bg-robinhood-green text-robinhood-dark border-2 border-robinhood-green animate-pulse shadow-lg shadow-robinhood-green/50'
                       : hasUnsavedChanges
                       ? 'bg-robinhood-green text-robinhood-dark hover:bg-robinhood-green/90'
                       : 'bg-robinhood-card border border-robinhood-green text-robinhood-green'
@@ -379,7 +378,7 @@ export default function Home() {
                 >
                   {isSaving ? (
                     <>
-                      <svg className="w-4 h-4 animate-spin text-robinhood-green" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 animate-spin text-robinhood-dark" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -514,133 +513,110 @@ export default function Home() {
               ) : (
                 configs.map((config) => {
                   const isActive = activeConfig?.id === config.id;
-                  const isExpanded = expandedActionsId === config.id;
 
                   return (
-                    <div key={config.id} className="space-y-0">
-                      <div
-                        onClick={() => {
-                          if (isActive) {
-                            // Toggle actions if clicking on the active persona
-                            setExpandedActionsId(isExpanded ? null : config.id);
-                          } else {
-                            // Switch to this persona and auto-expand actions
-                            setActiveConfig(config);
-                            setExpandedActionsId(config.id);
-                          }
-                        }}
-                        className={`p-3 rounded-lg cursor-pointer transition-all relative ${
-                          isActive
-                            ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
-                            : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-xl flex-shrink-0">{config.emoji}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">{config.name}</p>
-                              {config.description && (
-                                <p className="text-xs text-gray-400 truncate">{config.description}</p>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {config.systemPrompt && (
-                              <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-medium whitespace-nowrap ${config.isPublished ? 'text-blue-400' : 'text-red-400'}`}>
-                                  {config.isPublished ? 'Published' : 'Not Published'}
-                                </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    togglePublish(config.id, !config.isPublished);
-                                  }}
-                                  className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
-                                    config.isPublished
-                                      ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
-                                      : 'bg-red-500/30 shadow-sm'
-                                  }`}
-                                >
-                                  <div
-                                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
-                                      config.isPublished ? 'left-5' : 'left-0.5'
-                                    }`}
-                                  />
-                                </button>
-                              </div>
-                            )}
-
-                            {/* Chevron icon to indicate expand/collapse */}
-                            {isActive && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setExpandedActionsId(isExpanded ? null : config.id);
-                                }}
-                                className="text-gray-400 hover:text-robinhood-green transition-all"
-                              >
-                                <svg
-                                  className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
-                              </button>
+                    <div
+                      key={config.id}
+                      onClick={() => setActiveConfig(config)}
+                      className={`p-3 rounded-lg cursor-pointer transition-all relative ${
+                        isActive
+                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
+                          : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-xl flex-shrink-0">{config.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{config.name}</p>
+                            {config.description && (
+                              <p className="text-xs text-gray-400 truncate">{config.description}</p>
                             )}
                           </div>
                         </div>
 
-                        {/* Pulsating blue bar during generation */}
-                        {isSaving && isActive && (
-                          <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 animate-pulse shadow-lg shadow-blue-500/50" />
+                        {config.systemPrompt && (
+                          <div className="flex items-center gap-1.5 ml-2">
+                            <span className={`text-[9px] font-medium whitespace-nowrap ${config.isPublished ? 'text-blue-400' : 'text-red-400'}`}>
+                              {config.isPublished ? 'Published' : 'Not Published'}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePublish(config.id, !config.isPublished);
+                              }}
+                              className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
+                                config.isPublished
+                                  ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
+                                  : 'bg-red-500/30 shadow-sm'
+                              }`}
+                            >
+                              <div
+                                className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                                  config.isPublished ? 'left-5' : 'left-0.5'
+                                }`}
+                              />
+                            </button>
+                          </div>
                         )}
                       </div>
 
-                      {/* Collapsible Action Buttons */}
-                      {isActive && isExpanded && (
-                        <div className="mt-0 bg-robinhood-card/50 border-2 border-robinhood-green/30 rounded-b-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                          <div className="p-2 space-y-1.5">
-                            {config.systemPrompt && (
-                              <button
-                                onClick={() => setShowViewPromptModal(true)}
-                                className="w-full px-3 py-2 text-sm bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded-lg hover:bg-robinhood-green/10 transition-all flex items-center gap-2"
-                              >
-                                <span>📋</span>
-                                <span>View Prompt</span>
-                              </button>
-                            )}
-
-                            {config.isPublished && config.systemPrompt && (
-                              <button
-                                onClick={() => setShowEndpointsModal(true)}
-                                className="w-full px-3 py-2 text-sm bg-robinhood-green/20 text-robinhood-green border border-robinhood-green/30 rounded-lg hover:bg-robinhood-green/30 transition-all flex items-center gap-2"
-                              >
-                                <span>🔗</span>
-                                <span>View Endpoints</span>
-                              </button>
-                            )}
-
+                      {/* Action Icon Buttons - Show only for active persona */}
+                      {isActive && (
+                        <div className="mt-3 pt-2 border-t border-robinhood-green/30 flex items-center justify-center gap-2">
+                          {config.systemPrompt && (
                             <button
-                              onClick={() => handleDuplicate(config.id)}
-                              className="w-full px-3 py-2 text-sm bg-robinhood-card border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 transition-all flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowViewPromptModal(true);
+                              }}
+                              className="p-1.5 text-xs bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded hover:bg-robinhood-green/10 transition-all"
+                              title="View Prompt"
                             >
-                              <span>📑</span>
-                              <span>Duplicate</span>
+                              📋
                             </button>
+                          )}
 
+                          {config.isPublished && config.systemPrompt && (
                             <button
-                              onClick={() => confirmDelete(config.id)}
-                              className="w-full px-3 py-2 text-sm bg-robinhood-card border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 transition-all flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowEndpointsModal(true);
+                              }}
+                              className="p-1.5 text-xs bg-robinhood-green/20 text-robinhood-green border border-robinhood-green/30 rounded hover:bg-robinhood-green/30 transition-all"
+                              title="View Endpoints"
                             >
-                              <span>🗑️</span>
-                              <span>Delete</span>
+                              🔗
                             </button>
-                          </div>
+                          )}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicate(config.id);
+                            }}
+                            className="p-1.5 text-xs bg-robinhood-card border border-blue-500/30 text-blue-400 rounded hover:bg-blue-500/10 transition-all"
+                            title="Duplicate"
+                          >
+                            📑
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDelete(config.id);
+                            }}
+                            className="p-1.5 text-xs bg-robinhood-card border border-red-500/30 text-red-400 rounded hover:bg-red-500/10 transition-all"
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
                         </div>
+                      )}
+
+                      {/* Pulsating blue bar during generation */}
+                      {isSaving && isActive && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 animate-pulse shadow-lg shadow-blue-500/50" />
                       )}
                     </div>
                   );
@@ -695,7 +671,7 @@ export default function Home() {
       {/* Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed top-1/2 -translate-y-1/2 bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
+        className={`fixed top-20 bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
           sidebarOpen ? 'left-[312px]' : 'left-0'
         }`}
         style={{ marginLeft: sidebarOpen ? '0' : '0' }}

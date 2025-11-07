@@ -62,7 +62,7 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Info Box */}
       <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
         <p className="text-sm text-gray-300">
