@@ -46,7 +46,7 @@ export default function Home() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [autoPublishAfterSave, setAutoPublishAfterSave] = useState(false);
+  const [autoPublishAfterSave, setAutoPublishAfterSave] = useState(true);
 
   // Interview questions focused on the person's personality and preferences
   const interviewQuestions = [
@@ -1056,19 +1056,19 @@ export default function Home() {
 
                         {/* Auto-publish checkbox on final step */}
                         {interviewStep === 5 && (
-                          <div className="bg-robinhood-card/50 border border-robinhood-card-border rounded-lg p-4">
+                          <div className="bg-purple-500/10 border-2 border-purple-500/50 rounded-lg p-4 shadow-lg shadow-purple-500/30">
                             <label className="flex items-start gap-3 cursor-pointer group">
                               <input
                                 type="checkbox"
                                 checked={autoPublishAfterSave}
                                 onChange={(e) => setAutoPublishAfterSave(e.target.checked)}
-                                className="mt-1 w-4 h-4 rounded border-gray-500 bg-robinhood-card text-robinhood-green focus:ring-2 focus:ring-robinhood-green cursor-pointer"
+                                className="mt-1 w-4 h-4 rounded border-purple-500 bg-robinhood-card text-purple-400 focus:ring-2 focus:ring-purple-500 cursor-pointer"
                               />
                               <div className="flex-1">
-                                <span className="text-sm font-medium text-white group-hover:text-robinhood-green transition-colors">
+                                <span className="text-sm font-medium text-purple-200 group-hover:text-purple-300 transition-colors">
                                   Auto-publish after creation
                                 </span>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-purple-300/70 mt-1">
                                   Automatically save and publish this persona so it's ready to use via API immediately after creation
                                 </p>
                               </div>
