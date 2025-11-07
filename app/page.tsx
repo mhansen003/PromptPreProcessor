@@ -364,7 +364,6 @@ export default function Home() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">AI Persona Builder</h1>
-            <span className="text-xs text-gray-400">persona.cmgfinancial.ai</span>
           </div>
           <div className="flex items-center gap-3">
             {activeConfig && (
@@ -618,8 +617,8 @@ export default function Home() {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
-        <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-robinhood-darker border-r border-robinhood-card-border`}>
+        {/* Sidebar - Always Visible */}
+        <div className="w-80 bg-robinhood-darker border-r border-robinhood-card-border"">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Your Personas</h3>

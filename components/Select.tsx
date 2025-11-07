@@ -10,6 +10,7 @@ interface SelectProps {
   options: { value: string; label: string; description?: string }[];
   description?: string;
   tooltip?: string | React.ReactNode;
+  onShowExample?: () => void;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -19,6 +20,7 @@ export const Select: React.FC<SelectProps> = ({
   options,
   description,
   tooltip,
+  onShowExample,
 }) => {
   return (
     <div className="space-y-1">
@@ -30,6 +32,15 @@ export const Select: React.FC<SelectProps> = ({
               i
             </div>
           </Tooltip>
+        )}
+        {onShowExample && (
+          <button
+            onClick={onShowExample}
+            className="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded hover:bg-indigo-500/30 transition-all shadow-sm hover:shadow-indigo-500/20"
+            title="See example of this setting"
+          >
+            ✨ Example
+          </button>
         )}
       </div>
       {description && (
