@@ -115,32 +115,6 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
           />
         </div>
       </div>
-
-      {/* Response Organization */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>🗂️</span>
-          <span>Response Organization</span>
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Toggle
-            label="Show Thought Process"
-            checked={config.showThoughtProcess}
-            onChange={(checked) => onUpdate({ showThoughtProcess: checked })}
-            description="Show internal reasoning and chain of thought"
-            tooltip="Reveals the AI's reasoning process and logic leading to conclusions (Chain of Thought)"
-          />
-
-          <Toggle
-            label="Include Summary"
-            checked={config.includeSummary}
-            onChange={(checked) => onUpdate({ includeSummary: checked })}
-            description="Include summary sections for key points"
-            tooltip="Adds summary sections or TL;DR blocks highlighting the main takeaways"
-          />
-        </div>
-      </div>
     </div>
   );
 }

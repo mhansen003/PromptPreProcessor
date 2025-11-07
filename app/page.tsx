@@ -42,32 +42,32 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  // New persona-focused interview questions
+  // Interview questions focused on the person's personality and preferences
   const interviewQuestions = [
     {
-      title: "What should this AI persona help you with?",
-      description: "What's the main task or purpose for this AI assistant?",
-      placeholder: "e.g., 'Explaining mortgage terms to first-time homebuyers' or 'Writing technical documentation for developers'"
+      title: "How would you describe your communication style?",
+      description: "Tell us about how you naturally communicate with clients or colleagues",
+      placeholder: "e.g., 'I'm warm and conversational, I like to build rapport' or 'I'm direct and professional, I get straight to the point'"
     },
     {
-      title: "Who will this AI be responding to?",
-      description: "Describe the audience the AI will communicate with",
-      placeholder: "e.g., 'First-time homebuyers with limited financial knowledge' or 'Experienced loan officers who need quick answers'"
+      title: "How much mortgage/financial industry experience do you have?",
+      description: "This helps us understand your knowledge level and expertise",
+      placeholder: "e.g., '15 years as a loan officer' or 'New to the industry, still learning' or 'Experienced processor with deep product knowledge'"
     },
     {
-      title: "How should this AI communicate?",
-      description: "What tone and style should the AI use in its responses?",
-      placeholder: "e.g., 'Friendly and patient, explaining things simply' or 'Professional and concise, getting straight to the point'"
+      title: "Do you prefer detailed information or quick summaries?",
+      description: "When learning or explaining concepts, what works best for you?",
+      placeholder: "e.g., 'I like comprehensive explanations with research and context' or 'I prefer brief, actionable bullet points'"
     },
     {
-      title: "How detailed should the AI's responses be?",
-      description: "What length and depth of information works best?",
-      placeholder: "e.g., 'Brief bullet points for quick scanning' or 'Detailed explanations with examples and context'"
+      title: "How structured vs. flexible is your approach?",
+      description: "Do you like organized, step-by-step processes or more adaptable approaches?",
+      placeholder: "e.g., 'I follow clear processes and checklists' or 'I adapt to each situation as it comes' or 'Somewhere in between'"
     },
     {
-      title: "Any special instructions for the AI?",
-      description: "Special requirements, formatting preferences, or important constraints",
-      placeholder: "e.g., 'Always mention compliance requirements' or 'Include actionable next steps in every response'"
+      title: "What's your personality and tone when working with clients?",
+      description: "Are you more formal, casual, empathetic, analytical, etc.?",
+      placeholder: "e.g., 'Friendly and empathetic, I focus on relationships' or 'Professional and analytical, I focus on numbers' or 'Enthusiastic and energetic'"
     }
   ];
 
@@ -583,7 +583,7 @@ export default function Home() {
                                 e.stopPropagation();
                                 setShowEndpointsModal(true);
                               }}
-                              className="p-1.5 text-xs bg-robinhood-green/20 text-robinhood-green border border-robinhood-green/30 rounded hover:bg-robinhood-green/30 transition-all"
+                              className="p-1.5 text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded hover:bg-cyan-500/30 transition-all"
                               title="View Endpoints"
                             >
                               🔗
@@ -595,7 +595,7 @@ export default function Home() {
                               e.stopPropagation();
                               handleDuplicate(config.id);
                             }}
-                            className="p-1.5 text-xs bg-robinhood-card border border-blue-500/30 text-blue-400 rounded hover:bg-blue-500/10 transition-all"
+                            className="p-1.5 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded hover:bg-purple-500/30 transition-all"
                             title="Duplicate"
                           >
                             📑
@@ -671,7 +671,7 @@ export default function Home() {
       {/* Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed top-20 bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
+        className={`fixed top-[120px] bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
           sidebarOpen ? 'left-[312px]' : 'left-0'
         }`}
         style={{ marginLeft: sidebarOpen ? '0' : '0' }}
