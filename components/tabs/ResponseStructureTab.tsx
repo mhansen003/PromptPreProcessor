@@ -29,6 +29,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.useExamples}
             onChange={(checked) => onUpdate({ useExamples: checked })}
             description="Include relevant examples to illustrate concepts"
+            tooltip="When enabled, responses will include concrete examples to make concepts more understandable"
           />
 
           <Toggle
@@ -36,6 +37,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeAnalogies}
             onChange={(checked) => onUpdate({ includeAnalogies: checked })}
             description="Use analogies to explain complex concepts"
+            tooltip="Enables comparisons to familiar concepts to help explain unfamiliar or complex ideas"
           />
 
           <Toggle
@@ -43,6 +45,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeCodeSamples}
             onChange={(checked) => onUpdate({ includeCodeSamples: checked })}
             description="Include code examples when discussing technical topics"
+            tooltip="When enabled, technical explanations will include code snippets and programming examples"
           />
 
           <Toggle
@@ -50,6 +53,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeVisualDescriptions}
             onChange={(checked) => onUpdate({ includeVisualDescriptions: checked })}
             description="Provide visual descriptions and mental imagery"
+            tooltip="Adds vivid descriptions that help readers visualize concepts and scenarios"
           />
 
           <Toggle
@@ -57,6 +61,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeSnippets}
             onChange={(checked) => onUpdate({ includeSnippets: checked })}
             description="Extract and highlight key snippets or quotes"
+            tooltip="Highlights the most important parts of responses as pull quotes or key takeaways"
           />
 
           <Toggle
@@ -64,6 +69,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeExternalReferences}
             onChange={(checked) => onUpdate({ includeExternalReferences: checked })}
             description="Reference external resources and documentation"
+            tooltip="Includes citations and links to external documentation, articles, and resources"
           />
         </div>
       </div>
@@ -81,6 +87,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.useBulletPoints}
             onChange={(checked) => onUpdate({ useBulletPoints: checked })}
             description="Use bullet points to organize information"
+            tooltip="Formats responses with bullet points for easy scanning of key information"
           />
 
           <Toggle
@@ -88,6 +95,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.useNumberedLists}
             onChange={(checked) => onUpdate({ useNumberedLists: checked })}
             description="Use numbered lists for sequential information"
+            tooltip="Uses numbered lists for steps, rankings, or ordered information"
           />
 
           <Toggle
@@ -95,6 +103,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeTables}
             onChange={(checked) => onUpdate({ includeTables: checked })}
             description="Use data tables for structured information"
+            tooltip="Organizes comparative data and structured information into formatted tables"
           />
 
           <Toggle
@@ -102,6 +111,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeStepByStep}
             onChange={(checked) => onUpdate({ includeStepByStep: checked })}
             description="Break down processes into clear step-by-step instructions"
+            tooltip="Breaks complex processes into clear, numbered steps for easy following"
           />
         </div>
       </div>
@@ -119,6 +129,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.showThoughtProcess}
             onChange={(checked) => onUpdate({ showThoughtProcess: checked })}
             description="Show internal reasoning and chain of thought"
+            tooltip="Reveals the AI's reasoning process and logic leading to conclusions (Chain of Thought)"
           />
 
           <Toggle
@@ -126,6 +137,7 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             checked={config.includeSummary}
             onChange={(checked) => onUpdate({ includeSummary: checked })}
             description="Include summary sections for key points"
+            tooltip="Adds summary sections or TL;DR blocks highlighting the main takeaways"
           />
         </div>
       </div>

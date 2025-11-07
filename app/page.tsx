@@ -408,14 +408,42 @@ export default function Home() {
             <div className="flex-1">
               {isEditingName ? (
                 <div className="flex items-center gap-2">
-                  <input
-                    type="text"
+                  <select
                     value={editingEmoji}
                     onChange={(e) => setEditingEmoji(e.target.value)}
-                    placeholder="🎭"
-                    maxLength={2}
-                    className="w-12 px-2 py-1 bg-robinhood-card border border-robinhood-card-border rounded text-2xl text-center focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-                  />
+                    className="w-16 px-1 py-1 bg-robinhood-card border border-robinhood-card-border rounded text-2xl text-center focus:outline-none focus:ring-2 focus:ring-robinhood-green cursor-pointer"
+                  >
+                    <option value="🎭">🎭</option>
+                    <option value="🤖">🤖</option>
+                    <option value="💼">💼</option>
+                    <option value="👔">👔</option>
+                    <option value="🏠">🏠</option>
+                    <option value="💰">💰</option>
+                    <option value="📊">📊</option>
+                    <option value="📈">📈</option>
+                    <option value="🎯">🎯</option>
+                    <option value="⭐">⭐</option>
+                    <option value="💡">💡</option>
+                    <option value="🚀">🚀</option>
+                    <option value="📝">📝</option>
+                    <option value="📋">📋</option>
+                    <option value="✨">✨</option>
+                    <option value="🎨">🎨</option>
+                    <option value="🔧">🔧</option>
+                    <option value="⚙️">⚙️</option>
+                    <option value="🎓">🎓</option>
+                    <option value="📚">📚</option>
+                    <option value="🏆">🏆</option>
+                    <option value="🌟">🌟</option>
+                    <option value="💎">💎</option>
+                    <option value="🔑">🔑</option>
+                    <option value="👥">👥</option>
+                    <option value="💬">💬</option>
+                    <option value="📞">📞</option>
+                    <option value="✉️">✉️</option>
+                    <option value="🎤">🎤</option>
+                    <option value="🎬">🎬</option>
+                  </select>
                   <input
                     type="text"
                     value={editingName}

@@ -146,166 +146,171 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
         </div>
       </div>
 
-      {/* Specializations */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>⭐</span>
-          <span>Loan Program Specializations</span>
-        </h3>
+      {/* Loan Programs & Products - 2x2 Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Specializations */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span>⭐</span>
+            <span>Loan Program Specializations</span>
+          </h3>
 
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={specializationInput}
-              onChange={(e) => setSpecializationInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={specializationInput}
+                onChange={(e) => setSpecializationInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addSpecialization(specializationInput);
+                    setSpecializationInput('');
+                  }
+                }}
+                placeholder="Type and press Enter (e.g., FHA, VA, Jumbo)"
+                className="flex-1 px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green text-sm"
+              />
+              <button
+                onClick={() => {
                   addSpecialization(specializationInput);
                   setSpecializationInput('');
+                }}
+                className="px-3 py-2 bg-robinhood-green/20 text-robinhood-green border border-robinhood-green/30 rounded-lg hover:bg-robinhood-green/30 transition-colors text-sm"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 min-h-[60px]">
+              {config.specializations.map((spec) => (
+                <span
+                  key={spec}
+                  className="px-3 py-1 bg-robinhood-green/20 text-robinhood-green text-sm rounded-full flex items-center gap-2 h-fit"
+                >
+                  {spec}
+                  <button
+                    onClick={() => removeSpecialization(spec)}
+                    className="hover:text-red-400 transition-colors"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <p className="text-xs text-gray-400">
+              Examples: FHA, VA, Conventional, Jumbo, Reverse, USDA
+            </p>
+          </div>
+        </div>
+
+        {/* Loan Products */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span>📋</span>
+            <span>Specific Loan Products</span>
+          </h3>
+
+          <div className="space-y-2">
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value) {
+                  addLoanType(e.target.value);
+                  e.target.value = '';
                 }
               }}
-              placeholder="Type and press Enter (e.g., FHA, VA, Jumbo)"
-              className="flex-1 px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-            />
-            <button
-              onClick={() => {
-                addSpecialization(specializationInput);
-                setSpecializationInput('');
-              }}
-              className="px-4 py-2 bg-robinhood-green/20 text-robinhood-green border border-robinhood-green/30 rounded-lg hover:bg-robinhood-green/30 transition-colors"
+              className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green text-sm"
             >
-              Add
-            </button>
-          </div>
+              <option value="">-- Select a loan product to add --</option>
+              {LOAN_TYPES.filter(type => !config.loanTypes.includes(type)).map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
 
-          <div className="flex flex-wrap gap-2">
-            {config.specializations.map((spec) => (
-              <span
-                key={spec}
-                className="px-3 py-1 bg-robinhood-green/20 text-robinhood-green text-sm rounded-full flex items-center gap-2"
-              >
-                {spec}
-                <button
-                  onClick={() => removeSpecialization(spec)}
-                  className="hover:text-red-400 transition-colors"
+            <div className="flex flex-wrap gap-2 min-h-[60px]">
+              {config.loanTypes.map((type) => (
+                <span
+                  key={type}
+                  className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm rounded-full flex items-center gap-2 h-fit"
                 >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-
-          <p className="text-xs text-gray-400">
-            Examples: FHA, VA, Conventional, Jumbo, Reverse, USDA, Non-QM, Construction
-          </p>
-        </div>
-      </div>
-
-      {/* Loan Products */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>📋</span>
-          <span>Specific Loan Products</span>
-        </h3>
-
-        <div className="space-y-2">
-          <select
-            value=""
-            onChange={(e) => {
-              if (e.target.value) {
-                addLoanType(e.target.value);
-                e.target.value = '';
-              }
-            }}
-            className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-          >
-            <option value="">-- Select a loan product to add --</option>
-            {LOAN_TYPES.filter(type => !config.loanTypes.includes(type)).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex flex-wrap gap-2">
-            {config.loanTypes.map((type) => (
-              <span
-                key={type}
-                className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm rounded-full flex items-center gap-2"
-              >
-                {type}
-                <button
-                  onClick={() => removeLoanType(type)}
-                  className="hover:text-red-400 transition-colors"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+                  {type}
+                  <button
+                    onClick={() => removeLoanType(type)}
+                    className="hover:text-red-400 transition-colors"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Market Expertise */}
+      {/* Market Expertise - Full Width */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <span>🎯</span>
           <span>Market Expertise</span>
         </h3>
 
-        <Select
-          label="Primary Client Focus"
-          value={config.clientFocus}
-          onChange={(value) => onUpdate({ clientFocus: value as PersonaConfig['clientFocus'] })}
-          options={[
-            { value: 'mixed', label: 'Mixed (All client types)' },
-            { value: 'first-time-buyers', label: 'First-Time Homebuyers' },
-            { value: 'purchase', label: 'Purchase (Move-Up/Down)' },
-            { value: 'refinance', label: 'Refinance Specialists' },
-            { value: 'investors', label: 'Investors / Investment Properties' },
-          ]}
-          tooltip="Primary type of clients you work with most"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Select
+            label="Primary Client Focus"
+            value={config.clientFocus}
+            onChange={(value) => onUpdate({ clientFocus: value as PersonaConfig['clientFocus'] })}
+            options={[
+              { value: 'mixed', label: 'Mixed (All client types)' },
+              { value: 'first-time-buyers', label: 'First-Time Homebuyers' },
+              { value: 'purchase', label: 'Purchase (Move-Up/Down)' },
+              { value: 'refinance', label: 'Refinance Specialists' },
+              { value: 'investors', label: 'Investors / Investment Properties' },
+            ]}
+            tooltip="Primary type of clients you work with most"
+          />
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Additional Market Segments
-          </label>
-          <select
-            value=""
-            onChange={(e) => {
-              if (e.target.value) {
-                addMarketExpertise(e.target.value);
-                e.target.value = '';
-              }
-            }}
-            className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-          >
-            <option value="">-- Select a market segment to add --</option>
-            {MARKET_EXPERTISE_OPTIONS.filter(opt => !config.marketExpertise.includes(opt)).map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex flex-wrap gap-2">
-            {config.marketExpertise.map((market) => (
-              <span
-                key={market}
-                className="px-3 py-1 bg-purple-500/20 text-purple-400 text-sm rounded-full flex items-center gap-2"
-              >
-                {market}
-                <button
-                  onClick={() => removeMarketExpertise(market)}
-                  className="hover:text-red-400 transition-colors"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Additional Market Segments
+            </label>
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value) {
+                  addMarketExpertise(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+              className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green text-sm"
+            >
+              <option value="">-- Select a market segment to add --</option>
+              {MARKET_EXPERTISE_OPTIONS.filter(opt => !config.marketExpertise.includes(opt)).map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 min-h-[60px]">
+          {config.marketExpertise.map((market) => (
+            <span
+              key={market}
+              className="px-3 py-1 bg-purple-500/20 text-purple-400 text-sm rounded-full flex items-center gap-2 h-fit"
+            >
+              {market}
+              <button
+                onClick={() => removeMarketExpertise(market)}
+                className="hover:text-red-400 transition-colors"
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
       </div>
 
