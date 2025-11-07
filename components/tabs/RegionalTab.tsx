@@ -82,6 +82,18 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           tooltip="General geographic region for context and market references"
         />
 
+        <Select
+          label="Gender (for caricature)"
+          value={config.gender}
+          onChange={(value) => onUpdate({ gender: value as PersonaConfig['gender'] })}
+          options={[
+            { value: 'neutral', label: 'Neutral (Default)' },
+            { value: 'male', label: 'Male' },
+            { value: 'female', label: 'Female' },
+          ]}
+          tooltip="Used for generating AI caricature image of the persona"
+        />
+
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">
             State (Optional)

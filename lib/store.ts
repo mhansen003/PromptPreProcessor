@@ -54,6 +54,7 @@ export interface PersonaConfig {
   // Regional Settings (Regional Tab)
   region: 'northeast' | 'southeast' | 'midwest' | 'southwest' | 'west' | 'pacific-northwest' | 'mountain-west' | 'national' | 'none';
   state: string;  // Specific state (e.g., "California", "Texas", "New York")
+  gender: 'male' | 'female' | 'neutral';  // For DALL-E caricature generation
   dialect: 'standard-american' | 'southern' | 'midwestern' | 'northeast' | 'california' | 'neutral';
   includeLocalReferences: boolean;  // Include local landmarks, culture, etc.
   timeZoneAwareness: boolean;  // Mention time-specific context
@@ -78,6 +79,7 @@ export interface PersonaConfig {
   slug?: string;  // URL-friendly name (auto-generated from name)
   publishedUrl?: string;  // Public URL if published
   isPublished?: boolean;  // Publishing status
+  imageUrl?: string;  // DALL-E generated caricature image URL
 }
 
 // For backward compatibility, export as PromptConfig as well
@@ -148,6 +150,7 @@ const createDefaultConfig = (): PersonaConfig => ({
   // Regional Tab
   region: 'national',
   state: '',
+  gender: 'neutral',
   dialect: 'neutral',
   includeLocalReferences: false,
   timeZoneAwareness: false,
@@ -172,6 +175,7 @@ const createDefaultConfig = (): PersonaConfig => ({
 const defaultRegionalFields = {
   region: 'national' as const,
   state: '',
+  gender: 'neutral' as const,
   dialect: 'neutral' as const,
   includeLocalReferences: false,
   timeZoneAwareness: false,
@@ -238,6 +242,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       customStyle: '',
       region: 'national',
       state: '',
+      gender: 'neutral',
       dialect: 'neutral',
       includeLocalReferences: false,
       timeZoneAwareness: false,

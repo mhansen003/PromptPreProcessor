@@ -14,7 +14,6 @@ import SampleMessagesModal from '@/components/SampleMessagesModal';
 export default function Home() {
   const { configs, activeConfig, addConfig, updateConfig, saveConfig, setActiveConfig, deleteConfig, duplicateConfig, setConfigs } = useStore();
   const [mounted, setMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('personality');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -34,6 +33,7 @@ export default function Home() {
   const [showSampleMessagesModal, setShowSampleMessagesModal] = useState(false);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -338,6 +338,34 @@ export default function Home() {
     }
   };
 
+  const handleGenerateImage = async () => {
+    if (!activeConfig) return;
+
+    setIsGeneratingImage(true);
+    try {
+      const response = await fetch('/api/generate-persona-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(activeConfig),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.imageUrl) {
+        // Update config with new image URL
+        await handleNameEmojiUpdate({ imageUrl: data.imageUrl });
+        showToast('✨ Caricature generated successfully!');
+      } else {
+        showToast('⚠️ Failed to generate image: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error generating persona image:', error);
+      showToast('⚠️ Failed to generate image');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
   const renderTabContent = () => {
     if (!activeConfig) return null;
 
@@ -358,9 +386,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-robinhood-dark text-white">
+    <div className="h-screen bg-robinhood-dark text-white flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-robinhood-darker border-b border-robinhood-card-border py-4 px-6">
+      <header className="bg-robinhood-darker border-b border-robinhood-card-border py-4 px-6 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">AI Persona Builder</h1>
@@ -592,21 +620,65 @@ export default function Home() {
                   </button>
                 </div>
               ) : (
-                <h2 className="text-xl font-semibold flex items-center gap-2 group">
-                  <span>{activeConfig.emoji}</span>
-                  <span>{activeConfig.name}</span>
-                  <button
-                    onClick={() => {
-                      setEditingName(activeConfig.name);
-                      setEditingEmoji(activeConfig.emoji);
-                      setIsEditingName(true);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-robinhood-green text-sm transition-all ml-2"
-                    title="Edit name and emoji"
-                  >
-                    ✏️
-                  </button>
-                </h2>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 group">
+                    {/* Show generated image or emoji */}
+                    {activeConfig.imageUrl ? (
+                      <div className="relative">
+                        <img
+                          src={activeConfig.imageUrl}
+                          alt={activeConfig.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-robinhood-green/30"
+                        />
+                        <button
+                          onClick={handleGenerateImage}
+                          disabled={isGeneratingImage}
+                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-robinhood-green/20 hover:bg-robinhood-green/40 rounded-full flex items-center justify-center text-xs border border-robinhood-green/50 transition-all"
+                          title="Regenerate caricature"
+                        >
+                          {isGeneratingImage ? '⏳' : '🔄'}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-3xl">{activeConfig.emoji}</span>
+                    )}
+                    <div>
+                      <h2 className="text-xl font-semibold flex items-center gap-2">
+                        <span>{activeConfig.name}</span>
+                        <button
+                          onClick={() => {
+                            setEditingName(activeConfig.name);
+                            setEditingEmoji(activeConfig.emoji);
+                            setIsEditingName(true);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-robinhood-green text-sm transition-all"
+                          title="Edit name and emoji"
+                        >
+                          ✏️
+                        </button>
+                      </h2>
+                      {!activeConfig.imageUrl && (
+                        <button
+                          onClick={handleGenerateImage}
+                          disabled={isGeneratingImage}
+                          className="text-xs text-robinhood-green/70 hover:text-robinhood-green flex items-center gap-1 transition-all disabled:opacity-50"
+                        >
+                          {isGeneratingImage ? (
+                            <>
+                              <span className="animate-pulse">⏳</span>
+                              <span>Generating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>✨</span>
+                              <span>Generate Caricature</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
               {activeConfig.description && (
                 <p className="text-sm text-gray-400 mt-1">{activeConfig.description}</p>
@@ -616,9 +688,10 @@ export default function Home() {
         )}
       </header>
 
-      <div className="flex">
+      {/* Main Content Area - Scrollable */}
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Always Visible */}
-        <div className="w-80 bg-robinhood-darker border-r border-robinhood-card-border">
+        <div className="w-80 bg-robinhood-darker border-r border-robinhood-card-border overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Your Personas</h3>
@@ -654,7 +727,16 @@ export default function Home() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="text-xl flex-shrink-0">{config.emoji}</span>
+                          {/* Show generated image or emoji */}
+                          {config.imageUrl ? (
+                            <img
+                              src={config.imageUrl}
+                              alt={config.name}
+                              className="w-8 h-8 rounded-full object-cover border border-robinhood-green/30 flex-shrink-0"
+                            />
+                          ) : (
+                            <span className="text-xl flex-shrink-0">{config.emoji}</span>
+                          )}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{config.name}</p>
                             {config.description && (
@@ -698,9 +780,9 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           {configs.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center min-h-full">
               <div className="text-center max-w-md">
                 <div className="text-6xl mb-6">🎭</div>
                 <h2 className="text-3xl font-bold text-white mb-3">Welcome to AI Persona Builder</h2>
@@ -718,12 +800,12 @@ export default function Home() {
           ) : activeConfig ? (
             <>
               <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-              <div className="p-6">
+              <div className="p-6 m-4 bg-robinhood-card/30 border border-robinhood-card-border rounded-lg">
                 {renderTabContent()}
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center min-h-full">
               <div className="text-center text-gray-400">
                 <p className="text-xl mb-4">No persona selected</p>
                 <p className="text-sm mb-6">Select a persona from the sidebar or create a new one</p>
@@ -739,15 +821,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sidebar Toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed top-1/2 -translate-y-1/2 bg-white rounded-r-md py-6 px-1.5 hover:px-2 transition-all duration-200 z-50 shadow-md ${
-          sidebarOpen ? 'left-[320px]' : 'left-0'
-        }`}
-      >
-        <span className="text-gray-700 font-bold text-sm">{sidebarOpen ? '◀' : '▶'}</span>
-      </button>
+      {/* Footer - Always Visible */}
+      <footer className="border-t border-robinhood-card-border bg-robinhood-darker py-4 px-6 flex-shrink-0">
+        <div className="flex items-center justify-between text-sm text-gray-400">
+          <div className="flex items-center gap-4">
+            <span>© 2025 AI Persona Builder</span>
+            <span className="text-gray-600">|</span>
+            <span>CMG Financial</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-gray-500">Version 1.0</span>
+          </div>
+        </div>
+      </footer>
 
       {/* Toast Notification */}
       {showToaster && (
