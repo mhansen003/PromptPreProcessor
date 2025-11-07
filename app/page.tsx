@@ -606,10 +606,10 @@ export default function Home() {
 
       {/* New Persona Modal */}
       {showNewPersonaModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-robinhood-card-border flex items-center justify-between sticky top-0 bg-robinhood-dark z-10">
-              <h2 className="text-2xl font-bold">Create New Persona</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-purple-900/40 via-robinhood-dark to-blue-900/40 border-2 border-purple-500/50 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-purple-500/20">
+            <div className="p-6 border-b border-purple-500/30 flex items-center justify-between sticky top-0 bg-robinhood-dark/95 backdrop-blur-sm z-10">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Create New Persona</h2>
               <button
                 onClick={() => setShowNewPersonaModal(false)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -872,10 +872,10 @@ export default function Home() {
 
       {/* View Prompt Modal */}
       {showViewPromptModal && activeConfig?.systemPrompt && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-robinhood-card-border flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Generated System Prompt</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-green-900/40 via-robinhood-dark to-emerald-900/40 border-2 border-robinhood-green/50 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl shadow-robinhood-green/20">
+            <div className="p-6 border-b border-robinhood-green/30 flex items-center justify-between">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-robinhood-green to-emerald-400 bg-clip-text text-transparent">Generated System Prompt</h2>
               <button
                 onClick={() => {
                   setShowViewPromptModal(false);
@@ -901,16 +901,16 @@ export default function Home() {
               )}
             </div>
 
-            <div className="p-6 border-t border-robinhood-card-border flex gap-3">
+            <div className="p-6 border-t border-robinhood-green/30 flex gap-3">
               <button
                 onClick={() => copyToClipboard(activeConfig.systemPrompt || '')}
-                className="px-4 py-2 bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded-lg hover:bg-robinhood-green/10 transition-all"
+                className="px-4 py-2 bg-robinhood-green/20 border border-robinhood-green/50 text-robinhood-green rounded-lg hover:bg-robinhood-green/30 transition-all shadow-lg shadow-robinhood-green/10"
               >
                 📋 Copy
               </button>
               <button
                 onClick={() => setShowViewPromptModal(false)}
-                className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg hover:bg-robinhood-card-hover transition-all"
+                className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-green/30 rounded-lg hover:bg-robinhood-card-hover transition-all"
               >
                 Close
               </button>
@@ -921,10 +921,10 @@ export default function Home() {
 
       {/* Endpoints Modal */}
       {showEndpointsModal && activeConfig && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-3xl w-full">
-            <div className="p-6 border-b border-robinhood-card-border flex items-center justify-between">
-              <h2 className="text-2xl font-bold">API Endpoints</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-blue-900/40 via-robinhood-dark to-cyan-900/40 border-2 border-blue-500/50 rounded-xl max-w-3xl w-full shadow-2xl shadow-blue-500/20">
+            <div className="p-6 border-b border-blue-500/30 flex items-center justify-between">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">API Endpoints</h2>
               <button
                 onClick={() => setShowEndpointsModal(false)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -995,10 +995,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="p-6 border-t border-robinhood-card-border">
+            <div className="p-6 border-t border-blue-500/30">
               <button
                 onClick={() => setShowEndpointsModal(false)}
-                className="w-full px-4 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg hover:bg-robinhood-card-hover transition-all"
+                className="w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg hover:bg-blue-500/30 transition-all shadow-lg shadow-blue-500/10"
               >
                 Close
               </button>
@@ -1009,10 +1009,10 @@ export default function Home() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-robinhood-dark border border-robinhood-card-border rounded-xl max-w-md w-full">
-            <div className="p-6 border-b border-robinhood-card-border flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Delete Persona?</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-red-900/40 via-robinhood-dark to-orange-900/40 border-2 border-red-500/50 rounded-xl max-w-md w-full shadow-2xl shadow-red-500/20">
+            <div className="p-6 border-b border-red-500/30 flex items-center justify-between">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">Delete Persona?</h2>
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
@@ -1030,19 +1030,19 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="p-6 border-t border-robinhood-card-border flex gap-3">
+            <div className="p-6 border-t border-red-500/30 flex gap-3">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setPersonaToDelete(null);
                 }}
-                className="flex-1 px-4 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg hover:bg-robinhood-card-hover transition-all"
+                className="flex-1 px-4 py-2 bg-robinhood-card border border-red-500/30 rounded-lg hover:bg-robinhood-card-hover transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-all"
+                className="flex-1 px-4 py-2 bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/40 transition-all shadow-lg shadow-red-500/20"
               >
                 Delete
               </button>
