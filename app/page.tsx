@@ -34,6 +34,7 @@ export default function Home() {
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -160,6 +161,8 @@ export default function Home() {
     setActiveConfig(newConfig);
     setShowNewPersonaModal(false);
     showToast('✨ New persona created!');
+    // Auto-generate character image
+    setTimeout(() => handleGenerateImage(newConfig), 500);
   };
 
   const analyzeInterviewAndCreate = async () => {
@@ -190,6 +193,8 @@ export default function Home() {
         setActiveConfig(data.config);
         setShowNewPersonaModal(false);
         showToast('🎯 AI-configured persona created!');
+        // Auto-generate character image
+        setTimeout(() => handleGenerateImage(data.config), 500);
       } else {
         showToast('❌ Failed to analyze. Creating default.');
         createFromScratch();
@@ -338,23 +343,29 @@ export default function Home() {
     }
   };
 
-  const handleGenerateImage = async () => {
-    if (!activeConfig) return;
+  const handleGenerateImage = async (configToUse?: PersonaConfig) => {
+    const targetConfig = configToUse || activeConfig;
+    if (!targetConfig) return;
 
     setIsGeneratingImage(true);
     try {
       const response = await fetch('/api/generate-persona-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(activeConfig),
+        body: JSON.stringify(targetConfig),
       });
 
       const data = await response.json();
 
       if (data.success && data.imageUrl) {
         // Update config with new image URL
-        await handleNameEmojiUpdate({ imageUrl: data.imageUrl });
-        showToast('✨ Caricature generated successfully!');
+        updateConfig(targetConfig.id, { imageUrl: data.imageUrl });
+
+        // Save to backend (Redis) immediately so it persists on refresh
+        const updatedConfig = { ...targetConfig, imageUrl: data.imageUrl };
+        await saveConfig(updatedConfig);
+
+        showToast('✨ Character image generated successfully!');
       } else {
         showToast('⚠️ Failed to generate image: ' + (data.error || 'Unknown error'));
       }
@@ -624,26 +635,32 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 group">
+                  <div className="flex items-center gap-3 group">
                     {/* Show generated image or emoji */}
                     {activeConfig.imageUrl ? (
                       <div className="relative">
                         <img
                           src={activeConfig.imageUrl}
                           alt={activeConfig.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-robinhood-green/30"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-robinhood-green/30 shadow-lg shadow-robinhood-green/20 cursor-pointer transition-transform hover:scale-105"
+                          onMouseEnter={() => setShowImagePreview(true)}
+                          onMouseLeave={() => setShowImagePreview(false)}
                         />
-                        <button
-                          onClick={handleGenerateImage}
-                          disabled={isGeneratingImage}
-                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-robinhood-green/20 hover:bg-robinhood-green/40 rounded-full flex items-center justify-center text-xs border border-robinhood-green/50 transition-all"
-                          title="Regenerate caricature"
-                        >
-                          {isGeneratingImage ? '⏳' : '🔄'}
-                        </button>
+                        {/* Hover Preview - Larger Version */}
+                        {showImagePreview && (
+                          <div className="absolute left-24 top-0 z-50 pointer-events-none">
+                            <div className="bg-robinhood-dark border-2 border-robinhood-green/50 rounded-lg p-2 shadow-2xl shadow-robinhood-green/30">
+                              <img
+                                src={activeConfig.imageUrl}
+                                alt={activeConfig.name}
+                                className="w-64 h-64 rounded-lg object-cover"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <span className="text-3xl">{activeConfig.emoji}</span>
+                      <span className="text-5xl">{activeConfig.emoji}</span>
                     )}
                     <div>
                       <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -660,25 +677,29 @@ export default function Home() {
                           ✏️
                         </button>
                       </h2>
-                      {!activeConfig.imageUrl && (
-                        <button
-                          onClick={handleGenerateImage}
-                          disabled={isGeneratingImage}
-                          className="text-xs text-robinhood-green/70 hover:text-robinhood-green flex items-center gap-1 transition-all disabled:opacity-50"
-                        >
-                          {isGeneratingImage ? (
-                            <>
-                              <span className="animate-pulse">⏳</span>
-                              <span>Generating...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>✨</span>
-                              <span>Generate Caricature</span>
-                            </>
-                          )}
-                        </button>
-                      )}
+                      {/* Generate or Regenerate button */}
+                      <button
+                        onClick={() => handleGenerateImage()}
+                        disabled={isGeneratingImage}
+                        className="text-xs text-robinhood-green/70 hover:text-robinhood-green flex items-center gap-1 transition-all disabled:opacity-50 mt-1"
+                      >
+                        {isGeneratingImage ? (
+                          <>
+                            <span className="animate-pulse">⏳</span>
+                            <span>Generating...</span>
+                          </>
+                        ) : activeConfig.imageUrl ? (
+                          <>
+                            <span>🔄</span>
+                            <span>Regenerate Character Image</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>✨</span>
+                            <span>Generate Character Image</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -735,10 +756,10 @@ export default function Home() {
                             <img
                               src={config.imageUrl}
                               alt={config.name}
-                              className="w-8 h-8 rounded-full object-cover border border-robinhood-green/30 flex-shrink-0"
+                              className="w-10 h-10 rounded-full object-cover border border-robinhood-green/30 flex-shrink-0 shadow-md"
                             />
                           ) : (
-                            <span className="text-xl flex-shrink-0">{config.emoji}</span>
+                            <span className="text-2xl flex-shrink-0">{config.emoji}</span>
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{config.name}</p>

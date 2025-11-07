@@ -13,7 +13,7 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
   ];
 
   return (
-    <div className="flex gap-1 border-b border-robinhood-card-border bg-robinhood-darker/50 px-6">
+    <div className="sticky top-0 z-40 flex gap-1 border-b border-robinhood-card-border bg-robinhood-darker/95 backdrop-blur-sm px-6">
       {tabs.map((tab) => (
         <button
           key={tab.id}

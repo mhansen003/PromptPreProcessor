@@ -64,35 +64,37 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           <span>Location Settings</span>
         </h3>
 
-        <Select
-          label="Region"
-          value={config.region}
-          onChange={(value) => onUpdate({ region: value as PersonaConfig['region'] })}
-          options={[
-            { value: 'none', label: 'None / Not Applicable' },
-            { value: 'national', label: 'National (US-wide)' },
-            { value: 'northeast', label: 'Northeast' },
-            { value: 'southeast', label: 'Southeast' },
-            { value: 'midwest', label: 'Midwest' },
-            { value: 'southwest', label: 'Southwest' },
-            { value: 'west', label: 'West Coast' },
-            { value: 'pacific-northwest', label: 'Pacific Northwest' },
-            { value: 'mountain-west', label: 'Mountain West' },
-          ]}
-          tooltip="General geographic region for context and market references"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Region"
+            value={config.region}
+            onChange={(value) => onUpdate({ region: value as PersonaConfig['region'] })}
+            options={[
+              { value: 'none', label: 'None / Not Applicable' },
+              { value: 'national', label: 'National (US-wide)' },
+              { value: 'northeast', label: 'Northeast' },
+              { value: 'southeast', label: 'Southeast' },
+              { value: 'midwest', label: 'Midwest' },
+              { value: 'southwest', label: 'Southwest' },
+              { value: 'west', label: 'West Coast' },
+              { value: 'pacific-northwest', label: 'Pacific Northwest' },
+              { value: 'mountain-west', label: 'Mountain West' },
+            ]}
+            tooltip="General geographic region for context and market references"
+          />
 
-        <Select
-          label="Gender (for caricature)"
-          value={config.gender}
-          onChange={(value) => onUpdate({ gender: value as PersonaConfig['gender'] })}
-          options={[
-            { value: 'neutral', label: 'Neutral (Default)' },
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
-          ]}
-          tooltip="Used for generating AI caricature image of the persona"
-        />
+          <Select
+            label="Gender (for caricature)"
+            value={config.gender}
+            onChange={(value) => onUpdate({ gender: value as PersonaConfig['gender'] })}
+            options={[
+              { value: 'neutral', label: 'Neutral (Default)' },
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+            ]}
+            tooltip="Used for generating AI caricature image of the persona"
+          />
+        </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">
@@ -207,44 +209,37 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           )}
         />
 
-        <Slider
-          label="Regional Terminology"
-          value={config.regionalTerminology}
-          onChange={(value) => onUpdate({ regionalTerminology: value })}
-          min={0}
-          max={100}
-          tooltip="How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)"
-          onShowExample={() => openSliderExample(
-            'Regional Terminology',
-            'How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)',
-            config.regionalTerminology,
-            (value) => onUpdate({ regionalTerminology: value })
-          )}
-        />
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Slider
+            label="Regional Terminology"
+            value={config.regionalTerminology}
+            onChange={(value) => onUpdate({ regionalTerminology: value })}
+            min={0}
+            max={100}
+            tooltip="How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)"
+            onShowExample={() => openSliderExample(
+              'Regional Terminology',
+              'How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)',
+              config.regionalTerminology,
+              (value) => onUpdate({ regionalTerminology: value })
+            )}
+          />
 
-
-      {/* Cultural Sensitivity */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>🌍</span>
-          <span>Cultural Awareness</span>
-        </h3>
-
-        <Slider
-          label="Cultural Sensitivity"
-          value={config.culturalSensitivity}
-          onChange={(value) => onUpdate({ culturalSensitivity: value })}
-          min={0}
-          max={100}
-          tooltip="How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)"
-          onShowExample={() => openSliderExample(
-            'Cultural Sensitivity',
-            'How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)',
-            config.culturalSensitivity,
-            (value) => onUpdate({ culturalSensitivity: value })
-          )}
-        />
+          <Slider
+            label="Cultural Sensitivity"
+            value={config.culturalSensitivity}
+            onChange={(value) => onUpdate({ culturalSensitivity: value })}
+            min={0}
+            max={100}
+            tooltip="How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)"
+            onShowExample={() => openSliderExample(
+              'Cultural Sensitivity',
+              'How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)',
+              config.culturalSensitivity,
+              (value) => onUpdate({ culturalSensitivity: value })
+            )}
+          />
+        </div>
       </div>
 
       {/* Example Modal */}

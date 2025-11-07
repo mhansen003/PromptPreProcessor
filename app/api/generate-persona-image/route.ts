@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { put } from '@vercel/blob';
 import type { PersonaConfig } from '@/lib/store';
 
 // POST /api/generate-persona-image - Generate a DALL-E caricature for a persona
@@ -32,20 +33,38 @@ export async function POST(request: NextRequest) {
       style: 'vivid', // More artistic and caricature-like
     });
 
-    const imageUrl = response.data?.[0]?.url;
+    const tempImageUrl = response.data?.[0]?.url;
 
-    if (!imageUrl || !response.data) {
+    if (!tempImageUrl || !response.data) {
       return NextResponse.json(
         { success: false, error: 'No image URL returned from DALL-E' },
         { status: 500 }
       );
     }
 
-    console.log('[DALL-E] Image generated successfully:', imageUrl);
+    console.log('[DALL-E] Image generated, downloading from:', tempImageUrl);
+
+    // Download image from OpenAI's temporary URL
+    const imageResponse = await fetch(tempImageUrl);
+    if (!imageResponse.ok) {
+      throw new Error('Failed to download image from OpenAI');
+    }
+    const imageBlob = await imageResponse.blob();
+
+    console.log('[DALL-E] Image downloaded, uploading to Vercel Blob...');
+
+    // Upload to Vercel Blob for permanent storage
+    const filename = `persona-${config.id}-${Date.now()}.png`;
+    const blob = await put(filename, imageBlob, {
+      access: 'public',
+      contentType: 'image/png',
+    });
+
+    console.log('[DALL-E] Image uploaded to Vercel Blob:', blob.url);
 
     return NextResponse.json({
       success: true,
-      imageUrl,
+      imageUrl: blob.url, // Permanent Vercel Blob URL
       personaName: config.name,
     });
   } catch (error: any) {
@@ -61,92 +80,90 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Build a DALL-E prompt for a professional caricature
+// Build a DALL-E prompt for an abstract artistic persona representation
 function buildCaricaturePrompt(config: PersonaConfig): string {
-  let prompt = 'Professional caricature illustration of ';
+  let prompt = 'Abstract artistic avatar representing ';
 
-  // Gender descriptor
-  const genderMap = {
-    male: 'a male',
-    female: 'a female',
-    neutral: 'a person',
-  };
-  prompt += genderMap[config.gender] + ' ';
-
-  // Role and experience
+  // Base concept based on role
   if (config.jobRole && config.jobRole !== 'general') {
     const role = config.jobRole.split('-').join(' ');
-    prompt += `${role} `;
-    if (config.yearsExperience > 0) {
-      if (config.yearsExperience < 3) {
-        prompt += '(early career) ';
-      } else if (config.yearsExperience < 10) {
-        prompt += '(mid-career) ';
-      } else {
-        prompt += '(experienced veteran) ';
-      }
-    }
+    prompt += `a ${role} persona, `;
   } else {
-    prompt += 'professional ';
+    prompt += 'a professional persona, ';
   }
 
-  // Personality traits influence visual style
-  prompt += 'with ';
+  // Gender influences overall aesthetic (subtle, not literal)
+  const gender = config.gender || 'neutral';
+  const genderAesthetic: Record<string, string> = {
+    male: 'bold angular geometric forms',
+    female: 'flowing elegant curved shapes',
+    neutral: 'balanced harmonious geometric patterns',
+  };
+  prompt += `using ${genderAesthetic[gender]}, `;
 
-  // Confidence affects posture
-  if (config.confidence > 70) {
-    prompt += 'confident, assertive posture, ';
-  } else if (config.confidence < 40) {
-    prompt += 'humble, approachable demeanor, ';
-  }
+  // Color palette based on personality traits
+  prompt += 'color palette with ';
 
-  // Enthusiasm affects expression
+  // Enthusiasm affects color energy
   if (config.enthusiasm > 70) {
-    prompt += 'bright enthusiastic smile, ';
+    prompt += 'vibrant energetic colors (bright oranges, yellows, warm reds), ';
   } else if (config.enthusiasm > 40) {
-    prompt += 'friendly warm smile, ';
+    prompt += 'balanced warm colors (amber, coral, soft gold), ';
   } else {
-    prompt += 'professional composed expression, ';
+    prompt += 'cool calm colors (blues, teals, muted tones), ';
   }
 
-  // Formality affects attire
-  if (config.formalityLevel > 70) {
-    prompt += 'wearing formal business attire (suit and tie), ';
-  } else if (config.formalityLevel > 40) {
-    prompt += 'wearing business casual attire, ';
+  // Confidence affects shapes and composition
+  if (config.confidence > 70) {
+    prompt += 'strong bold shapes with sharp defined edges and prominent central forms, ';
+  } else if (config.confidence < 40) {
+    prompt += 'gentle soft shapes with subtle gradients and supportive elements, ';
   } else {
-    prompt += 'wearing casual professional clothing, ';
+    prompt += 'balanced shapes with smooth transitions, ';
   }
 
-  // Regional context
-  if (config.state) {
-    prompt += `${config.state} background elements, `;
-  } else if (config.region && config.region !== 'none' && config.region !== 'national') {
-    const regionMap: Record<string, string> = {
-      northeast: 'Northeast US urban',
-      southeast: 'Southeast US',
-      midwest: 'Midwest US',
-      southwest: 'Southwest US desert',
-      west: 'West Coast',
-      'pacific-northwest': 'Pacific Northwest',
-      'mountain-west': 'Mountain West',
-    };
-    prompt += `${regionMap[config.region] || ''} background elements, `;
-  }
-
-  // Creative style affects overall look
+  // Creativity level affects artistic style
   if (config.creativityLevel > 70) {
-    prompt += 'colorful vibrant artistic style, ';
+    prompt += 'highly creative abstract composition with unique unexpected elements and playful asymmetry, ';
+  } else if (config.creativityLevel > 40) {
+    prompt += 'moderately creative design with artistic flair and balanced innovation, ';
+  } else {
+    prompt += 'clean structured composition with elegant simplicity, ';
   }
 
-  // Style specification
-  prompt += 'professional caricature art style with exaggerated but flattering features, ';
-  prompt += 'vibrant colors, clean modern design, friendly and approachable, ';
-  prompt += 'isolated on white background, ';
-  prompt += 'suitable for professional profile picture, ';
-  prompt += 'digital art, high quality illustration';
+  // Formality affects overall aesthetic
+  if (config.formalityLevel > 70) {
+    prompt += 'professional refined aesthetic with geometric precision and sophisticated balance, ';
+  } else if (config.formalityLevel > 40) {
+    prompt += 'semi-formal approachable style with organized elements, ';
+  } else {
+    prompt += 'casual friendly aesthetic with organic flowing elements, ';
+  }
 
-  // Trim to DALL-E's 4000 character limit (though we're well under)
+  // Regional influence (as abstract background/accent elements)
+  if (config.state || (config.region && config.region !== 'none' && config.region !== 'national')) {
+    prompt += 'subtle regional motifs as abstract background patterns, ';
+  }
+
+  // Technical depth affects detail level
+  if (config.technicalDepth > 70) {
+    prompt += 'intricate detailed patterns with layered complexity, ';
+  } else {
+    prompt += 'clean minimalist approach, ';
+  }
+
+  // Style specification - key requirements
+  prompt += 'abstract modern digital art, ';
+  prompt += 'NO human faces, NO people, NO portraits, ';
+  prompt += 'geometric and organic shapes only, ';
+  prompt += 'symbolic representation of personality and role, ';
+  prompt += 'professional icon style suitable for profile avatar, ';
+  prompt += 'centered composition, ';
+  prompt += 'clean white or subtle gradient background, ';
+  prompt += 'high quality vector-style illustration, ';
+  prompt += 'modern minimalist aesthetic with depth';
+
+  // Trim to DALL-E's 4000 character limit
   if (prompt.length > 4000) {
     prompt = prompt.substring(0, 3997) + '...';
   }
