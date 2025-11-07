@@ -27,6 +27,9 @@ export default function Home() {
   const [editedPrompt, setEditedPrompt] = useState('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [username, setUsername] = useState<string>('default-user');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState('');
+  const [editingEmoji, setEditingEmoji] = useState('');
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -402,11 +405,66 @@ export default function Home() {
         {/* Active Persona Info */}
         {activeConfig && (
           <div className="mt-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span>{activeConfig.emoji}</span>
-                <span>{activeConfig.name}</span>
-              </h2>
+            <div className="flex-1">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editingEmoji}
+                    onChange={(e) => setEditingEmoji(e.target.value)}
+                    placeholder="🎭"
+                    maxLength={2}
+                    className="w-12 px-2 py-1 bg-robinhood-card border border-robinhood-card-border rounded text-2xl text-center focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+                  />
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleConfigUpdate({ name: editingName, emoji: editingEmoji });
+                        setIsEditingName(false);
+                      } else if (e.key === 'Escape') {
+                        setIsEditingName(false);
+                      }
+                    }}
+                    placeholder="Persona Name"
+                    className="flex-1 px-3 py-1 bg-robinhood-card border border-robinhood-card-border rounded text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      handleConfigUpdate({ name: editingName, emoji: editingEmoji });
+                      setIsEditingName(false);
+                    }}
+                    className="px-3 py-1 bg-robinhood-green text-robinhood-dark rounded hover:bg-robinhood-green/90 text-sm"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditingName(false)}
+                    className="px-3 py-1 bg-robinhood-card border border-robinhood-card-border rounded hover:bg-robinhood-card-hover text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <h2 className="text-xl font-semibold flex items-center gap-2 group">
+                  <span>{activeConfig.emoji}</span>
+                  <span>{activeConfig.name}</span>
+                  <button
+                    onClick={() => {
+                      setEditingName(activeConfig.name);
+                      setEditingEmoji(activeConfig.emoji);
+                      setIsEditingName(true);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-robinhood-green text-sm transition-all ml-2"
+                    title="Edit name and emoji"
+                  >
+                    ✏️
+                  </button>
+                </h2>
+              )}
               {activeConfig.description && (
                 <p className="text-sm text-gray-400 mt-1">{activeConfig.description}</p>
               )}

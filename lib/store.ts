@@ -704,6 +704,12 @@ export const useStore = create<StoreState>()((set, get) => ({
         id: Date.now().toString(),
         name: `${config.name} (Copy)`,
         createdAt: new Date().toISOString(),
+        // Clear generated prompt - needs to be regenerated
+        systemPrompt: undefined,
+        // Reset slug - will be generated on save
+        slug: undefined,
+        // Reset publish status - duplicate starts unpublished
+        isPublished: false,
       };
 
       // Save to Redis via API
