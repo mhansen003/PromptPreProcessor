@@ -178,6 +178,7 @@ Return ONLY valid JSON, no additional text.`;
       region: 'national',
       state: '',
       dialect: 'neutral',
+      gender: 'neutral',
       includeLocalReferences: false,
       timeZoneAwareness: false,
       regionalTerminology: 50,
