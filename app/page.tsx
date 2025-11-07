@@ -388,10 +388,13 @@ export default function Home() {
   return (
     <div className="h-screen bg-robinhood-dark text-white flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-robinhood-darker border-b border-robinhood-card-border py-4 px-6 flex-shrink-0">
+      <header className="bg-robinhood-darker border-b border-robinhood-card-border py-4 px-6 flex-shrink-0 shadow-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">AI Persona Builder</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🎭</span>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-robinhood-green via-emerald-400 to-robinhood-green bg-clip-text text-transparent">AI Persona Builder</h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {activeConfig && (
@@ -401,16 +404,16 @@ export default function Home() {
                   <button
                     onClick={() => setShowActionsDropdown(!showActionsDropdown)}
                     onBlur={() => setTimeout(() => setShowActionsDropdown(false), 200)}
-                    className="px-4 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-robinhood-card border border-robinhood-card-border hover:bg-robinhood-card-hover"
+                    className="px-4 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-robinhood-card border border-robinhood-card-border hover:bg-robinhood-card-hover hover:border-robinhood-green/30"
                   >
                     Actions
-                    <svg className={`w-3 h-3 transition-transform ${showActionsDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-3 h-3 transition-transform duration-200 ${showActionsDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
 
                   {showActionsDropdown && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-robinhood-card border border-robinhood-card-border rounded-lg shadow-xl z-50 py-1">
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-robinhood-card border border-robinhood-green/30 rounded-lg shadow-2xl shadow-black/50 z-50 py-1">
                       <button
                         onClick={() => {
                           setShowSampleMessagesModal(true);
@@ -697,7 +700,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold">Your Personas</h3>
               <button
                 onClick={handleNewPersona}
-                className="px-3 py-1 bg-robinhood-green text-robinhood-dark rounded-lg hover:bg-robinhood-green/90 transition-all text-sm font-medium"
+                className="px-3 py-1.5 bg-robinhood-green text-robinhood-dark rounded-lg hover:bg-robinhood-green/90 hover:shadow-lg hover:shadow-robinhood-green/30 transition-all text-sm font-medium"
               >
                 + New
               </button>
@@ -717,12 +720,12 @@ export default function Home() {
                     <div
                       key={config.id}
                       onClick={() => setActiveConfig(config)}
-                      className={`p-3 rounded-lg cursor-pointer transition-all relative ${
+                      className={`p-3 rounded-lg cursor-pointer transition-all duration-200 relative ${
                         isSaving && isActive
-                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green animate-pulse'
+                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green animate-pulse shadow-lg shadow-robinhood-green/20'
                           : isActive
-                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
-                          : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
+                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green shadow-lg shadow-robinhood-green/10'
+                          : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent hover:border-robinhood-green/30 hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-start justify-between">
@@ -782,11 +785,11 @@ export default function Home() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           {configs.length === 0 ? (
-            <div className="flex items-center justify-center min-h-full">
+            <div className="flex items-center justify-center min-h-full p-8">
               <div className="text-center max-w-md">
-                <div className="text-6xl mb-6">🎭</div>
-                <h2 className="text-3xl font-bold text-white mb-3">Welcome to AI Persona Builder</h2>
-                <p className="text-gray-400 mb-8 text-lg">
+                <div className="text-7xl mb-8 animate-bounce">🎭</div>
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-robinhood-green to-emerald-400 bg-clip-text text-transparent mb-4">Welcome to AI Persona Builder</h2>
+                <p className="text-gray-400 mb-10 text-lg leading-relaxed">
                   Create your first AI persona to get started. Choose from a quick interview or build from scratch.
                 </p>
                 <button

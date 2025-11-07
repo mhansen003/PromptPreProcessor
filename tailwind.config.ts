@@ -16,6 +16,8 @@ const config: Config = {
           dark: "#0F0F0F",
           darker: "#0A0A0A",
           card: "#1A1A1A",
+          'card-hover': "#222222",
+          'card-border': "#2A2A2A",
           border: "#2A2A2A",
         },
       },

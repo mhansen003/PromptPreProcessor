@@ -39,13 +39,35 @@ body {
 }
 
 /* Smooth animations */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, fill, stroke, transform, box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 200ms;
 }
 
 /* Glow effect for accent elements */
 .glow-green {
   box-shadow: 0 0 20px rgba(0, 200, 5, 0.3);
+}
+
+/* Focus states */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-color: #00C805;
+  ring-offset: 2px;
+}
+
+/* Smooth hover effects */
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Prevent text selection on buttons */
+button {
+  user-select: none;
+  -webkit-user-select: none;
 }
