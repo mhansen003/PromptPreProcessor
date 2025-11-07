@@ -37,33 +37,34 @@ export default function Home() {
   const [interviewAnswers, setInterviewAnswers] = useState<string[]>(['', '', '', '', '']);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // New persona-focused interview questions
   const interviewQuestions = [
     {
-      title: "What is this persona for?",
-      description: "Describe the primary purpose and use case for this AI persona",
-      placeholder: "e.g., 'Help me explain mortgage terms to first-time homebuyers' or 'Assist me with technical documentation for my team'"
+      title: "What should this AI persona help you with?",
+      description: "What's the main task or purpose for this AI assistant?",
+      placeholder: "e.g., 'Explaining mortgage terms to first-time homebuyers' or 'Writing technical documentation for developers'"
     },
     {
-      title: "Who will you be communicating with?",
-      description: "Describe your audience and their level of expertise",
-      placeholder: "e.g., 'Clients who are first-time homebuyers with little financial knowledge' or 'Experienced loan processors on my team'"
+      title: "Who will this AI be responding to?",
+      description: "Describe the audience the AI will communicate with",
+      placeholder: "e.g., 'First-time homebuyers with limited financial knowledge' or 'Experienced loan officers who need quick answers'"
     },
     {
-      title: "What tone should this persona use when responding to you?",
-      description: "How should the AI communicate with you and your audience?",
-      placeholder: "e.g., 'Friendly and patient, like a helpful advisor' or 'Professional and direct, like a colleague'"
+      title: "How should this AI communicate?",
+      description: "What tone and style should the AI use in its responses?",
+      placeholder: "e.g., 'Friendly and patient, explaining things simply' or 'Professional and concise, getting straight to the point'"
     },
     {
-      title: "How detailed should responses be?",
-      description: "What level of detail and length do you prefer?",
-      placeholder: "e.g., 'Brief summaries I can quickly scan' or 'Comprehensive explanations with examples'"
+      title: "How detailed should the AI's responses be?",
+      description: "What length and depth of information works best?",
+      placeholder: "e.g., 'Brief bullet points for quick scanning' or 'Detailed explanations with examples and context'"
     },
     {
-      title: "Any specific requirements or preferences?",
-      description: "Special constraints, formatting needs, or other considerations",
-      placeholder: "e.g., 'Always include actionable next steps' or 'Emphasize compliance and regulations'"
+      title: "Any special instructions for the AI?",
+      description: "Special requirements, formatting preferences, or important constraints",
+      placeholder: "e.g., 'Always mention compliance requirements' or 'Include actionable next steps in every response'"
     }
   ];
 
@@ -277,6 +278,29 @@ export default function Home() {
 
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      setUploadedFiles(prev => [...prev, ...files]);
+    }
   };
 
   const handleConfigUpdate = (updates: Partial<PersonaConfig>) => {
@@ -682,7 +706,16 @@ export default function Home() {
                           Upload any documents that might help us understand your communication style and needs (emails, reports, resume, writing samples, etc.)
                         </p>
 
-                        <div className="border-2 border-dashed border-robinhood-card-border rounded-lg p-6 text-center hover:border-robinhood-green/50 transition-all">
+                        <div
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
+                            isDragging
+                              ? 'border-robinhood-green bg-robinhood-green/10 scale-105'
+                              : 'border-robinhood-card-border hover:border-robinhood-green/50'
+                          }`}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                        >
                           <input
                             type="file"
                             id="file-upload"
@@ -696,7 +729,9 @@ export default function Home() {
                             className="cursor-pointer flex flex-col items-center gap-2"
                           >
                             <div className="text-4xl">📎</div>
-                            <p className="text-sm text-gray-400">Click to upload files</p>
+                            <p className="text-sm text-gray-400">
+                              {isDragging ? 'Drop files here' : 'Drag & drop files here or click to upload'}
+                            </p>
                             <p className="text-xs text-gray-500">TXT, PDF, DOC, MD files supported</p>
                           </label>
                         </div>
