@@ -620,9 +620,12 @@ export default function Home() {
       {/* Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 bg-robinhood-card border-y border-r border-robinhood-card-border rounded-r-lg p-2 hover:bg-robinhood-card-hover transition-all"
+        className={`fixed top-1/2 -translate-y-1/2 bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
+          sidebarOpen ? 'left-[312px]' : 'left-0'
+        }`}
+        style={{ marginLeft: sidebarOpen ? '0' : '0' }}
       >
-        {sidebarOpen ? '◀' : '▶'}
+        <span className="text-robinhood-green font-bold text-lg">{sidebarOpen ? '◀' : '▶'}</span>
       </button>
 
       {/* Toast Notification */}

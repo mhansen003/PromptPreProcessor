@@ -5,11 +5,11 @@ interface TabNavigationProps {
 
 export default function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   const tabs = [
-    { id: 'personality', label: 'Personality', icon: '🎭' },
-    { id: 'structure', label: 'Response Structure', icon: '📝' },
-    { id: 'regional', label: 'Regional', icon: '🗺️' },
-    { id: 'role', label: 'Role', icon: '💼' },
-    { id: 'advanced', label: 'Advanced', icon: '⚙️' },
+    { id: 'personality', label: 'Personality', icon: '🎭', color: 'text-robinhood-green', borderColor: 'bg-robinhood-green' },
+    { id: 'structure', label: 'Response Structure', icon: '📝', color: 'text-blue-400', borderColor: 'bg-blue-400' },
+    { id: 'regional', label: 'Regional', icon: '🗺️', color: 'text-orange-400', borderColor: 'bg-orange-400' },
+    { id: 'role', label: 'Role', icon: '💼', color: 'text-blue-400', borderColor: 'bg-blue-400' },
+    { id: 'advanced', label: 'Advanced', icon: '⚙️', color: 'text-purple-400', borderColor: 'bg-purple-400' },
   ];
 
   return (
@@ -20,7 +20,7 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
           onClick={() => onTabChange(tab.id)}
           className={`px-6 py-3 text-sm font-medium transition-all relative ${
             activeTab === tab.id
-              ? 'text-robinhood-green'
+              ? tab.color
               : 'text-gray-400 hover:text-gray-200'
           }`}
         >
@@ -29,7 +29,7 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
             <span>{tab.label}</span>
           </span>
           {activeTab === tab.id && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-robinhood-green" />
+            <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${tab.borderColor}`} />
           )}
         </button>
       ))}

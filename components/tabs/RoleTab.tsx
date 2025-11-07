@@ -62,7 +62,7 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Info Box */}
       <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
         <p className="text-sm text-gray-300">
@@ -71,7 +71,7 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
       </div>
 
       {/* Job Role & Experience */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <span>💼</span>
           <span>Job Role & Experience</span>
@@ -147,9 +147,9 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
       </div>
 
       {/* Loan Programs & Products - 2x2 Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Specializations */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
             <span>⭐</span>
             <span>Loan Program Specializations</span>
@@ -205,7 +205,7 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
         </div>
 
         {/* Loan Products */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
             <span>📋</span>
             <span>Specific Loan Products</span>
@@ -251,13 +251,13 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
       </div>
 
       {/* Market Expertise - Full Width */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <span>🎯</span>
           <span>Market Expertise</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             label="Primary Client Focus"
             value={config.clientFocus}
@@ -315,13 +315,13 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
       </div>
 
       {/* Knowledge & Compliance */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <span>📚</span>
           <span>Knowledge & Compliance</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Slider
             label="Product Knowledge Depth"
             value={config.productKnowledge}
