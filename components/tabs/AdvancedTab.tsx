@@ -11,6 +11,13 @@ interface AdvancedTabProps {
 export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
   return (
     <div className="space-y-8">
+      {/* Info Box */}
+      <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-purple-400">Advanced Settings</span> provide fine-grained control over response characteristics, audience targeting, and custom behavioral instructions.
+        </p>
+      </div>
+
       {/* Response Preferences */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -159,13 +166,6 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
             Additional formatting or output style preferences
           </p>
         </div>
-      </div>
-
-      {/* Info Box */}
-      <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-purple-400">Advanced Settings</span> provide fine-grained control over response characteristics, audience targeting, and custom behavioral instructions.
-        </p>
       </div>
     </div>
   );

@@ -9,6 +9,13 @@ interface PersonalityTabProps {
 export default function PersonalityTab({ config, onUpdate }: PersonalityTabProps) {
   return (
     <div className="space-y-8">
+      {/* Info Box */}
+      <div className="p-4 bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-robinhood-green">Personality Settings</span> define the core communication style and tone of your persona. These settings shape how formal, detailed, and emotionally expressive your AI responses will be.
+        </p>
+      </div>
+
       {/* Response Style Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -104,13 +111,6 @@ export default function PersonalityTab({ config, onUpdate }: PersonalityTabProps
           max={100}
           tooltip="Use of humor and levity (0 = completely serious, 100 = frequent appropriate humor)"
         />
-      </div>
-
-      {/* Info Box */}
-      <div className="p-4 bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg">
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-robinhood-green">Personality Settings</span> define the core communication style and tone of your persona. These settings shape how formal, detailed, and emotionally expressive your AI responses will be.
-        </p>
       </div>
     </div>
   );

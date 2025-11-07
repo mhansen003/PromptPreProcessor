@@ -9,6 +9,13 @@ interface ResponseStructureTabProps {
 export default function ResponseStructureTab({ config, onUpdate }: ResponseStructureTabProps) {
   return (
     <div className="space-y-8">
+      {/* Info Box */}
+      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-blue-400">Response Structure</span> controls how information is organized and formatted. Enable elements that match your preferred communication style and audience needs.
+        </p>
+      </div>
+
       {/* Content Elements */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -121,13 +128,6 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
             description="Include summary sections for key points"
           />
         </div>
-      </div>
-
-      {/* Info Box */}
-      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-blue-400">Response Structure</span> controls how information is organized and formatted. Enable elements that match your preferred communication style and audience needs.
-        </p>
       </div>
     </div>
   );

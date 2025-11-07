@@ -22,6 +22,13 @@ const US_STATES = [
 export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
   return (
     <div className="space-y-8">
+      {/* Info Box */}
+      <div className="p-4 bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-robinhood-green">Regional Settings</span> help tailor responses to specific geographic contexts, local markets, and cultural considerations. This is particularly useful for location-specific mortgage and real estate discussions.
+        </p>
+      </div>
+
       {/* Location Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -149,13 +156,6 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           max={100}
           tooltip="How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)"
         />
-      </div>
-
-      {/* Info Box */}
-      <div className="p-4 bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg">
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-robinhood-green">Regional Settings</span> help tailor responses to specific geographic contexts, local markets, and cultural considerations. This is particularly useful for location-specific mortgage and real estate discussions.
-        </p>
       </div>
     </div>
   );

@@ -63,6 +63,13 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
 
   return (
     <div className="space-y-8">
+      {/* Info Box */}
+      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-blue-400">Role Settings</span> tailor the persona to your specific mortgage and financial role, ensuring responses are relevant to your job responsibilities, expertise level, and client focus.
+        </p>
+      </div>
+
       {/* Job Role & Experience */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -332,13 +339,6 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
           max={100}
           tooltip="How much to emphasize regulatory compliance and legal requirements (0 = minimal mention, 100 = compliance-focused)"
         />
-      </div>
-
-      {/* Info Box */}
-      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-blue-400">Role Settings</span> tailor the persona to your specific mortgage and financial role, ensuring responses are relevant to your job responsibilities, expertise level, and client focus.
-        </p>
       </div>
     </div>
   );
