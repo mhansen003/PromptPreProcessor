@@ -36,6 +36,9 @@ export default function ExampleModal({
   const [exampleText, setExampleText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Track if value has changed from initial
+  const hasChanged = currentValue !== initialValue;
+
   // Generate example only when modal opens (not on value changes)
   useEffect(() => {
     if (isOpen) {
@@ -191,9 +194,13 @@ export default function ExampleModal({
           </button>
           <button
             onClick={handleApply}
-            className="flex-1 px-4 py-2 bg-indigo-500/30 text-indigo-400 border border-indigo-500/50 rounded-lg hover:bg-indigo-500/40 transition-all shadow-lg shadow-indigo-500/10"
+            className={`flex-1 px-4 py-2 rounded-lg transition-all shadow-lg ${
+              hasChanged
+                ? 'bg-robinhood-green text-robinhood-dark border border-robinhood-green hover:bg-robinhood-green/90 shadow-robinhood-green/20 font-semibold'
+                : 'bg-indigo-500/30 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500/40 shadow-indigo-500/10'
+            }`}
           >
-            Apply Setting
+            {hasChanged ? 'Update' : 'Apply Setting'}
           </button>
         </div>
       </div>
