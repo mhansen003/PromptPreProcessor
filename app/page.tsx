@@ -1001,7 +1001,7 @@ export default function Home() {
               {creationFlow === 'interview' && (
                 <div className="flex flex-col h-full">
                   {/* Main Content Area */}
-                  <div className="flex-1 space-y-6 overflow-y-auto">
+                  <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden">
                     {/* Progress Bar */}
                     <div className="flex items-center gap-2">
                       {[0, 1, 2, 3, 4, 5].map((step) => (
