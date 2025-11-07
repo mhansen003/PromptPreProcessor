@@ -93,29 +93,29 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Toggle
             label="Prioritize Accuracy"
-            enabled={config.prioritizeAccuracy}
-            onChange={(enabled) => onUpdate({ prioritizeAccuracy: enabled })}
+            checked={config.prioritizeAccuracy}
+            onChange={(checked) => onUpdate({ prioritizeAccuracy: checked })}
             description="Emphasize factual accuracy over speed"
           />
 
           <Toggle
             label="Prioritize Speed"
-            enabled={config.prioritizeSpeed}
-            onChange={(enabled) => onUpdate({ prioritizeSpeed: enabled })}
+            checked={config.prioritizeSpeed}
+            onChange={(checked) => onUpdate({ prioritizeSpeed: checked })}
             description="Emphasize quick responses over depth"
           />
 
           <Toggle
             label="Prioritize Clarity"
-            enabled={config.prioritizeClarity}
-            onChange={(enabled) => onUpdate({ prioritizeClarity: enabled })}
+            checked={config.prioritizeClarity}
+            onChange={(checked) => onUpdate({ prioritizeClarity: checked })}
             description="Emphasize clear, understandable explanations"
           />
 
           <Toggle
             label="Prioritize Comprehensiveness"
-            enabled={config.prioritizeComprehensiveness}
-            onChange={(enabled) => onUpdate({ prioritizeComprehensiveness: enabled })}
+            checked={config.prioritizeComprehensiveness}
+            onChange={(checked) => onUpdate({ prioritizeComprehensiveness: checked })}
             description="Emphasize thorough, complete coverage"
           />
         </div>

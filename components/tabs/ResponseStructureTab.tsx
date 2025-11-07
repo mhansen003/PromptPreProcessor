@@ -19,43 +19,43 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Toggle
             label="Examples"
-            enabled={config.useExamples}
-            onChange={(enabled) => onUpdate({ useExamples: enabled })}
+            checked={config.useExamples}
+            onChange={(checked) => onUpdate({ useExamples: checked })}
             description="Include relevant examples to illustrate concepts"
           />
 
           <Toggle
             label="Analogies"
-            enabled={config.includeAnalogies}
-            onChange={(enabled) => onUpdate({ includeAnalogies: enabled })}
+            checked={config.includeAnalogies}
+            onChange={(checked) => onUpdate({ includeAnalogies: checked })}
             description="Use analogies to explain complex concepts"
           />
 
           <Toggle
             label="Code Samples"
-            enabled={config.includeCodeSamples}
-            onChange={(enabled) => onUpdate({ includeCodeSamples: enabled })}
+            checked={config.includeCodeSamples}
+            onChange={(checked) => onUpdate({ includeCodeSamples: checked })}
             description="Include code examples when discussing technical topics"
           />
 
           <Toggle
             label="Visual Descriptions"
-            enabled={config.includeVisualDescriptions}
-            onChange={(enabled) => onUpdate({ includeVisualDescriptions: enabled })}
+            checked={config.includeVisualDescriptions}
+            onChange={(checked) => onUpdate({ includeVisualDescriptions: checked })}
             description="Provide visual descriptions and mental imagery"
           />
 
           <Toggle
             label="Snippets"
-            enabled={config.includeSnippets}
-            onChange={(enabled) => onUpdate({ includeSnippets: enabled })}
+            checked={config.includeSnippets}
+            onChange={(checked) => onUpdate({ includeSnippets: checked })}
             description="Extract and highlight key snippets or quotes"
           />
 
           <Toggle
             label="External References"
-            enabled={config.includeExternalReferences}
-            onChange={(enabled) => onUpdate({ includeExternalReferences: enabled })}
+            checked={config.includeExternalReferences}
+            onChange={(checked) => onUpdate({ includeExternalReferences: checked })}
             description="Reference external resources and documentation"
           />
         </div>
@@ -71,29 +71,29 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Toggle
             label="Bullet Points"
-            enabled={config.useBulletPoints}
-            onChange={(enabled) => onUpdate({ useBulletPoints: enabled })}
+            checked={config.useBulletPoints}
+            onChange={(checked) => onUpdate({ useBulletPoints: checked })}
             description="Use bullet points to organize information"
           />
 
           <Toggle
             label="Numbered Lists"
-            enabled={config.useNumberedLists}
-            onChange={(enabled) => onUpdate({ useNumberedLists: enabled })}
+            checked={config.useNumberedLists}
+            onChange={(checked) => onUpdate({ useNumberedLists: checked })}
             description="Use numbered lists for sequential information"
           />
 
           <Toggle
             label="Tables"
-            enabled={config.includeTables}
-            onChange={(enabled) => onUpdate({ includeTables: enabled })}
+            checked={config.includeTables}
+            onChange={(checked) => onUpdate({ includeTables: checked })}
             description="Use data tables for structured information"
           />
 
           <Toggle
             label="Step-by-Step"
-            enabled={config.includeStepByStep}
-            onChange={(enabled) => onUpdate({ includeStepByStep: enabled })}
+            checked={config.includeStepByStep}
+            onChange={(checked) => onUpdate({ includeStepByStep: checked })}
             description="Break down processes into clear step-by-step instructions"
           />
         </div>
@@ -109,15 +109,15 @@ export default function ResponseStructureTab({ config, onUpdate }: ResponseStruc
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Toggle
             label="Show Thought Process"
-            enabled={config.showThoughtProcess}
-            onChange={(enabled) => onUpdate({ showThoughtProcess: enabled })}
+            checked={config.showThoughtProcess}
+            onChange={(checked) => onUpdate({ showThoughtProcess: checked })}
             description="Show internal reasoning and chain of thought"
           />
 
           <Toggle
             label="Include Summary"
-            enabled={config.includeSummary}
-            onChange={(enabled) => onUpdate({ includeSummary: enabled })}
+            checked={config.includeSummary}
+            onChange={(checked) => onUpdate({ includeSummary: checked })}
             description="Include summary sections for key points"
           />
         </div>

@@ -113,22 +113,22 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
         <div className="space-y-3">
           <Toggle
             label="Include Local References"
-            enabled={config.includeLocalReferences}
-            onChange={(enabled) => onUpdate({ includeLocalReferences: enabled })}
+            checked={config.includeLocalReferences}
+            onChange={(checked) => onUpdate({ includeLocalReferences: checked })}
             description="Reference local landmarks, culture, events, and regional characteristics"
           />
 
           <Toggle
             label="Time Zone Awareness"
-            enabled={config.timeZoneAwareness}
-            onChange={(enabled) => onUpdate({ timeZoneAwareness: enabled })}
+            checked={config.timeZoneAwareness}
+            onChange={(checked) => onUpdate({ timeZoneAwareness: checked })}
             description="Consider regional time zones when discussing time-sensitive topics"
           />
 
           <Toggle
             label="Local Market Knowledge"
-            enabled={config.localMarketKnowledge}
-            onChange={(enabled) => onUpdate({ localMarketKnowledge: enabled })}
+            checked={config.localMarketKnowledge}
+            onChange={(checked) => onUpdate({ localMarketKnowledge: checked })}
             description="Include local real estate market insights, pricing trends, and regional mortgage practices"
           />
         </div>
