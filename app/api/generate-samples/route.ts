@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
           },
           {
             role: 'user',
-            content: `Scenario: ${scenario.title}\n\n${scenario.context}\n\nProvide your response as if you're communicating with this client. Write a brief but complete response (2-4 paragraphs) that demonstrates your communication style and expertise.`,
+            content: `Scenario: ${scenario.title}\n\n${scenario.context}\n\nProvide your response as if you're communicating with this client. Follow your personality settings exactly - let your configured verbosity, detail level, structure preferences, and communication style guide the length and format of your response naturally.`,
           },
         ],
         temperature: 0.8,
-        max_tokens: 600,
+        max_tokens: 1000,
       });
 
       return {
@@ -82,62 +82,194 @@ export async function POST(request: NextRequest) {
 
 // Build a persona prompt from the configuration
 function buildPersonaPrompt(config: PersonaConfig): string {
-  let prompt = `You are an AI assistant configured with the following personality and communication style:\n\n`;
+  let prompt = `You are an AI mortgage/financial assistant with a specific personality configuration. STRICTLY follow these settings in your responses:\n\n`;
 
   // Add role context
   if (config.jobRole && config.jobRole !== 'general') {
-    prompt += `**Role:** ${formatRole(config.jobRole)}`;
+    prompt += `**Your Role:** ${formatRole(config.jobRole)}`;
     if (config.yearsExperience > 0) {
       prompt += ` with ${config.yearsExperience} years of experience`;
     }
-    prompt += `\n\n`;
+    prompt += `\n`;
   }
 
   // Add specializations
   if (config.specializations && config.specializations.length > 0) {
-    prompt += `**Specializations:** ${config.specializations.join(', ')}\n\n`;
+    prompt += `**Your Specializations:** ${config.specializations.join(', ')}\n`;
   }
 
-  // Add communication style
-  prompt += `**Communication Style:**\n`;
-  prompt += `- Detail Level: ${getLevel(config.detailLevel)} (${config.detailLevel}/100)\n`;
-  prompt += `- Formality: ${getLevel(config.formalityLevel)} (${config.formalityLevel}/100)\n`;
-  prompt += `- Technical Depth: ${getLevel(config.technicalDepth)} (${config.technicalDepth}/100)\n`;
-  prompt += `- Creativity: ${getLevel(config.creativityLevel)} (${config.creativityLevel}/100)\n`;
-  prompt += `- Verbosity: ${getLevel(config.verbosity)} (${config.verbosity}/100)\n`;
-  prompt += `- Enthusiasm: ${getLevel(config.enthusiasm)} (${config.enthusiasm}/100)\n`;
-  prompt += `- Empathy: ${getLevel(config.empathy)} (${config.empathy}/100)\n`;
-  prompt += `- Confidence: ${getLevel(config.confidence)} (${config.confidence}/100)\n`;
-  prompt += `- Humor: ${getLevel(config.humor)} (${config.humor}/100)\n\n`;
+  prompt += `\n`;
 
-  // Add structure preferences
-  const structurePrefs = [];
-  if (config.useExamples) structurePrefs.push('use concrete examples');
-  if (config.useBulletPoints) structurePrefs.push('use bullet points for clarity');
-  if (config.useNumberedLists) structurePrefs.push('use numbered lists for steps');
-  if (config.includeAnalogies) structurePrefs.push('include helpful analogies');
-  if (config.showThoughtProcess) structurePrefs.push('explain your reasoning');
-  if (config.includeSummary) structurePrefs.push('include a summary of key points');
+  // Add communication style with explicit instructions
+  prompt += `**CRITICAL - Communication Style Settings (Follow Exactly):**\n\n`;
 
-  if (structurePrefs.length > 0) {
-    prompt += `**Structure Preferences:** ${structurePrefs.join(', ')}\n\n`;
+  // Verbosity - affects overall response length
+  prompt += `• **Verbosity (${config.verbosity}/100 - ${getLevel(config.verbosity)}):** `;
+  if (config.verbosity < 20) {
+    prompt += `Keep responses EXTREMELY brief (1-2 short sentences maximum). Be concise.\n`;
+  } else if (config.verbosity < 40) {
+    prompt += `Keep responses short and to-the-point (2-4 sentences). No lengthy explanations.\n`;
+  } else if (config.verbosity < 60) {
+    prompt += `Write moderate-length responses (1-2 paragraphs). Balance brevity with completeness.\n`;
+  } else if (config.verbosity < 80) {
+    prompt += `Write detailed responses (2-4 paragraphs). Provide thorough coverage.\n`;
+  } else {
+    prompt += `Write comprehensive, lengthy responses (4+ paragraphs). Cover topics exhaustively.\n`;
   }
+
+  // Detail Level
+  prompt += `• **Detail Level (${config.detailLevel}/100 - ${getLevel(config.detailLevel)}):** `;
+  if (config.detailLevel < 20) {
+    prompt += `Provide only essential information. Skip details.\n`;
+  } else if (config.detailLevel < 40) {
+    prompt += `Give basic information with minimal detail.\n`;
+  } else if (config.detailLevel < 60) {
+    prompt += `Include moderate detail where helpful.\n`;
+  } else if (config.detailLevel < 80) {
+    prompt += `Provide detailed explanations with supporting information.\n`;
+  } else {
+    prompt += `Include extensive detail, background, context, and comprehensive explanations.\n`;
+  }
+
+  // Formality
+  prompt += `• **Formality (${config.formalityLevel}/100 - ${getLevel(config.formalityLevel)}):** `;
+  if (config.formalityLevel < 20) {
+    prompt += `Very casual and conversational. Use contractions, friendly language.\n`;
+  } else if (config.formalityLevel < 40) {
+    prompt += `Relaxed but professional. Approachable tone.\n`;
+  } else if (config.formalityLevel < 60) {
+    prompt += `Balanced professional tone. Semi-formal.\n`;
+  } else if (config.formalityLevel < 80) {
+    prompt += `Formal and professional language. Business-appropriate.\n`;
+  } else {
+    prompt += `Highly formal, academic tone. Structured and proper.\n`;
+  }
+
+  // Technical Depth
+  prompt += `• **Technical Depth (${config.technicalDepth}/100 - ${getLevel(config.technicalDepth)}):** `;
+  if (config.technicalDepth < 20) {
+    prompt += `Use simple, everyday language. Avoid jargon.\n`;
+  } else if (config.technicalDepth < 40) {
+    prompt += `Use basic terms, explain technical concepts simply.\n`;
+  } else if (config.technicalDepth < 60) {
+    prompt += `Use some technical terms with brief explanations.\n`;
+  } else if (config.technicalDepth < 80) {
+    prompt += `Use technical terminology freely with detailed explanations.\n`;
+  } else {
+    prompt += `Use advanced technical jargon, industry terms, and complex concepts.\n`;
+  }
+
+  // Enthusiasm
+  prompt += `• **Enthusiasm (${config.enthusiasm}/100 - ${getLevel(config.enthusiasm)}):** `;
+  if (config.enthusiasm < 20) {
+    prompt += `Neutral, measured tone. No excitement.\n`;
+  } else if (config.enthusiasm < 40) {
+    prompt += `Slightly positive but subdued.\n`;
+  } else if (config.enthusiasm < 60) {
+    prompt += `Positive and engaging tone.\n`;
+  } else if (config.enthusiasm < 80) {
+    prompt += `Energetic and enthusiastic! Show excitement.\n`;
+  } else {
+    prompt += `VERY enthusiastic!! Highly energetic and passionate!\n`;
+  }
+
+  // Empathy
+  prompt += `• **Empathy (${config.empathy}/100 - ${getLevel(config.empathy)}):** `;
+  if (config.empathy < 20) {
+    prompt += `Objective and detached. Focus on facts.\n`;
+  } else if (config.empathy < 40) {
+    prompt += `Slightly understanding but mostly factual.\n`;
+  } else if (config.empathy < 60) {
+    prompt += `Show balanced empathy and understanding.\n`;
+  } else if (config.empathy < 80) {
+    prompt += `Very understanding and supportive. Acknowledge emotions.\n`;
+  } else {
+    prompt += `Deeply empathetic and compassionate. Highly supportive tone.\n`;
+  }
+
+  // Confidence
+  prompt += `• **Confidence (${config.confidence}/100 - ${getLevel(config.confidence)}):** `;
+  if (config.confidence < 20) {
+    prompt += `Cautious language. Use "might", "could", "possibly", hedging phrases.\n`;
+  } else if (config.confidence < 40) {
+    prompt += `Somewhat tentative. Occasional qualifiers.\n`;
+  } else if (config.confidence < 60) {
+    prompt += `Balanced confidence. Neither overly cautious nor overly assertive.\n`;
+  } else if (config.confidence < 80) {
+    prompt += `Confident, assertive statements. Speak with authority.\n`;
+  } else {
+    prompt += `HIGHLY confident and authoritative. Definitive statements.\n`;
+  }
+
+  // Humor
+  prompt += `• **Humor (${config.humor}/100 - ${getLevel(config.humor)}):** `;
+  if (config.humor < 20) {
+    prompt += `Completely serious. No jokes or levity.\n`;
+  } else if (config.humor < 40) {
+    prompt += `Mostly serious with rare light moments.\n`;
+  } else if (config.humor < 60) {
+    prompt += `Professional with occasional appropriate humor.\n`;
+  } else if (config.humor < 80) {
+    prompt += `Use frequent appropriate humor and wit.\n`;
+  } else {
+    prompt += `Very humorous! Use jokes, wit, and playful language frequently.\n`;
+  }
+
+  // Creativity
+  prompt += `• **Creativity (${config.creativityLevel}/100 - ${getLevel(config.creativityLevel)}):** `;
+  if (config.creativityLevel < 20) {
+    prompt += `Strictly factual. No creative approaches.\n`;
+  } else if (config.creativityLevel < 40) {
+    prompt += `Mostly factual with minimal creativity.\n`;
+  } else if (config.creativityLevel < 60) {
+    prompt += `Balance facts with some creative explanations.\n`;
+  } else if (config.creativityLevel < 80) {
+    prompt += `Use creative approaches and innovative perspectives.\n`;
+  } else {
+    prompt += `Highly creative! Use unique metaphors, innovative angles, fresh perspectives.\n`;
+  }
+
+  prompt += `\n`;
+
+  // Add structure preferences with clear instructions
+  prompt += `**Structure Requirements:**\n`;
+  if (config.useBulletPoints) prompt += `• Use bullet points to organize information\n`;
+  if (config.useNumberedLists) prompt += `• Use numbered lists for sequential steps\n`;
+  if (config.useExamples) prompt += `• Include concrete examples to illustrate concepts\n`;
+  if (config.includeAnalogies) prompt += `• Use analogies and metaphors to explain\n`;
+  if (config.showThoughtProcess) prompt += `• Show your reasoning and thought process\n`;
+  if (config.includeSummary) prompt += `• Include a summary or key takeaways section\n`;
+  if (config.includeStepByStep) prompt += `• Break down processes into clear steps\n`;
 
   // Add regional context
   if (config.region && config.region !== 'none') {
-    prompt += `**Regional Context:** ${formatRegion(config.region)}`;
+    prompt += `\n**Regional Context:** Reference ${formatRegion(config.region)}`;
     if (config.state) {
       prompt += ` (${config.state})`;
     }
-    prompt += `\n\n`;
+    prompt += ` market conditions and terminology where relevant.\n`;
+  }
+
+  // Add response length preference
+  prompt += `\n**Response Length Guidance:** `;
+  if (config.responseLength === 'short') {
+    prompt += `Keep responses brief and concise.\n`;
+  } else if (config.responseLength === 'medium') {
+    prompt += `Moderate length responses.\n`;
+  } else if (config.responseLength === 'long') {
+    prompt += `Longer, more detailed responses.\n`;
+  } else if (config.responseLength === 'comprehensive') {
+    prompt += `Very comprehensive and thorough responses.\n`;
+  } else {
+    prompt += `Let verbosity and detail settings determine length.\n`;
   }
 
   // Add custom instructions
   if (config.customInstructions) {
-    prompt += `**Additional Instructions:** ${config.customInstructions}\n\n`;
+    prompt += `\n**Custom Instructions:** ${config.customInstructions}\n`;
   }
 
-  prompt += `Respond naturally according to these settings while providing helpful, accurate mortgage and financial guidance.`;
+  prompt += `\n**IMPORTANT:** These settings should VISIBLY affect your response. Different setting combinations should produce noticeably different communication styles, lengths, and formats. Follow these parameters precisely.`;
 
   return prompt;
 }
