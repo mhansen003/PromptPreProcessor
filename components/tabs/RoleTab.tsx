@@ -433,7 +433,9 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
           controlDescription={exampleControl.description}
           initialValue={exampleControl.value}
           onApply={(value) => {
-            exampleControl.onApply(value);
+            if (typeof value !== 'boolean') {
+              exampleControl.onApply(value);
+            }
           }}
           min={exampleControl.min}
           max={exampleControl.max}
