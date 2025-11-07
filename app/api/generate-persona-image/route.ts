@@ -81,92 +81,165 @@ export async function POST(request: NextRequest) {
 }
 
 // Build a DALL-E prompt for an abstract artistic persona representation
+// Uses HEAVY weighting of personality traits for maximum diversity
 function buildCaricaturePrompt(config: PersonaConfig): string {
-  let prompt = 'Abstract artistic avatar representing ';
+  const parts: string[] = [];
 
-  // Base concept based on role
-  if (config.jobRole && config.jobRole !== 'general') {
-    const role = config.jobRole.split('-').join(' ');
-    prompt += `a ${role} persona, `;
-  } else {
-    prompt += 'a professional persona, ';
-  }
+  // Start with abstract art style
+  parts.push('Abstract artistic avatar');
 
-  // Gender influences overall aesthetic (subtle, not literal)
-  const gender = config.gender || 'neutral';
-  const genderAesthetic: Record<string, string> = {
-    male: 'bold angular geometric forms',
-    female: 'flowing elegant curved shapes',
-    neutral: 'balanced harmonious geometric patterns',
-  };
-  prompt += `using ${genderAesthetic[gender]}, `;
-
-  // Color palette based on personality traits
-  prompt += 'color palette with ';
-
-  // Enthusiasm affects color energy
-  if (config.enthusiasm > 70) {
-    prompt += 'vibrant energetic colors (bright oranges, yellows, warm reds), ';
+  // HEAVY WEIGHT: Enthusiasm drives the entire color scheme and energy
+  let colorScheme = '';
+  let backgroundStyle = '';
+  if (config.enthusiasm > 80) {
+    colorScheme = 'EXPLOSIVE vibrant neon colors - electric pinks, vivid cyans, blazing oranges, hot magentas';
+    backgroundStyle = 'dynamic radiating energy bursts, swirling particles, high-contrast gradients';
+  } else if (config.enthusiasm > 60) {
+    colorScheme = 'bold saturated warm colors - deep reds, bright yellows, rich purples, warm magentas';
+    backgroundStyle = 'flowing color waves, energetic sweeps, layered gradients';
   } else if (config.enthusiasm > 40) {
-    prompt += 'balanced warm colors (amber, coral, soft gold), ';
+    colorScheme = 'balanced color palette - soft teals, warm corals, muted golds, gentle purples';
+    backgroundStyle = 'smooth gradient transitions, subtle color shifts';
+  } else if (config.enthusiasm > 20) {
+    colorScheme = 'cool muted tones - slate blues, soft grays, sage greens, dusty lavenders';
+    backgroundStyle = 'gentle fog-like gradients, misty atmospheric effects';
   } else {
-    prompt += 'cool calm colors (blues, teals, muted tones), ';
+    colorScheme = 'minimalist monochromatic palette - deep navy, charcoal, silver, slate';
+    backgroundStyle = 'stark clean background with subtle depth, professional gradient';
   }
 
-  // Confidence affects shapes and composition
-  if (config.confidence > 70) {
-    prompt += 'strong bold shapes with sharp defined edges and prominent central forms, ';
-  } else if (config.confidence < 40) {
-    prompt += 'gentle soft shapes with subtle gradients and supportive elements, ';
+  // HEAVY WEIGHT: Confidence determines shape boldness and size
+  let shapeStyle = '';
+  if (config.confidence > 80) {
+    shapeStyle = 'MASSIVE DOMINANT central geometric form with sharp aggressive angles, commanding presence, oversized bold shapes';
+  } else if (config.confidence > 60) {
+    shapeStyle = 'strong prominent geometric shapes with defined edges, assertive forms, clear structure';
+  } else if (config.confidence > 40) {
+    shapeStyle = 'balanced mix of geometric and organic shapes, moderate sizing, harmonious proportions';
+  } else if (config.confidence > 20) {
+    shapeStyle = 'soft gentle curves, smaller supportive shapes, delicate forms, subtle patterns';
   } else {
-    prompt += 'balanced shapes with smooth transitions, ';
+    shapeStyle = 'minimal understated shapes, fine lines, whisper-soft forms, gentle presence';
   }
 
-  // Creativity level affects artistic style
-  if (config.creativityLevel > 70) {
-    prompt += 'highly creative abstract composition with unique unexpected elements and playful asymmetry, ';
+  // HEAVY WEIGHT: Creativity determines composition complexity
+  let compositionStyle = '';
+  if (config.creativityLevel > 80) {
+    compositionStyle = 'WILDLY EXPERIMENTAL layout - chaotic asymmetry, unexpected elements, surreal combinations, breaking traditional composition rules';
+  } else if (config.creativityLevel > 60) {
+    compositionStyle = 'highly creative arrangement - dynamic asymmetry, playful element placement, innovative patterns, artistic flair';
   } else if (config.creativityLevel > 40) {
-    prompt += 'moderately creative design with artistic flair and balanced innovation, ';
+    compositionStyle = 'moderately creative design - interesting balance, tasteful variety, thoughtful arrangement';
+  } else if (config.creativityLevel > 20) {
+    compositionStyle = 'structured organized layout - clean lines, predictable patterns, orderly arrangement';
   } else {
-    prompt += 'clean structured composition with elegant simplicity, ';
+    compositionStyle = 'ultra-minimalist composition - extreme simplicity, single focal point, bare essentials';
   }
 
-  // Formality affects overall aesthetic
+  // Gender aesthetic influences (not literal)
+  const gender = config.gender || 'neutral';
+  let genderInfluence = '';
+  if (gender === 'male') {
+    genderInfluence = 'angular hard-edged geometric bias, straight lines and sharp corners';
+  } else if (gender === 'female') {
+    genderInfluence = 'flowing curved organic bias, smooth arcs and circular motifs';
+  } else {
+    genderInfluence = 'balanced geometric and organic fusion, harmonious blend';
+  }
+
+  // Formality affects texture and polish
+  let textureStyle = '';
   if (config.formalityLevel > 70) {
-    prompt += 'professional refined aesthetic with geometric precision and sophisticated balance, ';
+    textureStyle = 'ultra-polished smooth surfaces, glass-like finish, professional sheen, corporate precision';
   } else if (config.formalityLevel > 40) {
-    prompt += 'semi-formal approachable style with organized elements, ';
+    textureStyle = 'semi-polished surfaces with some texture, approachable finish';
   } else {
-    prompt += 'casual friendly aesthetic with organic flowing elements, ';
+    textureStyle = 'organic textures, hand-crafted feel, artistic imperfections, natural materials';
   }
 
-  // Regional influence (as abstract background/accent elements)
-  if (config.state || (config.region && config.region !== 'none' && config.region !== 'national')) {
-    prompt += 'subtle regional motifs as abstract background patterns, ';
-  }
-
-  // Technical depth affects detail level
+  // Technical depth affects detail complexity
+  let detailLevel = '';
   if (config.technicalDepth > 70) {
-    prompt += 'intricate detailed patterns with layered complexity, ';
+    detailLevel = 'INTRICATE micro-patterns, layered complexity, fine details, nested elements, mathematical precision';
+  } else if (config.technicalDepth > 40) {
+    detailLevel = 'moderate detail work, some layering, balanced complexity';
   } else {
-    prompt += 'clean minimalist approach, ';
+    detailLevel = 'minimal details, clean surfaces, simple forms';
   }
 
-  // Style specification - key requirements
-  prompt += 'abstract modern digital art, ';
-  prompt += 'NO human faces, NO people, NO portraits, ';
-  prompt += 'geometric and organic shapes only, ';
-  prompt += 'symbolic representation of personality and role, ';
-  prompt += 'professional icon style suitable for profile avatar, ';
-  prompt += 'centered composition, ';
-  prompt += 'clean white or subtle gradient background, ';
-  prompt += 'high quality vector-style illustration, ';
-  prompt += 'modern minimalist aesthetic with depth';
+  // Role-based thematic elements (abstract symbols)
+  let thematicElements = '';
+  if (config.jobRole && config.jobRole !== 'general') {
+    const roleMap: Record<string, string> = {
+      'loan-officer': 'abstract currency symbols, flowing transaction lines, trust motifs',
+      'processor': 'interconnected data nodes, pipeline structures, systematic patterns',
+      'underwriter': 'analytical grids, risk assessment symbols, balanced scales motifs',
+      'manager': 'hierarchical structures, organizational patterns, leadership arrows',
+      'executive': 'executive crown motifs, premium luxury elements, authority symbols',
+    };
+    thematicElements = roleMap[config.jobRole] || 'professional abstract motifs';
+  }
+
+  // Regional color influences (subtle)
+  if (config.region && config.region !== 'none' && config.region !== 'national') {
+    const regionColors: Record<string, string> = {
+      'northeast': 'with subtle urban steel blue accents',
+      'southeast': 'with warm southern sunset orange hints',
+      'midwest': 'with earthy amber grain-field tones',
+      'southwest': 'with desert terra-cotta and turquoise touches',
+      'west': 'with golden coast sunset hues',
+      'pacific-northwest': 'with deep forest green and misty gray notes',
+      'mountain-west': 'with alpine blue and snow-white highlights',
+    };
+    colorScheme += ` ${regionColors[config.region] || ''}`;
+  }
+
+  // Build final prompt with heavy emphasis on variety
+  parts.push(`DOMINANT COLOR SCHEME: ${colorScheme}`);
+  parts.push(`BACKGROUND: ${backgroundStyle}`);
+  parts.push(`SHAPE STYLE: ${shapeStyle}`);
+  parts.push(`with ${genderInfluence}`);
+  parts.push(`COMPOSITION: ${compositionStyle}`);
+  parts.push(`TEXTURE: ${textureStyle}`);
+  parts.push(`DETAIL LEVEL: ${detailLevel}`);
+
+  if (thematicElements) {
+    parts.push(`subtle thematic elements: ${thematicElements}`);
+  }
+
+  // Add variation seed based on config ID for uniqueness
+  const idHash = config.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const variations = [
+    'with crystalline structures',
+    'with fluid dynamics',
+    'with fractal patterns',
+    'with geometric tessellation',
+    'with organic growth patterns',
+    'with technological circuitry motifs',
+    'with liquid metal effects',
+    'with particle systems',
+    'with wave interference patterns',
+    'with molecular structures',
+  ];
+  parts.push(variations[idHash % variations.length]);
+
+  // Critical constraints
+  parts.push('NO HUMAN FACES, NO PEOPLE, NO PORTRAITS, NO CHARACTERS');
+  parts.push('abstract symbolic representation only');
+  parts.push('suitable for profile avatar');
+  parts.push('professional icon style');
+  parts.push('centered focal point');
+  parts.push('1024x1024 square format');
+  parts.push('high contrast for visibility');
+  parts.push('modern digital art aesthetic');
+
+  let prompt = parts.join(', ');
 
   // Trim to DALL-E's 4000 character limit
   if (prompt.length > 4000) {
     prompt = prompt.substring(0, 3997) + '...';
   }
 
+  console.log('[DALL-E PROMPT]', prompt);
   return prompt;
 }

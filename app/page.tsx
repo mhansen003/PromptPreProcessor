@@ -33,7 +33,7 @@ export default function Home() {
   const [showSampleMessagesModal, setShowSampleMessagesModal] = useState(false);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [generatingImageForId, setGeneratingImageForId] = useState<string | null>(null);
   const [showImagePreview, setShowImagePreview] = useState(false);
 
   // New Persona Modal States
@@ -347,7 +347,8 @@ export default function Home() {
     const targetConfig = configToUse || activeConfig;
     if (!targetConfig) return;
 
-    setIsGeneratingImage(true);
+    // Track which persona is being generated
+    setGeneratingImageForId(targetConfig.id);
     try {
       const response = await fetch('/api/generate-persona-image', {
         method: 'POST',
@@ -373,7 +374,7 @@ export default function Home() {
       console.error('Error generating persona image:', error);
       showToast('⚠️ Failed to generate image');
     } finally {
-      setIsGeneratingImage(false);
+      setGeneratingImageForId(null);
     }
   };
 
@@ -648,12 +649,12 @@ export default function Home() {
                         />
                         {/* Hover Preview - Larger Version */}
                         {showImagePreview && (
-                          <div className="absolute left-24 top-0 z-50 pointer-events-none">
-                            <div className="bg-robinhood-dark border-2 border-robinhood-green/50 rounded-lg p-2 shadow-2xl shadow-robinhood-green/30">
+                          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] pointer-events-none">
+                            <div className="bg-robinhood-dark border-4 border-robinhood-green/70 rounded-lg p-3 shadow-2xl shadow-robinhood-green/50">
                               <img
                                 src={activeConfig.imageUrl}
                                 alt={activeConfig.name}
-                                className="w-64 h-64 rounded-lg object-cover"
+                                className="w-80 h-80 rounded-lg object-cover"
                               />
                             </div>
                           </div>
@@ -680,10 +681,10 @@ export default function Home() {
                       {/* Generate or Regenerate button */}
                       <button
                         onClick={() => handleGenerateImage()}
-                        disabled={isGeneratingImage}
+                        disabled={generatingImageForId === activeConfig.id}
                         className="text-xs text-robinhood-green/70 hover:text-robinhood-green flex items-center gap-1 transition-all disabled:opacity-50 mt-1"
                       >
-                        {isGeneratingImage ? (
+                        {generatingImageForId === activeConfig.id ? (
                           <>
                             <span className="animate-pulse">⏳</span>
                             <span>Generating...</span>
@@ -736,13 +737,16 @@ export default function Home() {
               ) : (
                 configs.map((config) => {
                   const isActive = activeConfig?.id === config.id;
+                  const isGenerating = generatingImageForId === config.id;
 
                   return (
                     <div
                       key={config.id}
                       onClick={() => setActiveConfig(config)}
                       className={`p-3 rounded-lg cursor-pointer transition-all duration-200 relative ${
-                        isSaving && isActive
+                        isGenerating
+                          ? 'bg-blue-500/20 border-2 border-blue-400 animate-pulse shadow-lg shadow-blue-400/30'
+                          : isSaving && isActive
                           ? 'bg-robinhood-green/20 border-2 border-robinhood-green animate-pulse shadow-lg shadow-robinhood-green/20'
                           : isActive
                           ? 'bg-robinhood-green/20 border-2 border-robinhood-green shadow-lg shadow-robinhood-green/10'
