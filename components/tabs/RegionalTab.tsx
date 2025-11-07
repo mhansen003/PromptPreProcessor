@@ -64,45 +64,43 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           <span>Location Settings</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Region"
-            value={config.region}
-            onChange={(value) => onUpdate({ region: value as PersonaConfig['region'] })}
-            options={[
-              { value: 'none', label: 'None / Not Applicable' },
-              { value: 'national', label: 'National (US-wide)' },
-              { value: 'northeast', label: 'Northeast' },
-              { value: 'southeast', label: 'Southeast' },
-              { value: 'midwest', label: 'Midwest' },
-              { value: 'southwest', label: 'Southwest' },
-              { value: 'west', label: 'West Coast' },
-              { value: 'pacific-northwest', label: 'Pacific Northwest' },
-              { value: 'mountain-west', label: 'Mountain West' },
-            ]}
-            tooltip="General geographic region for context and market references"
-          />
+        <Select
+          label="Region"
+          value={config.region}
+          onChange={(value) => onUpdate({ region: value as PersonaConfig['region'] })}
+          options={[
+            { value: 'none', label: 'None / Not Applicable' },
+            { value: 'national', label: 'National (US-wide)' },
+            { value: 'northeast', label: 'Northeast' },
+            { value: 'southeast', label: 'Southeast' },
+            { value: 'midwest', label: 'Midwest' },
+            { value: 'southwest', label: 'Southwest' },
+            { value: 'west', label: 'West Coast' },
+            { value: 'pacific-northwest', label: 'Pacific Northwest' },
+            { value: 'mountain-west', label: 'Mountain West' },
+          ]}
+          tooltip="General geographic region for context and market references"
+        />
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              State
-            </label>
-            <select
-              value={config.state || ''}
-              onChange={(e) => onUpdate({ state: e.target.value })}
-              className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-            >
-              <option value="">-- Select State --</option>
-              {US_STATES.filter(state => state).map((state) => (
-                <option key={state} value={state}>
-                  {state}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-400">
-              Required for local context features below
-            </p>
-          </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            State (Optional)
+          </label>
+          <select
+            value={config.state || ''}
+            onChange={(e) => onUpdate({ state: e.target.value })}
+            className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+          >
+            <option value="">-- Select State --</option>
+            {US_STATES.filter(state => state).map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400">
+            Required for local context features below
+          </p>
         </div>
       </div>
 
