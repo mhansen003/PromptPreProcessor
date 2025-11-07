@@ -168,6 +168,31 @@ const createDefaultConfig = (): PersonaConfig => ({
   marketExpertise: [],
 });
 
+// Default Regional and Role fields for example personas
+const defaultRegionalFields = {
+  region: 'national' as const,
+  state: '',
+  dialect: 'neutral' as const,
+  includeLocalReferences: false,
+  timeZoneAwareness: false,
+  regionalTerminology: 50,
+  localMarketKnowledge: false,
+  culturalSensitivity: 50,
+};
+
+const defaultRoleFields = {
+  jobRole: 'general' as const,
+  yearsExperience: 5,
+  specializations: [] as string[],
+  certifications: '',
+  clientFocus: 'mixed' as const,
+  teamRole: 'individual' as const,
+  complianceEmphasis: 50,
+  productKnowledge: 50,
+  loanTypes: [] as string[],
+  marketExpertise: [] as string[],
+};
+
 // Pre-configured example personalities
 const createExampleConfigs = (): PromptConfig[] => {
   const baseDate = new Date('2024-01-01').toISOString();
@@ -234,6 +259,7 @@ const createExampleConfigs = (): PromptConfig[] => {
       id: 'example-2',
       name: 'Code Review Expert',
       emoji: '💻',
+      description: 'Technical expert providing in-depth code analysis and best practices',
       createdAt: baseDate,
       detailLevel: 80,
       formalityLevel: 60,
@@ -267,11 +293,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: true,
       customInstructions: 'Provide thorough code reviews focusing on best practices, performance, and maintainability.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-3',
       name: 'Creative Storyteller',
       emoji: '✨',
+      description: 'Imaginative storyteller crafting engaging narratives with vivid descriptions',
       createdAt: baseDate,
       detailLevel: 75,
       formalityLevel: 30,
@@ -305,11 +334,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Craft engaging narratives with vivid descriptions and creative flair.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-4',
       name: 'Executive Briefing',
       emoji: '📊',
+      description: 'Concise executive-level summaries focusing on key insights and decisions',
       createdAt: baseDate,
       detailLevel: 40,
       formalityLevel: 85,
@@ -343,11 +375,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Deliver concise, high-level summaries focused on key insights and actionable items.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-5',
       name: 'Casual Chat Friend',
       emoji: '💬',
+      description: 'Friendly conversational assistant like chatting with a knowledgeable friend',
       createdAt: baseDate,
       detailLevel: 45,
       formalityLevel: 15,
@@ -381,11 +416,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Be friendly, relatable, and conversational. Like chatting with a knowledgeable friend.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-6',
       name: 'Research Analyst',
       emoji: '🔬',
+      description: 'In-depth research analysis with comprehensive coverage and citations',
       createdAt: baseDate,
       detailLevel: 95,
       formalityLevel: 75,
@@ -419,11 +457,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: true,
       customInstructions: 'Provide in-depth analysis with comprehensive coverage of topics, citing sources when possible.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-7',
       name: 'Quick Helper',
       emoji: '⚡',
+      description: 'Fast direct answers getting straight to the point',
       createdAt: baseDate,
       detailLevel: 25,
       formalityLevel: 40,
@@ -457,11 +498,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Get straight to the point with brief, actionable answers.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-8',
       name: 'Social Media Writer',
       emoji: '📱',
+      description: 'Trendy engaging social content that\'s snappy and shareable',
       createdAt: baseDate,
       detailLevel: 30,
       formalityLevel: 20,
@@ -495,11 +539,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Create engaging, snappy content perfect for social media. Be trendy and relatable.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-9',
       name: 'Technical Documentation',
       emoji: '📚',
+      description: 'Comprehensive technical documentation with clear examples and instructions',
       createdAt: baseDate,
       detailLevel: 85,
       formalityLevel: 70,
@@ -533,11 +580,14 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: true,
       customInstructions: 'Write clear, comprehensive technical documentation with code examples and step-by-step instructions.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
     {
       id: 'example-10',
       name: 'Debug Assistant',
       emoji: '🐛',
+      description: 'Systematic troubleshooting to identify issues and provide clear fixes',
       createdAt: baseDate,
       detailLevel: 75,
       formalityLevel: 45,
@@ -571,6 +621,8 @@ const createExampleConfigs = (): PromptConfig[] => {
       prioritizeComprehensiveness: false,
       customInstructions: 'Help identify and fix bugs with clear explanations of what went wrong and how to fix it.',
       customStyle: '',
+      ...defaultRegionalFields,
+      ...defaultRoleFields,
     },
   ];
 };

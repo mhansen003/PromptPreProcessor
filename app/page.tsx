@@ -406,61 +406,84 @@ export default function Home() {
             </div>
 
             <div className="space-y-2">
-              {configs.map((config) => (
-                <div
-                  key={config.id}
-                  onClick={() => setActiveConfig(config)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all ${
-                    activeConfig?.id === config.id
-                      ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
-                      : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="text-xl flex-shrink-0">{config.emoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{config.name}</p>
-                        {config.description && (
-                          <p className="text-xs text-gray-400 truncate">{config.description}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {config.systemPrompt && (
-                      <div className="flex items-center gap-1.5 ml-2">
-                        <span className={`text-[9px] font-medium whitespace-nowrap ${config.isPublished ? 'text-blue-400' : 'text-red-400'}`}>
-                          {config.isPublished ? 'Published' : 'Not Published'}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            togglePublish(config.id, !config.isPublished);
-                          }}
-                          className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
-                            config.isPublished
-                              ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
-                              : 'bg-red-500/30 shadow-sm'
-                          }`}
-                        >
-                          <div
-                            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
-                              config.isPublished ? 'left-5' : 'left-0.5'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+              {configs.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <p className="text-sm mb-3">No personas yet</p>
+                  <p className="text-xs">Click "+ New" above to create your first one</p>
                 </div>
-              ))}
+              ) : (
+                configs.map((config) => (
+                  <div
+                    key={config.id}
+                    onClick={() => setActiveConfig(config)}
+                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                      activeConfig?.id === config.id
+                        ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
+                        : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-xl flex-shrink-0">{config.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{config.name}</p>
+                          {config.description && (
+                            <p className="text-xs text-gray-400 truncate">{config.description}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {config.systemPrompt && (
+                        <div className="flex items-center gap-1.5 ml-2">
+                          <span className={`text-[9px] font-medium whitespace-nowrap ${config.isPublished ? 'text-blue-400' : 'text-red-400'}`}>
+                            {config.isPublished ? 'Published' : 'Not Published'}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePublish(config.id, !config.isPublished);
+                            }}
+                            className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
+                              config.isPublished
+                                ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
+                                : 'bg-red-500/30 shadow-sm'
+                            }`}
+                          >
+                            <div
+                              className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                                config.isPublished ? 'left-5' : 'left-0.5'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1">
-          {activeConfig ? (
+          {configs.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center max-w-md">
+                <div className="text-6xl mb-6">🎭</div>
+                <h2 className="text-3xl font-bold text-white mb-3">Welcome to AI Persona Builder</h2>
+                <p className="text-gray-400 mb-8 text-lg">
+                  Create your first AI persona to get started. Choose from a quick interview or build from scratch.
+                </p>
+                <button
+                  onClick={handleNewPersona}
+                  className="px-8 py-4 bg-robinhood-green text-robinhood-dark rounded-lg hover:bg-robinhood-green/90 transition-all font-medium text-lg shadow-lg shadow-robinhood-green/20"
+                >
+                  + Create Your First Persona
+                </button>
+              </div>
+            </div>
+          ) : activeConfig ? (
             <>
               <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
               <div className="p-6">
@@ -471,11 +494,12 @@ export default function Home() {
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-400">
                 <p className="text-xl mb-4">No persona selected</p>
+                <p className="text-sm mb-6">Select a persona from the sidebar or create a new one</p>
                 <button
                   onClick={handleNewPersona}
                   className="px-6 py-3 bg-robinhood-green text-robinhood-dark rounded-lg hover:bg-robinhood-green/90 transition-all font-medium"
                 >
-                  Create Your First Persona
+                  + Create New Persona
                 </button>
               </div>
             </div>

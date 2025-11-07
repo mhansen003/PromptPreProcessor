@@ -18,17 +18,9 @@ function generateSlug(name: string): string {
 export async function GET(request: NextRequest) {
   try {
     const userEmail = request.headers.get('x-user-email') || 'default-user';
-    let configs = await getUserConfigs(userEmail);
+    const configs = await getUserConfigs(userEmail);
 
-    // If no configs exist, initialize with examples
-    if (configs.length === 0) {
-      const examples = createExampleConfigs();
-      for (const config of examples) {
-        await saveConfig(config, userEmail);
-      }
-      configs = examples;
-    }
-
+    // Return empty array for new users - they'll be prompted to create their first persona
     return NextResponse.json({ configs });
   } catch (error: any) {
     console.error('Error fetching configs:', error);
