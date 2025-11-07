@@ -192,32 +192,42 @@ export default function Home() {
       if (data.success && data.config) {
         addConfig(data.config);
         setActiveConfig(data.config);
-        setShowNewPersonaModal(false);
 
         // Save the persona to generate systemPrompt (required for publishing)
+        console.log('[Interview] Saving config...', data.config.id);
         const savedConfig = await saveConfig(data.config);
+        console.log('[Interview] Config saved:', savedConfig?.id, 'Has systemPrompt:', !!savedConfig?.systemPrompt);
 
         if (savedConfig) {
           showToast('🎯 AI-configured persona created and saved!');
 
           // Auto-publish if checkbox was checked
           if (autoPublishAfterSave) {
+            console.log('[Interview] Auto-publish enabled, attempting to publish...', savedConfig.id);
             try {
               await togglePublish(savedConfig.id, true);
+              console.log('[Interview] Auto-publish successful!');
+              // Success toast is shown by togglePublish
             } catch (publishError) {
-              console.error('Error auto-publishing:', publishError);
+              console.error('[Interview] Error auto-publishing:', publishError);
               showToast('⚠️ Persona created but auto-publish failed');
             }
+          } else {
+            console.log('[Interview] Auto-publish disabled (checkbox unchecked)');
           }
         } else {
+          console.error('[Interview] Failed to save config');
           showToast('🎯 AI-configured persona created! (Save required to publish)');
         }
 
-        // Auto-generate character image
-        setTimeout(() => handleGenerateImage(data.config), 500);
+        // Close modal after all operations complete
+        setShowNewPersonaModal(false);
 
-        // Reset auto-publish checkbox
-        setAutoPublishAfterSave(false);
+        // Auto-generate character image (use savedConfig if available)
+        setTimeout(() => handleGenerateImage(savedConfig || data.config), 500);
+
+        // Reset auto-publish checkbox back to default (true)
+        setAutoPublishAfterSave(true);
       } else {
         showToast('❌ Failed to analyze. Creating default.');
         createFromScratch();
