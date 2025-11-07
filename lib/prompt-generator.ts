@@ -75,7 +75,32 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
 
 ---
 
-### 5. Resulting Behavior Summary (Human-Readable)
+### 5. Regional & Cultural Settings
+| Setting | Value | Description |
+|----------|--------|-------------|
+| **Region** | ${config.region === 'none' ? 'Not Applicable' : config.region} | Geographic context for responses |
+${config.state ? `| **State** | ${config.state} | Specific state for localized content |\n` : ''}| **Dialect** | ${config.dialect} | Speaking style and regional language patterns |
+| **Regional Terminology** | ${config.regionalTerminology}/100 | ${getValueDescription(config.regionalTerminology)} - ${config.regionalTerminology < 30 ? 'Use generic language' : config.regionalTerminology > 70 ? 'Heavy use of regional terms and phrases' : 'Moderate regional terminology'} |
+| **Local References** | ${config.includeLocalReferences ? 'Yes' : 'No'} | ${config.includeLocalReferences ? 'Include local landmarks, culture, and events' : 'Avoid local references'} |
+| **Time Zone Awareness** | ${config.timeZoneAwareness ? 'Yes' : 'No'} | ${config.timeZoneAwareness ? 'Consider regional time zones' : 'Time zone agnostic'} |
+| **Local Market Knowledge** | ${config.localMarketKnowledge ? 'Yes' : 'No'} | ${config.localMarketKnowledge ? 'Include local real estate market insights and pricing trends' : 'General market information only'} |
+| **Cultural Sensitivity** | ${config.culturalSensitivity}/100 | ${getValueDescription(config.culturalSensitivity)} - ${config.culturalSensitivity < 30 ? 'General approach' : config.culturalSensitivity > 70 ? 'Highly attuned to cultural nuances and diversity' : 'Moderate cultural awareness'} |
+
+---
+
+### 6. Role & Professional Expertise
+| Setting | Value | Description |
+|----------|--------|-------------|
+| **Job Role** | ${config.jobRole === 'general' ? 'General (No specific role)' : config.jobRole} | Professional role in mortgage/financial industry |
+| **Years of Experience** | ${config.yearsExperience} years | Experience level to reflect in responses |
+${config.certifications ? `| **Certifications** | ${config.certifications} | Professional credentials and licenses |\n` : ''}| **Team Role** | ${config.teamRole} | Position within team or organization |
+| **Client Focus** | ${config.clientFocus} | Primary type of clients served |
+| **Product Knowledge** | ${config.productKnowledge}/100 | ${getValueDescription(config.productKnowledge)} - ${config.productKnowledge < 30 ? 'Basic awareness of loan products' : config.productKnowledge > 70 ? 'Expert-level mastery of loan products' : 'Solid product knowledge'} |
+| **Compliance Emphasis** | ${config.complianceEmphasis}/100 | ${getValueDescription(config.complianceEmphasis)} - ${config.complianceEmphasis < 30 ? 'Minimal mention of compliance' : config.complianceEmphasis > 70 ? 'Compliance-focused approach' : 'Moderate compliance awareness'} |
+${config.specializations && config.specializations.length > 0 ? `| **Specializations** | ${config.specializations.join(', ')} | Loan program areas of expertise |\n` : ''}${config.loanTypes && config.loanTypes.length > 0 ? `| **Loan Products** | ${config.loanTypes.join(', ')} | Specific loan products offered |\n` : ''}${config.marketExpertise && config.marketExpertise.length > 0 ? `| **Market Expertise** | ${config.marketExpertise.join(', ')} | Market segments and transaction types |\n` : ''}
+---
+
+### 7. Resulting Behavior Summary (Human-Readable)
 > This AI will respond with **${getValueDescription(config.detailLevel).toLowerCase()} detail** in a **${config.formalityLevel < 30 ? 'casual' : config.formalityLevel > 70 ? 'formal' : 'balanced'}** tone.
 > Technical content will be ${config.technicalDepth < 30 ? 'simplified and accessible' : config.technicalDepth > 70 ? 'technical and in-depth' : 'moderately technical'}.
 > The personality is ${config.enthusiasm > 60 ? 'enthusiastic' : 'measured'}, ${config.empathy > 60 ? 'empathetic' : 'objective'}, and ${config.confidence > 70 ? 'confident' : config.confidence < 30 ? 'cautious' : 'balanced'}${config.humor > 60 ? ' with appropriate humor' : ''}.
@@ -83,7 +108,7 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
 
 ---
 
-### 6. Machine-Readable Configuration (JSON)
+### 8. Machine-Readable Configuration (JSON)
 \`\`\`json
 {
   "response_style": {
@@ -123,6 +148,28 @@ ${config.customStyle ? `\n**Additional Style Requirements:**\n${config.customSty
     "speed": ${config.prioritizeSpeed},
     "clarity": ${config.prioritizeClarity},
     "completeness": ${config.prioritizeComprehensiveness}
+  },
+  "regional_settings": {
+    "region": "${config.region}",
+    "state": "${config.state || ''}",
+    "dialect": "${config.dialect}",
+    "regional_terminology": ${config.regionalTerminology},
+    "include_local_references": ${config.includeLocalReferences},
+    "time_zone_awareness": ${config.timeZoneAwareness},
+    "local_market_knowledge": ${config.localMarketKnowledge},
+    "cultural_sensitivity": ${config.culturalSensitivity}
+  },
+  "role_expertise": {
+    "job_role": "${config.jobRole}",
+    "years_experience": ${config.yearsExperience},
+    "certifications": "${config.certifications || ''}",
+    "team_role": "${config.teamRole}",
+    "client_focus": "${config.clientFocus}",
+    "product_knowledge": ${config.productKnowledge},
+    "compliance_emphasis": ${config.complianceEmphasis},
+    "specializations": ${JSON.stringify(config.specializations || [])},
+    "loan_types": ${JSON.stringify(config.loanTypes || [])},
+    "market_expertise": ${JSON.stringify(config.marketExpertise || [])}
   }
 }
 \`\`\`
