@@ -14,6 +14,7 @@ interface SliderProps {
   rightLabel?: string;
   showValue?: boolean;
   tooltip?: string;
+  onShowExample?: () => void;
 }
 
 export const Slider: React.FC<SliderProps> = ({
@@ -27,6 +28,7 @@ export const Slider: React.FC<SliderProps> = ({
   rightLabel,
   showValue = true,
   tooltip,
+  onShowExample,
 }) => {
   const percentage = ((value - min) / (max - min)) * 100;
 
@@ -43,7 +45,7 @@ export const Slider: React.FC<SliderProps> = ({
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-300">
             {label}
           </label>
@@ -53,6 +55,15 @@ export const Slider: React.FC<SliderProps> = ({
                 i
               </div>
             </Tooltip>
+          )}
+          {onShowExample && (
+            <button
+              onClick={onShowExample}
+              className="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded hover:bg-indigo-500/30 transition-all shadow-sm hover:shadow-indigo-500/20"
+              title="See example of this setting"
+            >
+              ✨ Example
+            </button>
           )}
         </div>
         {showValue && (

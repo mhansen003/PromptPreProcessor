@@ -1,5 +1,7 @@
 import type { PersonaConfig } from '@/lib/store';
 import { Slider } from '../Slider';
+import { useState } from 'react';
+import ExampleModal from '../ExampleModal';
 
 interface PersonalityTabProps {
   config: PersonaConfig;
@@ -7,6 +9,21 @@ interface PersonalityTabProps {
 }
 
 export default function PersonalityTab({ config, onUpdate }: PersonalityTabProps) {
+  const [showExampleModal, setShowExampleModal] = useState(false);
+  const [exampleControl, setExampleControl] = useState<{
+    name: string;
+    description: string;
+    value: number;
+    min: number;
+    max: number;
+    onApply: (value: number) => void;
+  } | null>(null);
+
+  const openExample = (name: string, description: string, value: number, onApply: (value: number) => void) => {
+    setExampleControl({ name, description, value, min: 0, max: 100, onApply });
+    setShowExampleModal(true);
+  };
+
   return (
     <div className="space-y-8">
       {/* Info Box */}
@@ -30,6 +47,12 @@ export default function PersonalityTab({ config, onUpdate }: PersonalityTabProps
           min={0}
           max={100}
           tooltip="How detailed responses should be (0 = very concise, 100 = extremely detailed with comprehensive explanations)"
+          onShowExample={() => openExample(
+            'Detail Level',
+            'How detailed responses should be (0 = very concise, 100 = extremely detailed)',
+            config.detailLevel,
+            (value) => onUpdate({ detailLevel: value })
+          )}
         />
 
         <Slider
@@ -112,6 +135,26 @@ export default function PersonalityTab({ config, onUpdate }: PersonalityTabProps
           tooltip="Use of humor and levity (0 = completely serious, 100 = frequent appropriate humor)"
         />
       </div>
+
+      {/* Example Modal */}
+      {exampleControl && (
+        <ExampleModal
+          isOpen={showExampleModal}
+          onClose={() => {
+            setShowExampleModal(false);
+            setExampleControl(null);
+          }}
+          controlType="slider"
+          controlName={exampleControl.name}
+          controlDescription={exampleControl.description}
+          initialValue={exampleControl.value}
+          onApply={(value) => {
+            exampleControl.onApply(value as number);
+          }}
+          min={exampleControl.min}
+          max={exampleControl.max}
+        />
+      )}
     </div>
   );
 }
