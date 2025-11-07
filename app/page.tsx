@@ -33,7 +33,7 @@ export default function Home() {
   const [showSampleMessagesModal, setShowSampleMessagesModal] = useState(false);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [generatingImageForId, setGeneratingImageForId] = useState<string | null>(null);
+  const [generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set());
   const [showImagePreview, setShowImagePreview] = useState(false);
 
   // New Persona Modal States
@@ -347,8 +347,9 @@ export default function Home() {
     const targetConfig = configToUse || activeConfig;
     if (!targetConfig) return;
 
-    // Track which persona is being generated
-    setGeneratingImageForId(targetConfig.id);
+    // Add this persona to the generating set
+    setGeneratingImageIds(prev => new Set(prev).add(targetConfig.id));
+
     try {
       const response = await fetch('/api/generate-persona-image', {
         method: 'POST',
@@ -374,7 +375,12 @@ export default function Home() {
       console.error('Error generating persona image:', error);
       showToast('⚠️ Failed to generate image');
     } finally {
-      setGeneratingImageForId(null);
+      // Remove this persona from the generating set
+      setGeneratingImageIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(targetConfig.id);
+        return newSet;
+      });
     }
   };
 
@@ -681,10 +687,10 @@ export default function Home() {
                       {/* Generate or Regenerate button */}
                       <button
                         onClick={() => handleGenerateImage()}
-                        disabled={generatingImageForId === activeConfig.id}
+                        disabled={generatingImageIds.has(activeConfig.id)}
                         className="text-xs text-robinhood-green/70 hover:text-robinhood-green flex items-center gap-1 transition-all disabled:opacity-50 mt-1"
                       >
-                        {generatingImageForId === activeConfig.id ? (
+                        {generatingImageIds.has(activeConfig.id) ? (
                           <>
                             <span className="animate-pulse">⏳</span>
                             <span>Generating...</span>
@@ -737,7 +743,7 @@ export default function Home() {
               ) : (
                 configs.map((config) => {
                   const isActive = activeConfig?.id === config.id;
-                  const isGenerating = generatingImageForId === config.id;
+                  const isGenerating = generatingImageIds.has(config.id);
 
                   return (
                     <div
