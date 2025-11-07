@@ -80,7 +80,7 @@ Return ONLY the paragraph, no labels or commentary.`;
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o-mini', // Fast, efficient model for quick results
       messages: [
         {
           role: 'system',

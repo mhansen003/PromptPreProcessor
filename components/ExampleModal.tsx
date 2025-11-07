@@ -36,12 +36,12 @@ export default function ExampleModal({
   const [exampleText, setExampleText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Generate example when modal opens or value changes
+  // Generate example only when modal opens (not on value changes)
   useEffect(() => {
     if (isOpen) {
       generateExample();
     }
-  }, [isOpen, currentValue]);
+  }, [isOpen]);
 
   const generateExample = async () => {
     setIsGenerating(true);
