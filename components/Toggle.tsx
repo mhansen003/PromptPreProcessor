@@ -9,6 +9,7 @@ interface ToggleProps {
   onChange: (checked: boolean) => void;
   description?: string;
   tooltip?: string;
+  onShowExample?: () => void;
 }
 
 export const Toggle: React.FC<ToggleProps> = ({
@@ -17,6 +18,7 @@ export const Toggle: React.FC<ToggleProps> = ({
   onChange,
   description,
   tooltip,
+  onShowExample,
 }) => {
   return (
     <div className="flex items-start gap-3">
@@ -53,6 +55,16 @@ export const Toggle: React.FC<ToggleProps> = ({
               <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-robinhood-green/20 text-robinhood-green text-[9px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
                 i
               </div>
+            </Tooltip>
+          )}
+          {onShowExample && (
+            <Tooltip content="See example">
+              <button
+                onClick={onShowExample}
+                className="flex items-center justify-center w-5 h-5 rounded bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 hover:scale-110 transition-all shadow-sm"
+              >
+                💡
+              </button>
             </Tooltip>
           )}
         </div>
