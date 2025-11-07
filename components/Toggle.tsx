@@ -58,14 +58,13 @@ export const Toggle: React.FC<ToggleProps> = ({
             </Tooltip>
           )}
           {onShowExample && (
-            <Tooltip content="See example">
-              <button
-                onClick={onShowExample}
-                className="flex items-center justify-center w-5 h-5 rounded bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 hover:scale-110 transition-all shadow-sm"
-              >
-                💡
-              </button>
-            </Tooltip>
+            <button
+              onClick={onShowExample}
+              className="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded hover:bg-indigo-500/30 transition-all shadow-sm hover:shadow-indigo-500/20"
+              title="See example of this setting"
+            >
+              ✨ Example
+            </button>
           )}
         </div>
         {description && (
