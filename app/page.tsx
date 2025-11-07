@@ -618,7 +618,7 @@ export default function Home() {
 
       <div className="flex">
         {/* Sidebar - Always Visible */}
-        <div className="w-80 bg-robinhood-darker border-r border-robinhood-card-border"">
+        <div className="w-80 bg-robinhood-darker border-r border-robinhood-card-border">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Your Personas</h3>
