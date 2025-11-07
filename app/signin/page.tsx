@@ -39,7 +39,31 @@ export default function SignIn() {
       return;
     }
 
-    const fullEmail = `${email.trim()}@cmgfi.com`;
+    // Smart email parsing: handle @cmgfi.com if provided, validate domain, or auto-append
+    const trimmedInput = email.trim();
+    let fullEmail: string;
+
+    if (trimmedInput.includes('@')) {
+      // User included @ symbol - validate it's @cmgfi.com
+      const [username, domain] = trimmedInput.split('@');
+
+      if (!username || username.length === 0) {
+        setError('Please enter a username before @');
+        return;
+      }
+
+      if (domain && domain.toLowerCase() !== 'cmgfi.com') {
+        setError('Only @cmgfi.com email addresses are allowed');
+        return;
+      }
+
+      // If they typed just "username@" without domain, append it
+      fullEmail = domain ? `${username}@${domain.toLowerCase()}` : `${username}@cmgfi.com`;
+    } else {
+      // No @ symbol - just append @cmgfi.com
+      fullEmail = `${trimmedInput}@cmgfi.com`;
+    }
+
     setLoading(true);
 
     try {
@@ -112,7 +136,17 @@ export default function SignIn() {
       return;
     }
 
-    const fullEmail = `${email.trim()}@cmgfi.com`;
+    // Smart email parsing: handle @cmgfi.com if provided, or auto-append
+    const trimmedInput = email.trim();
+    let fullEmail: string;
+
+    if (trimmedInput.includes('@')) {
+      const [username, domain] = trimmedInput.split('@');
+      fullEmail = domain ? `${username}@${domain.toLowerCase()}` : `${username}@cmgfi.com`;
+    } else {
+      fullEmail = `${trimmedInput}@cmgfi.com`;
+    }
+
     setLoading(true);
 
     try {
@@ -183,28 +217,28 @@ export default function SignIn() {
             <form onSubmit={handleSendOTP}>
               <h2 className="text-2xl font-bold text-white mb-2">Sign In</h2>
               <p className="text-gray-400 mb-6">
-                Enter your CMG username to receive a verification code
+                Enter your CMG username or email to receive a verification code
               </p>
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  CMG Username
+                  CMG Username or Email
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="firstname.lastname"
-                    className="w-full px-4 py-3 bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-robinhood-green focus:ring-1 focus:ring-robinhood-green transition-colors pr-24"
+                    placeholder="firstname.lastname or firstname.lastname@cmgfi.com"
+                    className="w-full px-4 py-3 bg-robinhood-darker border border-robinhood-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-robinhood-green focus:ring-1 focus:ring-robinhood-green transition-colors"
                     required
                     disabled={loading}
                     autoFocus
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none text-sm">
-                    @cmgfi.com
-                  </span>
                 </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Enter your username (we'll add @cmgfi.com) or full email
+                </p>
               </div>
 
               {error && (
@@ -236,7 +270,9 @@ export default function SignIn() {
 
               <h2 className="text-2xl font-bold text-white mb-2">Enter Code</h2>
               <p className="text-gray-400 mb-6">
-                We sent a 6-digit code to <strong>{email}@cmgfi.com</strong>
+                We sent a 6-digit code to <strong>
+                  {email.includes('@') ? email : `${email}@cmgfi.com`}
+                </strong>
               </p>
 
               <div className="mb-6">
