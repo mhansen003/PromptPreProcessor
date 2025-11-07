@@ -1,6 +1,6 @@
 import type { PersonaConfig } from '@/lib/store';
-import Slider from '../Slider';
-import Select from '../Select';
+import { Slider } from '../Slider';
+import { Select } from '../Select';
 import { useState } from 'react';
 
 interface RoleTabProps {

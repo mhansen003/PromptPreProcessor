@@ -1,5 +1,5 @@
 import type { PersonaConfig } from '@/lib/store';
-import Slider from '../Slider';
+import { Slider } from '../Slider';
 
 interface PersonalityTabProps {
   config: PersonaConfig;

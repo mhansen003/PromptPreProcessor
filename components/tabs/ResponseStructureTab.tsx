@@ -1,5 +1,5 @@
 import type { PersonaConfig } from '@/lib/store';
-import Toggle from '../Toggle';
+import { Toggle } from '../Toggle';
 
 interface ResponseStructureTabProps {
   config: PersonaConfig;

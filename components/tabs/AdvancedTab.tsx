@@ -1,7 +1,7 @@
 import type { PersonaConfig } from '@/lib/store';
-import Slider from '../Slider';
-import Select from '../Select';
-import Toggle from '../Toggle';
+import { Slider } from '../Slider';
+import { Select } from '../Select';
+import { Toggle } from '../Toggle';
 
 interface AdvancedTabProps {
   config: PersonaConfig;
