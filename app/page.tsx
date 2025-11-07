@@ -9,6 +9,7 @@ import ResponseStructureTab from '@/components/tabs/ResponseStructureTab';
 import AdvancedTab from '@/components/tabs/AdvancedTab';
 import RegionalTab from '@/components/tabs/RegionalTab';
 import RoleTab from '@/components/tabs/RoleTab';
+import SampleMessagesModal from '@/components/SampleMessagesModal';
 
 export default function Home() {
   const { configs, activeConfig, addConfig, updateConfig, saveConfig, setActiveConfig, deleteConfig, duplicateConfig, setConfigs } = useStore();
@@ -30,6 +31,7 @@ export default function Home() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState('');
   const [editingEmoji, setEditingEmoji] = useState('');
+  const [showSampleMessagesModal, setShowSampleMessagesModal] = useState(false);
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -365,6 +367,18 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {activeConfig && (
               <>
+                {/* Generate Sample Message Button */}
+                <button
+                  onClick={() => setShowSampleMessagesModal(true)}
+                  className="px-6 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg"
+                  title="Generate sample mortgage messages to preview your persona"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Generate Sample Message
+                </button>
+
                 <button
                   onClick={handleSaveChanges}
                   disabled={isSaving}
@@ -387,6 +401,25 @@ export default function Home() {
                   ) : hasUnsavedChanges ? '💾 Save & Generate' : '💾 Save'}
                 </button>
               </>
+            )}
+
+            {/* User Menu */}
+            {userEmail && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-robinhood-green/20 flex items-center justify-center text-robinhood-green font-semibold text-sm">
+                    {userEmail.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm text-gray-300">{userEmail.split('@')[0]}</span>
+                </div>
+                <button
+                  onClick={() => window.location.href = '/api/auth/logout'}
+                  className="ml-2 text-xs text-gray-400 hover:text-red-400 transition-colors"
+                  title="Logout"
+                >
+                  🚪
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -437,10 +470,11 @@ export default function Home() {
                     type="text"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
-                    onKeyDown={(e) => {
+                    onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
-                        handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
+                        await handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
                         setIsEditingName(false);
+                        handleSaveChanges();
                       } else if (e.key === 'Escape') {
                         setIsEditingName(false);
                       }
@@ -450,9 +484,11 @@ export default function Home() {
                     autoFocus
                   />
                   <button
-                    onClick={() => {
-                      handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
+                    onClick={async () => {
+                      await handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
                       setIsEditingName(false);
+                      // Trigger regeneration
+                      handleSaveChanges();
                     }}
                     className="px-3 py-1 bg-robinhood-green text-robinhood-dark rounded hover:bg-robinhood-green/90 text-sm"
                   >
@@ -519,7 +555,9 @@ export default function Home() {
                       key={config.id}
                       onClick={() => setActiveConfig(config)}
                       className={`p-3 rounded-lg cursor-pointer transition-all relative ${
-                        isActive
+                        isSaving && isActive
+                          ? 'bg-robinhood-green/20 border-2 border-robinhood-green animate-pulse'
+                          : isActive
                           ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
                           : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
                       }`}
@@ -613,11 +651,6 @@ export default function Home() {
                           </button>
                         </div>
                       )}
-
-                      {/* Pulsating blue bar during generation */}
-                      {isSaving && isActive && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 animate-pulse shadow-lg shadow-blue-500/50" />
-                      )}
                     </div>
                   );
                 })
@@ -671,12 +704,11 @@ export default function Home() {
       {/* Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed top-[120px] bg-robinhood-green/20 border-2 border-robinhood-green/50 rounded-lg p-2 hover:bg-robinhood-green/30 transition-all duration-300 z-50 shadow-lg shadow-robinhood-green/20 ${
-          sidebarOpen ? 'left-[312px]' : 'left-0'
+        className={`fixed top-1/2 -translate-y-1/2 bg-white rounded-r-md py-6 px-1.5 hover:px-2 transition-all duration-200 z-50 shadow-md ${
+          sidebarOpen ? 'left-[320px]' : 'left-0'
         }`}
-        style={{ marginLeft: sidebarOpen ? '0' : '0' }}
       >
-        <span className="text-robinhood-green font-bold text-lg">{sidebarOpen ? '◀' : '▶'}</span>
+        <span className="text-gray-700 font-bold text-sm">{sidebarOpen ? '◀' : '▶'}</span>
       </button>
 
       {/* Toast Notification */}
@@ -1132,6 +1164,13 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Sample Messages Modal */}
+      <SampleMessagesModal
+        isOpen={showSampleMessagesModal}
+        onClose={() => setShowSampleMessagesModal(false)}
+        config={activeConfig}
+      />
     </div>
   );
 }
