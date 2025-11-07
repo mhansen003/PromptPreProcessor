@@ -19,23 +19,7 @@ export const Toggle: React.FC<ToggleProps> = ({
   tooltip,
 }) => {
   return (
-    <div className="flex items-center justify-between gap-6">
-      <div className="flex items-center gap-1.5">
-        <label className="text-xs font-medium text-gray-300 cursor-pointer">
-          {label}
-        </label>
-        {tooltip && (
-          <Tooltip content={tooltip}>
-            <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-robinhood-green/20 text-robinhood-green text-[9px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
-              i
-            </div>
-          </Tooltip>
-        )}
-        {description && (
-          <p className="text-[10px] text-gray-500 mt-0.5">{description}</p>
-        )}
-      </div>
-
+    <div className="flex items-start gap-3">
       <button
         type="button"
         role="switch"
@@ -58,6 +42,24 @@ export const Toggle: React.FC<ToggleProps> = ({
           `}
         />
       </button>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm font-medium text-gray-300 cursor-pointer">
+            {label}
+          </label>
+          {tooltip && (
+            <Tooltip content={tooltip}>
+              <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-robinhood-green/20 text-robinhood-green text-[9px] font-bold cursor-help hover:bg-robinhood-green hover:text-robinhood-dark hover:scale-110 transition-all shadow-sm">
+                i
+              </div>
+            </Tooltip>
+          )}
+        </div>
+        {description && (
+          <p className="text-xs text-gray-400 mt-1">{description}</p>
+        )}
+      </div>
     </div>
   );
 };

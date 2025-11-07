@@ -25,60 +25,62 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
           <span>Response Preferences</span>
         </h3>
 
-        <Select
-          label="Response Length"
-          value={config.responseLength}
-          onChange={(value) => onUpdate({ responseLength: value as PersonaConfig['responseLength'] })}
-          options={[
-            { value: 'auto', label: 'Auto (Context-dependent)' },
-            { value: 'short', label: 'Short (Brief answers)' },
-            { value: 'medium', label: 'Medium (Balanced detail)' },
-            { value: 'long', label: 'Long (Detailed explanations)' },
-            { value: 'comprehensive', label: 'Comprehensive (Exhaustive coverage)' },
-          ]}
-          tooltip="Preferred overall length of responses"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Response Length"
+            value={config.responseLength}
+            onChange={(value) => onUpdate({ responseLength: value as PersonaConfig['responseLength'] })}
+            options={[
+              { value: 'auto', label: 'Auto (Context-dependent)' },
+              { value: 'short', label: 'Short (Brief answers)' },
+              { value: 'medium', label: 'Medium (Balanced detail)' },
+              { value: 'long', label: 'Long (Detailed explanations)' },
+              { value: 'comprehensive', label: 'Comprehensive (Exhaustive coverage)' },
+            ]}
+            tooltip="Preferred overall length of responses"
+          />
 
-        <Select
-          label="Perspective"
-          value={config.perspective}
-          onChange={(value) => onUpdate({ perspective: value as PersonaConfig['perspective'] })}
-          options={[
-            { value: '1st-person', label: '1st Person (I/We)' },
-            { value: '2nd-person', label: '2nd Person (You)' },
-            { value: '3rd-person', label: '3rd Person (They/It)' },
-            { value: 'mixed', label: 'Mixed (Flexible)' },
-          ]}
-          tooltip="Narrative perspective for responses"
-        />
+          <Select
+            label="Perspective"
+            value={config.perspective}
+            onChange={(value) => onUpdate({ perspective: value as PersonaConfig['perspective'] })}
+            options={[
+              { value: '1st-person', label: '1st Person (I/We)' },
+              { value: '2nd-person', label: '2nd Person (You)' },
+              { value: '3rd-person', label: '3rd Person (They/It)' },
+              { value: 'mixed', label: 'Mixed (Flexible)' },
+            ]}
+            tooltip="Narrative perspective for responses"
+          />
 
-        <Select
-          label="Target Audience"
-          value={config.audience}
-          onChange={(value) => onUpdate({ audience: value as PersonaConfig['audience'] })}
-          options={[
-            { value: 'mixed', label: 'Mixed (General audience)' },
-            { value: 'gen-z', label: 'Gen Z (Born 1997-2012)' },
-            { value: 'millennial', label: 'Millennial (Born 1981-1996)' },
-            { value: 'gen-x', label: 'Gen X (Born 1965-1980)' },
-            { value: 'boomer', label: 'Boomer (Born 1946-1964)' },
-            { value: 'senior', label: 'Senior (65+)' },
-          ]}
-          tooltip="Primary demographic and generational focus"
-        />
+          <Select
+            label="Target Audience"
+            value={config.audience}
+            onChange={(value) => onUpdate({ audience: value as PersonaConfig['audience'] })}
+            options={[
+              { value: 'mixed', label: 'Mixed (General audience)' },
+              { value: 'gen-z', label: 'Gen Z (Born 1997-2012)' },
+              { value: 'millennial', label: 'Millennial (Born 1981-1996)' },
+              { value: 'gen-x', label: 'Gen X (Born 1965-1980)' },
+              { value: 'boomer', label: 'Boomer (Born 1946-1964)' },
+              { value: 'senior', label: 'Senior (65+)' },
+            ]}
+            tooltip="Primary demographic and generational focus"
+          />
 
-        <Select
-          label="Explanation Style"
-          value={config.explanationStyle}
-          onChange={(value) => onUpdate({ explanationStyle: value as PersonaConfig['explanationStyle'] })}
-          options={[
-            { value: 'direct', label: 'Direct (Straightforward)' },
-            { value: 'socratic', label: 'Socratic (Question-driven)' },
-            { value: 'narrative', label: 'Narrative (Story-based)' },
-            { value: 'analytical', label: 'Analytical (Data-driven)' },
-          ]}
-          tooltip="Approach to explaining concepts"
-        />
+          <Select
+            label="Explanation Style"
+            value={config.explanationStyle}
+            onChange={(value) => onUpdate({ explanationStyle: value as PersonaConfig['explanationStyle'] })}
+            options={[
+              { value: 'direct', label: 'Direct (Straightforward)' },
+              { value: 'socratic', label: 'Socratic (Question-driven)' },
+              { value: 'narrative', label: 'Narrative (Story-based)' },
+              { value: 'analytical', label: 'Analytical (Data-driven)' },
+            ]}
+            tooltip="Approach to explaining concepts"
+          />
+        </div>
 
         <Slider
           label="Industry Terminology"

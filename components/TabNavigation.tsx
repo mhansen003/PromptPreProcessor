@@ -7,9 +7,9 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
   const tabs = [
     { id: 'personality', label: 'Personality', icon: '🎭' },
     { id: 'structure', label: 'Response Structure', icon: '📝' },
-    { id: 'advanced', label: 'Advanced', icon: '⚙️' },
     { id: 'regional', label: 'Regional', icon: '🗺️' },
     { id: 'role', label: 'Role', icon: '💼' },
+    { id: 'advanced', label: 'Advanced', icon: '⚙️' },
   ];
 
   return (

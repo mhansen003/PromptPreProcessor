@@ -77,24 +77,39 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
           <span>Job Role & Experience</span>
         </h3>
 
-        <Select
-          label="Job Role"
-          value={config.jobRole}
-          onChange={(value) => onUpdate({ jobRole: value as PersonaConfig['jobRole'] })}
-          options={[
-            { value: 'general', label: 'General (No specific role)' },
-            { value: 'loan-officer', label: 'Loan Officer / Mortgage Originator' },
-            { value: 'processor', label: 'Loan Processor' },
-            { value: 'underwriter', label: 'Underwriter' },
-            { value: 'sales', label: 'Sales / Business Development' },
-            { value: 'sales-assistant', label: 'Sales Assistant / Coordinator' },
-            { value: 'branch-manager', label: 'Branch Manager' },
-            { value: 'operations', label: 'Operations Manager' },
-            { value: 'closer', label: 'Closer / Settlement Agent' },
-            { value: 'account-executive', label: 'Account Executive' },
-          ]}
-          tooltip="Your specific role in the mortgage/financial industry"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Job Role"
+            value={config.jobRole}
+            onChange={(value) => onUpdate({ jobRole: value as PersonaConfig['jobRole'] })}
+            options={[
+              { value: 'general', label: 'General (No specific role)' },
+              { value: 'loan-officer', label: 'Loan Officer / Mortgage Originator' },
+              { value: 'processor', label: 'Loan Processor' },
+              { value: 'underwriter', label: 'Underwriter' },
+              { value: 'sales', label: 'Sales / Business Development' },
+              { value: 'sales-assistant', label: 'Sales Assistant / Coordinator' },
+              { value: 'branch-manager', label: 'Branch Manager' },
+              { value: 'operations', label: 'Operations Manager' },
+              { value: 'closer', label: 'Closer / Settlement Agent' },
+              { value: 'account-executive', label: 'Account Executive' },
+            ]}
+            tooltip="Your specific role in the mortgage/financial industry"
+          />
+
+          <Select
+            label="Team Role"
+            value={config.teamRole}
+            onChange={(value) => onUpdate({ teamRole: value as PersonaConfig['teamRole'] })}
+            options={[
+              { value: 'individual', label: 'Individual Contributor' },
+              { value: 'team-lead', label: 'Team Lead' },
+              { value: 'manager', label: 'Manager' },
+              { value: 'executive', label: 'Executive / Director' },
+            ]}
+            tooltip="Your position within your team or organization"
+          />
+        </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">
@@ -129,27 +144,6 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
             List relevant certifications, licenses, and credentials
           </p>
         </div>
-      </div>
-
-      {/* Team Structure */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>👥</span>
-          <span>Team Structure</span>
-        </h3>
-
-        <Select
-          label="Team Role"
-          value={config.teamRole}
-          onChange={(value) => onUpdate({ teamRole: value as PersonaConfig['teamRole'] })}
-          options={[
-            { value: 'individual', label: 'Individual Contributor' },
-            { value: 'team-lead', label: 'Team Lead' },
-            { value: 'manager', label: 'Manager' },
-            { value: 'executive', label: 'Executive / Director' },
-          ]}
-          tooltip="Your position within your team or organization"
-        />
       </div>
 
       {/* Specializations */}
@@ -322,23 +316,25 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
           <span>Knowledge & Compliance</span>
         </h3>
 
-        <Slider
-          label="Product Knowledge Depth"
-          value={config.productKnowledge}
-          onChange={(value) => onUpdate({ productKnowledge: value })}
-          min={0}
-          max={100}
-          tooltip="Depth of loan product knowledge to assume (0 = basic awareness, 100 = expert-level mastery)"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Slider
+            label="Product Knowledge Depth"
+            value={config.productKnowledge}
+            onChange={(value) => onUpdate({ productKnowledge: value })}
+            min={0}
+            max={100}
+            tooltip="Depth of loan product knowledge to assume (0 = basic awareness, 100 = expert-level mastery)"
+          />
 
-        <Slider
-          label="Compliance Emphasis"
-          value={config.complianceEmphasis}
-          onChange={(value) => onUpdate({ complianceEmphasis: value })}
-          min={0}
-          max={100}
-          tooltip="How much to emphasize regulatory compliance and legal requirements (0 = minimal mention, 100 = compliance-focused)"
-        />
+          <Slider
+            label="Compliance Emphasis"
+            value={config.complianceEmphasis}
+            onChange={(value) => onUpdate({ complianceEmphasis: value })}
+            min={0}
+            max={100}
+            tooltip="How much to emphasize regulatory compliance and legal requirements (0 = minimal mention, 100 = compliance-focused)"
+          />
+        </div>
       </div>
     </div>
   );
