@@ -46,6 +46,7 @@ export default function Home() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [autoPublishAfterSave, setAutoPublishAfterSave] = useState(false);
 
   // Interview questions focused on the person's personality and preferences
   const interviewQuestions = [
@@ -192,9 +193,31 @@ export default function Home() {
         addConfig(data.config);
         setActiveConfig(data.config);
         setShowNewPersonaModal(false);
-        showToast('🎯 AI-configured persona created!');
+
+        // Save the persona to generate systemPrompt (required for publishing)
+        const savedConfig = await saveConfig(data.config);
+
+        if (savedConfig) {
+          showToast('🎯 AI-configured persona created and saved!');
+
+          // Auto-publish if checkbox was checked
+          if (autoPublishAfterSave) {
+            try {
+              await togglePublish(savedConfig.id, true);
+            } catch (publishError) {
+              console.error('Error auto-publishing:', publishError);
+              showToast('⚠️ Persona created but auto-publish failed');
+            }
+          }
+        } else {
+          showToast('🎯 AI-configured persona created! (Save required to publish)');
+        }
+
         // Auto-generate character image
         setTimeout(() => handleGenerateImage(data.config), 500);
+
+        // Reset auto-publish checkbox
+        setAutoPublishAfterSave(false);
       } else {
         showToast('❌ Failed to analyze. Creating default.');
         createFromScratch();
@@ -360,20 +383,23 @@ export default function Home() {
       const data = await response.json();
 
       if (data.success && data.imageUrl) {
-        // Update config with new image URL
-        updateConfig(targetConfig.id, { imageUrl: data.imageUrl });
-
-        // Save to backend (Redis) immediately so it persists on refresh
+        // Save to backend (Redis) FIRST to ensure persistence
         const updatedConfig = { ...targetConfig, imageUrl: data.imageUrl };
-        await saveConfig(updatedConfig);
+        const savedConfig = await saveConfig(updatedConfig);
 
-        showToast('✨ Character image generated successfully!');
+        if (savedConfig) {
+          // Only update local state if Redis save succeeded
+          updateConfig(targetConfig.id, { imageUrl: data.imageUrl });
+          showToast('✨ Character image generated and saved!');
+        } else {
+          showToast('⚠️ Image generated but failed to save - please try saving manually');
+        }
       } else {
         showToast('⚠️ Failed to generate image: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error generating persona image:', error);
-      showToast('⚠️ Failed to generate image');
+      showToast('⚠️ Failed to generate or save image');
     } finally {
       // Remove this persona from the generating set
       setGeneratingImageIds(prev => {
@@ -871,7 +897,7 @@ export default function Home() {
 
       {/* Toast Notification */}
       {showToaster && (
-        <div className="fixed top-4 right-4 bg-robinhood-card border border-robinhood-green rounded-lg px-4 py-3 shadow-lg z-50 animate-slide-in">
+        <div className="fixed bottom-4 right-4 bg-robinhood-card border border-robinhood-green rounded-lg px-4 py-3 shadow-lg z-50 animate-slide-in">
           <p className="text-white">{toasterMessage}</p>
         </div>
       )}
@@ -1027,6 +1053,28 @@ export default function Home() {
                             className="w-full px-4 py-3 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green resize-none"
                           />
                         </div>
+
+                        {/* Auto-publish checkbox on final step */}
+                        {interviewStep === 5 && (
+                          <div className="bg-robinhood-card/50 border border-robinhood-card-border rounded-lg p-4">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={autoPublishAfterSave}
+                                onChange={(e) => setAutoPublishAfterSave(e.target.checked)}
+                                className="mt-1 w-4 h-4 rounded border-gray-500 bg-robinhood-card text-robinhood-green focus:ring-2 focus:ring-robinhood-green cursor-pointer"
+                              />
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-white group-hover:text-robinhood-green transition-colors">
+                                  Auto-publish after creation
+                                </span>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Automatically save and publish this persona so it's ready to use via API immediately after creation
+                                </p>
+                              </div>
+                            </label>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

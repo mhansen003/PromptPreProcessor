@@ -8,7 +8,7 @@ import { Select } from './Select';
 interface ExampleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  controlType: 'slider' | 'toggle' | 'select';
+  controlType: 'slider' | 'toggle' | 'select' | 'textarea';
   controlName: string;
   controlDescription?: string;
   initialValue: number | boolean | string;
@@ -133,6 +133,24 @@ export default function ExampleModal({
                   options={options}
                   tooltip={controlDescription}
                 />
+              )}
+
+              {controlType === 'textarea' && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    {controlName}
+                  </label>
+                  <textarea
+                    value={currentValue as string}
+                    onChange={(e) => setCurrentValue(e.target.value)}
+                    rows={4}
+                    placeholder={`Enter ${controlName.toLowerCase()}...`}
+                    className="w-full px-3 py-2 bg-robinhood-dark border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  />
+                  {controlDescription && (
+                    <p className="text-xs text-gray-400">{controlDescription}</p>
+                  )}
+                </div>
               )}
             </div>
           </div>

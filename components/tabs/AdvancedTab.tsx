@@ -16,7 +16,7 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
     name: string;
     description: string;
     value: number | boolean | string;
-    controlType: 'slider' | 'toggle' | 'select';
+    controlType: 'slider' | 'toggle' | 'select' | 'textarea';
     min?: number;
     max?: number;
     options?: Array<{ value: string; label: string }>;
@@ -35,6 +35,11 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
 
   const openSelectExample = (name: string, description: string, value: string, options: Array<{ value: string; label: string }>, onApply: (value: string) => void) => {
     setExampleControl({ name, description, value, controlType: 'select', options, onApply: onApply as (value: number | boolean | string) => void });
+    setShowExampleModal(true);
+  };
+
+  const openTextareaExample = (name: string, description: string, value: string, onApply: (value: string) => void) => {
+    setExampleControl({ name, description, value, controlType: 'textarea', onApply: onApply as (value: number | boolean | string) => void });
     setShowExampleModal(true);
   };
   return (
@@ -252,12 +257,11 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
               Custom Instructions
             </label>
             <button
-              onClick={() => openSelectExample(
+              onClick={() => openTextareaExample(
                 'Custom Instructions',
                 'Additional behavioral guidelines and specific requirements',
-                config.customInstructions || 'None',
-                [{ value: 'None', label: 'None' }],
-                (value) => {}
+                config.customInstructions || '',
+                (value) => onUpdate({ customInstructions: value as string })
               )}
               className="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded hover:bg-indigo-500/30 transition-all shadow-sm hover:shadow-indigo-500/20"
               title="See example of this setting"
@@ -283,12 +287,11 @@ export default function AdvancedTab({ config, onUpdate }: AdvancedTabProps) {
               Custom Style Notes
             </label>
             <button
-              onClick={() => openSelectExample(
+              onClick={() => openTextareaExample(
                 'Custom Style Notes',
                 'Additional formatting or output style preferences',
-                config.customStyle || 'None',
-                [{ value: 'None', label: 'None' }],
-                (value) => {}
+                config.customStyle || '',
+                (value) => onUpdate({ customStyle: value as string })
               )}
               className="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded hover:bg-indigo-500/30 transition-all shadow-sm hover:shadow-indigo-500/20"
               title="See example of this setting"
