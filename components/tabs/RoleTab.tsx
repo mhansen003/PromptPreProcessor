@@ -2,6 +2,7 @@ import type { PersonaConfig } from '@/lib/store';
 import { Slider } from '../Slider';
 import { Select } from '../Select';
 import { useState } from 'react';
+import ExampleModal from '../ExampleModal';
 
 interface RoleTabProps {
   config: PersonaConfig;
@@ -30,6 +31,27 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
   const [specializationInput, setSpecializationInput] = useState('');
   const [loanTypeInput, setLoanTypeInput] = useState('');
   const [marketInput, setMarketInput] = useState('');
+  const [showExampleModal, setShowExampleModal] = useState(false);
+  const [exampleControl, setExampleControl] = useState<{
+    name: string;
+    description: string;
+    value: number | string;
+    controlType: 'slider' | 'select';
+    min?: number;
+    max?: number;
+    options?: Array<{ value: string; label: string }>;
+    onApply: (value: number | string) => void;
+  } | null>(null);
+
+  const openSliderExample = (name: string, description: string, value: number, onApply: (value: number) => void, min: number = 0, max: number = 100) => {
+    setExampleControl({ name, description, value, controlType: 'slider', min, max, onApply: onApply as (value: number | string) => void });
+    setShowExampleModal(true);
+  };
+
+  const openSelectExample = (name: string, description: string, value: string, options: Array<{ value: string; label: string }>, onApply: (value: string) => void) => {
+    setExampleControl({ name, description, value, controlType: 'select', options, onApply: onApply as (value: number | string) => void });
+    setShowExampleModal(true);
+  };
 
   const addSpecialization = (spec: string) => {
     if (spec && !config.specializations.includes(spec)) {
@@ -95,6 +117,24 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
               { value: 'account-executive', label: 'Account Executive' },
             ]}
             tooltip="Your specific role in the mortgage/financial industry"
+            onShowExample={() => openSelectExample(
+              'Job Role',
+              'Your specific role in the mortgage/financial industry',
+              config.jobRole,
+              [
+                { value: 'general', label: 'General (No specific role)' },
+                { value: 'loan-officer', label: 'Loan Officer / Mortgage Originator' },
+                { value: 'processor', label: 'Loan Processor' },
+                { value: 'underwriter', label: 'Underwriter' },
+                { value: 'sales', label: 'Sales / Business Development' },
+                { value: 'sales-assistant', label: 'Sales Assistant / Coordinator' },
+                { value: 'branch-manager', label: 'Branch Manager' },
+                { value: 'operations', label: 'Operations Manager' },
+                { value: 'closer', label: 'Closer / Settlement Agent' },
+                { value: 'account-executive', label: 'Account Executive' },
+              ],
+              (value) => onUpdate({ jobRole: value as PersonaConfig['jobRole'] })
+            )}
           />
 
           <Select
@@ -108,26 +148,39 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
               { value: 'executive', label: 'Executive / Director' },
             ]}
             tooltip="Your position within your team or organization"
+            onShowExample={() => openSelectExample(
+              'Team Role',
+              'Your position within your team or organization',
+              config.teamRole,
+              [
+                { value: 'individual', label: 'Individual Contributor' },
+                { value: 'team-lead', label: 'Team Lead' },
+                { value: 'manager', label: 'Manager' },
+                { value: 'executive', label: 'Executive / Director' },
+              ],
+              (value) => onUpdate({ teamRole: value as PersonaConfig['teamRole'] })
+            )}
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Years of Experience: {config.yearsExperience} years
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="50"
-            value={config.yearsExperience}
-            onChange={(e) => onUpdate({ yearsExperience: parseInt(e.target.value) })}
-            className="w-full h-2 bg-robinhood-card rounded-lg appearance-none cursor-pointer slider-thumb"
-          />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>0 years (Entry-level)</span>
-            <span>50+ years (Industry Veteran)</span>
-          </div>
-        </div>
+        <Slider
+          label="Years of Experience"
+          value={config.yearsExperience}
+          onChange={(value) => onUpdate({ yearsExperience: value })}
+          min={0}
+          max={50}
+          leftLabel="0 years (Entry-level)"
+          rightLabel="50+ years (Industry Veteran)"
+          tooltip="Your years of professional experience in the mortgage/financial industry"
+          onShowExample={() => openSliderExample(
+            'Years of Experience',
+            'Your years of professional experience in the mortgage/financial industry',
+            config.yearsExperience,
+            (value) => onUpdate({ yearsExperience: value }),
+            0,
+            50
+          )}
+        />
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">
@@ -270,6 +323,19 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
               { value: 'investors', label: 'Investors / Investment Properties' },
             ]}
             tooltip="Primary type of clients you work with most"
+            onShowExample={() => openSelectExample(
+              'Primary Client Focus',
+              'Primary type of clients you work with most',
+              config.clientFocus,
+              [
+                { value: 'mixed', label: 'Mixed (All client types)' },
+                { value: 'first-time-buyers', label: 'First-Time Homebuyers' },
+                { value: 'purchase', label: 'Purchase (Move-Up/Down)' },
+                { value: 'refinance', label: 'Refinance Specialists' },
+                { value: 'investors', label: 'Investors / Investment Properties' },
+              ],
+              (value) => onUpdate({ clientFocus: value as PersonaConfig['clientFocus'] })
+            )}
           />
 
           <div className="space-y-2">
@@ -329,6 +395,12 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
             min={0}
             max={100}
             tooltip="Depth of loan product knowledge to assume (0 = basic awareness, 100 = expert-level mastery)"
+            onShowExample={() => openSliderExample(
+              'Product Knowledge Depth',
+              'Depth of loan product knowledge to assume (0 = basic awareness, 100 = expert-level mastery)',
+              config.productKnowledge,
+              (value) => onUpdate({ productKnowledge: value })
+            )}
           />
 
           <Slider
@@ -338,9 +410,36 @@ export default function RoleTab({ config, onUpdate }: RoleTabProps) {
             min={0}
             max={100}
             tooltip="How much to emphasize regulatory compliance and legal requirements (0 = minimal mention, 100 = compliance-focused)"
+            onShowExample={() => openSliderExample(
+              'Compliance Emphasis',
+              'How much to emphasize regulatory compliance and legal requirements (0 = minimal mention, 100 = compliance-focused)',
+              config.complianceEmphasis,
+              (value) => onUpdate({ complianceEmphasis: value })
+            )}
           />
         </div>
       </div>
+
+      {/* Example Modal */}
+      {exampleControl && (
+        <ExampleModal
+          isOpen={showExampleModal}
+          onClose={() => {
+            setShowExampleModal(false);
+            setExampleControl(null);
+          }}
+          controlType={exampleControl.controlType}
+          controlName={exampleControl.name}
+          controlDescription={exampleControl.description}
+          initialValue={exampleControl.value}
+          onApply={(value) => {
+            exampleControl.onApply(value);
+          }}
+          min={exampleControl.min}
+          max={exampleControl.max}
+          options={exampleControl.options}
+        />
+      )}
     </div>
   );
 }

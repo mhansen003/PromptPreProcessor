@@ -32,6 +32,8 @@ export default function Home() {
   const [editingName, setEditingName] = useState('');
   const [editingEmoji, setEditingEmoji] = useState('');
   const [showSampleMessagesModal, setShowSampleMessagesModal] = useState(false);
+  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   // New Persona Modal States
   const [showNewPersonaModal, setShowNewPersonaModal] = useState(false);
@@ -367,65 +369,84 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {activeConfig && (
               <>
-                {/* Persona Action Buttons - Grouped with Separators */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-robinhood-card/50 border border-robinhood-card-border rounded-lg">
-                  {activeConfig.systemPrompt && (
-                    <button
-                      onClick={() => setShowViewPromptModal(true)}
-                      className="px-3 py-1.5 text-xs bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded hover:bg-robinhood-green/10 transition-all flex items-center gap-1.5"
-                      title="View Generated Prompt"
-                    >
-                      📋 View Prompt
-                    </button>
-                  )}
+                {/* Actions Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowActionsDropdown(!showActionsDropdown)}
+                    onBlur={() => setTimeout(() => setShowActionsDropdown(false), 200)}
+                    className="px-4 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-robinhood-card border border-robinhood-card-border hover:bg-robinhood-card-hover"
+                  >
+                    Actions
+                    <svg className={`w-3 h-3 transition-transform ${showActionsDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
 
-                  {activeConfig.isPublished && activeConfig.systemPrompt && (
-                    <>
-                      <div className="w-px h-5 bg-robinhood-card-border"></div>
+                  {showActionsDropdown && (
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-robinhood-card border border-robinhood-card-border rounded-lg shadow-xl z-50 py-1">
                       <button
-                        onClick={() => setShowEndpointsModal(true)}
-                        className="px-3 py-1.5 text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded hover:bg-cyan-500/30 transition-all flex items-center gap-1.5"
-                        title="View API Endpoints"
+                        onClick={() => {
+                          setShowSampleMessagesModal(true);
+                          setShowActionsDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-blue-400"
                       >
-                        🔗 Endpoints
+                        <span className="text-lg">📋</span>
+                        <span>Generate Sample Message</span>
                       </button>
-                    </>
+
+                      {activeConfig.systemPrompt && (
+                        <button
+                          onClick={() => {
+                            setShowViewPromptModal(true);
+                            setShowActionsDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-robinhood-green"
+                        >
+                          <span className="text-lg">👁️</span>
+                          <span>View Prompt</span>
+                        </button>
+                      )}
+
+                      {activeConfig.isPublished && activeConfig.systemPrompt && (
+                        <button
+                          onClick={() => {
+                            setShowEndpointsModal(true);
+                            setShowActionsDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-cyan-400"
+                        >
+                          <span className="text-lg">🔗</span>
+                          <span>View Endpoints</span>
+                        </button>
+                      )}
+
+                      <div className="h-px bg-robinhood-card-border my-1"></div>
+
+                      <button
+                        onClick={() => {
+                          handleDuplicate(activeConfig.id);
+                          setShowActionsDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-purple-400"
+                      >
+                        <span className="text-lg">📑</span>
+                        <span>Duplicate Persona</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          confirmDelete(activeConfig.id);
+                          setShowActionsDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-red-400"
+                      >
+                        <span className="text-lg">🗑️</span>
+                        <span>Delete Persona</span>
+                      </button>
+                    </div>
                   )}
-
-                  <div className="w-px h-5 bg-robinhood-card-border"></div>
-
-                  <button
-                    onClick={() => handleDuplicate(activeConfig.id)}
-                    className="px-3 py-1.5 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded hover:bg-purple-500/30 transition-all flex items-center gap-1.5"
-                    title="Duplicate Persona"
-                  >
-                    📑 Copy
-                  </button>
-
-                  <div className="w-px h-5 bg-robinhood-card-border"></div>
-
-                  <button
-                    onClick={() => confirmDelete(activeConfig.id)}
-                    className="px-3 py-1.5 text-xs bg-robinhood-card border border-red-500/30 text-red-400 rounded hover:bg-red-500/10 transition-all flex items-center gap-1.5"
-                    title="Delete Persona"
-                  >
-                    🗑️ Delete
-                  </button>
                 </div>
-
-                <div className="w-px h-8 bg-robinhood-card-border"></div>
-
-                {/* Generate Sample Message Button */}
-                <button
-                  onClick={() => setShowSampleMessagesModal(true)}
-                  className="px-6 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg"
-                  title="Generate sample mortgage messages to preview your persona"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Generate Sample Message
-                </button>
 
                 <button
                   onClick={handleSaveChanges}
@@ -453,20 +474,42 @@ export default function Home() {
 
             {/* User Menu */}
             {userEmail && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-robinhood-green/20 flex items-center justify-center text-robinhood-green font-semibold text-sm">
-                    {userEmail.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-sm text-gray-300">{userEmail.split('@')[0]}</span>
-                </div>
+              <div className="relative">
                 <button
-                  onClick={() => window.location.href = '/api/auth/logout'}
-                  className="ml-2 text-xs text-gray-400 hover:text-red-400 transition-colors"
-                  title="Logout"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  onBlur={() => setTimeout(() => setShowUserDropdown(false), 200)}
+                  className="w-10 h-10 bg-robinhood-green/20 hover:bg-robinhood-green/30 rounded-full flex items-center justify-center transition-all cursor-pointer"
+                  title={userEmail}
                 >
-                  🚪
+                  <span className="text-lg font-bold text-robinhood-green">
+                    {userEmail.charAt(0).toUpperCase()}
+                  </span>
                 </button>
+
+                {showUserDropdown && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-robinhood-card border border-robinhood-card-border rounded-lg shadow-xl z-50 py-1">
+                    <div className="px-4 py-2 border-b border-robinhood-card-border">
+                      <p className="text-xs text-gray-400">Signed in as</p>
+                      <p className="text-sm font-medium truncate">{userEmail}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await fetch('/api/auth/logout', { method: 'POST' });
+                          window.location.href = '/signin';
+                        } catch (error) {
+                          console.error('Logout error:', error);
+                        }
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-red-400"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

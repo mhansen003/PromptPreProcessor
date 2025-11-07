@@ -2,6 +2,8 @@ import type { PersonaConfig } from '@/lib/store';
 import { Slider } from '../Slider';
 import { Select } from '../Select';
 import { Toggle } from '../Toggle';
+import { useState } from 'react';
+import ExampleModal from '../ExampleModal';
 
 interface RegionalTabProps {
   config: PersonaConfig;
@@ -20,6 +22,32 @@ const US_STATES = [
 ];
 
 export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
+  const [showExampleModal, setShowExampleModal] = useState(false);
+  const [exampleControl, setExampleControl] = useState<{
+    name: string;
+    description: string;
+    value: number | boolean | string;
+    controlType: 'slider' | 'toggle' | 'select';
+    min?: number;
+    max?: number;
+    options?: Array<{ value: string; label: string }>;
+    onApply: (value: number | boolean | string) => void;
+  } | null>(null);
+
+  const openSliderExample = (name: string, description: string, value: number, onApply: (value: number) => void) => {
+    setExampleControl({ name, description, value, controlType: 'slider', min: 0, max: 100, onApply: onApply as (value: number | boolean | string) => void });
+    setShowExampleModal(true);
+  };
+
+  const openToggleExample = (name: string, description: string, value: boolean, onApply: (value: boolean) => void) => {
+    setExampleControl({ name, description, value, controlType: 'toggle', onApply: onApply as (value: number | boolean | string) => void });
+    setShowExampleModal(true);
+  };
+
+  const openSelectExample = (name: string, description: string, value: string, options: Array<{ value: string; label: string }>, onApply: (value: string) => void) => {
+    setExampleControl({ name, description, value, controlType: 'select', options, onApply: onApply as (value: number | boolean | string) => void });
+    setShowExampleModal(true);
+  };
   return (
     <div className="space-y-8">
       {/* Info Box */}
@@ -95,6 +123,12 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
             onChange={(checked) => onUpdate({ includeLocalReferences: checked })}
             description="Reference local landmarks, culture, events, and regional characteristics"
             disabled={!config.state}
+            onShowExample={() => openToggleExample(
+              'Include Local References',
+              'Reference local landmarks, culture, events, and regional characteristics',
+              config.includeLocalReferences,
+              (value) => onUpdate({ includeLocalReferences: value })
+            )}
           />
 
           <Toggle
@@ -103,6 +137,12 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
             onChange={(checked) => onUpdate({ timeZoneAwareness: checked })}
             description="Consider regional time zones when discussing time-sensitive topics"
             disabled={!config.state}
+            onShowExample={() => openToggleExample(
+              'Time Zone Awareness',
+              'Consider regional time zones when discussing time-sensitive topics',
+              config.timeZoneAwareness,
+              (value) => onUpdate({ timeZoneAwareness: value })
+            )}
           />
 
           <Toggle
@@ -111,6 +151,12 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
             onChange={(checked) => onUpdate({ localMarketKnowledge: checked })}
             description="Include local real estate market insights, pricing trends, and regional mortgage practices"
             disabled={!config.state}
+            onShowExample={() => openToggleExample(
+              'Local Market Knowledge',
+              'Include local real estate market insights, pricing trends, and regional mortgage practices',
+              config.localMarketKnowledge,
+              (value) => onUpdate({ localMarketKnowledge: value })
+            )}
           />
         </div>
       </div>
@@ -135,6 +181,20 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
             { value: 'california', label: 'California / West Coast' },
           ]}
           tooltip="Regional dialect and speaking patterns to incorporate"
+          onShowExample={() => openSelectExample(
+            'Dialect / Speaking Style',
+            'Regional dialect and speaking patterns to incorporate',
+            config.dialect,
+            [
+              { value: 'neutral', label: 'Neutral (No specific dialect)' },
+              { value: 'standard-american', label: 'Standard American English' },
+              { value: 'southern', label: 'Southern Dialect' },
+              { value: 'midwestern', label: 'Midwestern Dialect' },
+              { value: 'northeast', label: 'Northeast Dialect (NY/Boston)' },
+              { value: 'california', label: 'California / West Coast' },
+            ],
+            (value) => onUpdate({ dialect: value as PersonaConfig['dialect'] })
+          )}
         />
 
         <Slider
@@ -144,6 +204,12 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           min={0}
           max={100}
           tooltip="How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)"
+          onShowExample={() => openSliderExample(
+            'Regional Terminology',
+            'How much to use region-specific terms and phrases (0 = generic language, 100 = heavy regional terminology)',
+            config.regionalTerminology,
+            (value) => onUpdate({ regionalTerminology: value })
+          )}
         />
       </div>
 
@@ -162,8 +228,35 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
           min={0}
           max={100}
           tooltip="How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)"
+          onShowExample={() => openSliderExample(
+            'Cultural Sensitivity',
+            'How culturally aware and sensitive responses should be (0 = general approach, 100 = highly attuned to cultural nuances and diversity)',
+            config.culturalSensitivity,
+            (value) => onUpdate({ culturalSensitivity: value })
+          )}
         />
       </div>
+
+      {/* Example Modal */}
+      {exampleControl && (
+        <ExampleModal
+          isOpen={showExampleModal}
+          onClose={() => {
+            setShowExampleModal(false);
+            setExampleControl(null);
+          }}
+          controlType={exampleControl.controlType}
+          controlName={exampleControl.name}
+          controlDescription={exampleControl.description}
+          initialValue={exampleControl.value}
+          onApply={(value) => {
+            exampleControl.onApply(value);
+          }}
+          min={exampleControl.min}
+          max={exampleControl.max}
+          options={exampleControl.options}
+        />
+      )}
     </div>
   );
 }
