@@ -468,17 +468,6 @@ export default function Home() {
 
                   {showActionsDropdown && (
                     <div className="absolute top-full left-0 mt-2 w-56 bg-robinhood-card border border-robinhood-green/30 rounded-lg shadow-2xl shadow-black/50 z-50 py-1">
-                      <button
-                        onClick={() => {
-                          setShowSampleMessagesModal(true);
-                          setShowActionsDropdown(false);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-robinhood-card-hover transition-all flex items-center gap-3 text-blue-400"
-                      >
-                        <span className="text-lg">📋</span>
-                        <span>Generate Sample Message</span>
-                      </button>
-
                       {activeConfig.systemPrompt && (
                         <button
                           onClick={() => {
@@ -531,6 +520,15 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                {/* Generate Sample Message Button */}
+                <button
+                  onClick={() => setShowSampleMessagesModal(true)}
+                  className="px-4 py-2 text-sm rounded-lg font-medium transition-all flex items-center gap-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 hover:bg-blue-500/30 hover:border-blue-500 shadow-sm hover:shadow-blue-500/20"
+                >
+                  <span className="text-lg">📋</span>
+                  <span>Generate Sample Message</span>
+                </button>
 
                 <button
                   onClick={handleSaveChanges}
