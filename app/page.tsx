@@ -367,6 +367,54 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {activeConfig && (
               <>
+                {/* Persona Action Buttons - Grouped with Separators */}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-robinhood-card/50 border border-robinhood-card-border rounded-lg">
+                  {activeConfig.systemPrompt && (
+                    <button
+                      onClick={() => setShowViewPromptModal(true)}
+                      className="px-3 py-1.5 text-xs bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded hover:bg-robinhood-green/10 transition-all flex items-center gap-1.5"
+                      title="View Generated Prompt"
+                    >
+                      📋 View Prompt
+                    </button>
+                  )}
+
+                  {activeConfig.isPublished && activeConfig.systemPrompt && (
+                    <>
+                      <div className="w-px h-5 bg-robinhood-card-border"></div>
+                      <button
+                        onClick={() => setShowEndpointsModal(true)}
+                        className="px-3 py-1.5 text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded hover:bg-cyan-500/30 transition-all flex items-center gap-1.5"
+                        title="View API Endpoints"
+                      >
+                        🔗 Endpoints
+                      </button>
+                    </>
+                  )}
+
+                  <div className="w-px h-5 bg-robinhood-card-border"></div>
+
+                  <button
+                    onClick={() => handleDuplicate(activeConfig.id)}
+                    className="px-3 py-1.5 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded hover:bg-purple-500/30 transition-all flex items-center gap-1.5"
+                    title="Duplicate Persona"
+                  >
+                    📑 Copy
+                  </button>
+
+                  <div className="w-px h-5 bg-robinhood-card-border"></div>
+
+                  <button
+                    onClick={() => confirmDelete(activeConfig.id)}
+                    className="px-3 py-1.5 text-xs bg-robinhood-card border border-red-500/30 text-red-400 rounded hover:bg-red-500/10 transition-all flex items-center gap-1.5"
+                    title="Delete Persona"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
+
+                <div className="w-px h-8 bg-robinhood-card-border"></div>
+
                 {/* Generate Sample Message Button */}
                 <button
                   onClick={() => setShowSampleMessagesModal(true)}
@@ -599,58 +647,6 @@ export default function Home() {
                         )}
                       </div>
 
-                      {/* Action Icon Buttons - Show only for active persona */}
-                      {isActive && (
-                        <div className="mt-3 pt-2 border-t border-robinhood-green/30 flex items-center justify-center gap-2">
-                          {config.systemPrompt && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowViewPromptModal(true);
-                              }}
-                              className="p-1.5 text-xs bg-robinhood-card border border-robinhood-green/30 text-robinhood-green rounded hover:bg-robinhood-green/10 transition-all"
-                              title="View Prompt"
-                            >
-                              📋
-                            </button>
-                          )}
-
-                          {config.isPublished && config.systemPrompt && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowEndpointsModal(true);
-                              }}
-                              className="p-1.5 text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded hover:bg-cyan-500/30 transition-all"
-                              title="View Endpoints"
-                            >
-                              🔗
-                            </button>
-                          )}
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDuplicate(config.id);
-                            }}
-                            className="p-1.5 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded hover:bg-purple-500/30 transition-all"
-                            title="Duplicate"
-                          >
-                            📑
-                          </button>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmDelete(config.id);
-                            }}
-                            className="p-1.5 text-xs bg-robinhood-card border border-red-500/30 text-red-400 rounded hover:bg-red-500/10 transition-all"
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      )}
                     </div>
                   );
                 })
@@ -807,128 +803,137 @@ export default function Home() {
               )}
 
               {creationFlow === 'interview' && (
-                <div className="space-y-6">
-                  {/* Progress Bar */}
-                  <div className="flex items-center gap-2">
-                    {[0, 1, 2, 3, 4, 5].map((step) => (
-                      <div
-                        key={step}
-                        className={`flex-1 h-2 rounded-full transition-all ${
-                          step <= interviewStep ? 'bg-robinhood-green' : 'bg-robinhood-card'
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="text-center text-sm text-gray-400">
-                    Step {interviewStep + 1} of 6
-                  </div>
-
-                  {interviewStep === 0 && (
-                    <div className="space-y-4">
-                      <div className="bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg p-4 mb-6">
-                        <p className="text-sm text-gray-300">
-                          <span className="font-semibold text-robinhood-green">What is a Persona?</span><br />
-                          A persona defines how AI will communicate with you and your audience. Think of it as creating a custom assistant tailored to your specific needs, communication style, and the type of responses you prefer.
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Persona Name</label>
-                        <input
-                          type="text"
-                          value={newPersonaName}
-                          onChange={(e) => setNewPersonaName(e.target.value)}
-                          placeholder="e.g., Client Communication Assistant"
-                          className="w-full px-4 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {interviewStep > 0 && interviewStep <= 5 && (
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          {interviewQuestions[interviewStep - 1].title}
-                        </h3>
-                        <p className="text-sm text-gray-400 mb-4">
-                          {interviewQuestions[interviewStep - 1].description}
-                        </p>
-                        <textarea
-                          value={interviewAnswers[interviewStep - 1]}
-                          onChange={(e) => {
-                            const newAnswers = [...interviewAnswers];
-                            newAnswers[interviewStep - 1] = e.target.value;
-                            setInterviewAnswers(newAnswers);
-                          }}
-                          rows={4}
-                          placeholder={interviewQuestions[interviewStep - 1].placeholder}
-                          className="w-full px-4 py-3 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green resize-none"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {interviewStep === 5 && (
-                    <div className="space-y-4 mt-6">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">Additional Context (Optional)</h3>
-                        <p className="text-sm text-gray-400 mb-4">
-                          Upload any documents that might help us understand your communication style and needs (emails, reports, resume, writing samples, etc.)
-                        </p>
-
+                <div className="flex flex-col h-full">
+                  {/* Main Content Area */}
+                  <div className="flex-1 space-y-6 overflow-y-auto">
+                    {/* Progress Bar */}
+                    <div className="flex items-center gap-2">
+                      {[0, 1, 2, 3, 4, 5].map((step) => (
                         <div
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
-                            isDragging
-                              ? 'border-robinhood-green bg-robinhood-green/10 scale-105'
-                              : 'border-robinhood-card-border hover:border-robinhood-green/50'
+                          key={step}
+                          className={`flex-1 h-2 rounded-full transition-all ${
+                            step <= interviewStep ? 'bg-robinhood-green' : 'bg-robinhood-card'
                           }`}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                        >
-                          <input
-                            type="file"
-                            id="file-upload"
-                            multiple
-                            accept=".txt,.pdf,.doc,.docx,.md"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                          <label
-                            htmlFor="file-upload"
-                            className="cursor-pointer flex flex-col items-center gap-2"
-                          >
-                            <div className="text-4xl">📎</div>
-                            <p className="text-sm text-gray-400">
-                              {isDragging ? 'Drop files here' : 'Drag & drop files here or click to upload'}
-                            </p>
-                            <p className="text-xs text-gray-500">TXT, PDF, DOC, MD files supported</p>
-                          </label>
+                        />
+                      ))}
+                    </div>
+
+                    <div className="text-center text-sm text-gray-400">
+                      Step {interviewStep + 1} of 6
+                    </div>
+
+                    {interviewStep === 0 && (
+                      <div className="space-y-4">
+                        <div className="bg-robinhood-green/10 border border-robinhood-green/30 rounded-lg p-4 mb-6">
+                          <p className="text-sm text-gray-300">
+                            <span className="font-semibold text-robinhood-green">What is a Persona?</span><br />
+                            A persona defines how AI will communicate with you and your audience. Think of it as creating a custom assistant tailored to your specific needs, communication style, and the type of responses you prefer.
+                          </p>
                         </div>
 
-                        {uploadedFiles.length > 0 && (
-                          <div className="mt-4 space-y-2">
-                            {uploadedFiles.map((file, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between p-2 bg-robinhood-card rounded-lg"
-                              >
-                                <span className="text-sm truncate flex-1">{file.name}</span>
-                                <button
-                                  onClick={() => removeFile(index)}
-                                  className="text-red-400 hover:text-red-300 ml-2"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Persona Name</label>
+                          <input
+                            type="text"
+                            value={newPersonaName}
+                            onChange={(e) => setNewPersonaName(e.target.value)}
+                            placeholder="e.g., Client Communication Assistant"
+                            className="w-full px-4 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green"
+                          />
+                        </div>
                       </div>
+                    )}
+
+                    {interviewStep > 0 && interviewStep <= 5 && (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            {interviewQuestions[interviewStep - 1].title}
+                          </h3>
+                          <p className="text-sm text-gray-400 mb-4">
+                            {interviewQuestions[interviewStep - 1].description}
+                          </p>
+                          <textarea
+                            value={interviewAnswers[interviewStep - 1]}
+                            onChange={(e) => {
+                              const newAnswers = [...interviewAnswers];
+                              newAnswers[interviewStep - 1] = e.target.value;
+                              setInterviewAnswers(newAnswers);
+                            }}
+                            rows={4}
+                            placeholder={interviewQuestions[interviewStep - 1].placeholder}
+                            className="w-full px-4 py-3 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-robinhood-green resize-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Always-Visible File Upload at Bottom */}
+                  <div className="mt-6 pt-4 border-t border-robinhood-card-border">
+                    <p className="text-sm text-gray-400 mb-3 text-center">
+                      You may also drop artifacts here that describe your personality preferences
+                    </p>
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
+                        isDragging
+                          ? 'border-robinhood-green bg-robinhood-green/10 scale-105'
+                          : 'border-robinhood-card-border hover:border-robinhood-green/50'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => {
+                        handleDrop(e);
+                        // If files uploaded, auto-complete and jump to end
+                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                          setInterviewStep(5);
+                        }
+                      }}
+                    >
+                      <input
+                        type="file"
+                        id="file-upload-bottom"
+                        multiple
+                        accept=".txt,.pdf,.doc,.docx,.md"
+                        onChange={(e) => {
+                          handleFileUpload(e);
+                          // If files uploaded via click, auto-complete and jump to end
+                          if (e.target.files && e.target.files.length > 0) {
+                            setInterviewStep(5);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="file-upload-bottom"
+                        className="cursor-pointer flex flex-col items-center gap-1"
+                      >
+                        <div className="text-2xl">📎</div>
+                        <p className="text-xs text-gray-400">
+                          {isDragging ? 'Drop files here' : 'Drop files or click to upload'}
+                        </p>
+                      </label>
                     </div>
-                  )}
+
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-3 space-y-1 max-h-24 overflow-y-auto">
+                        {uploadedFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-2 bg-robinhood-card rounded text-xs"
+                          >
+                            <span className="truncate flex-1">{file.name}</span>
+                            <button
+                              onClick={() => removeFile(index)}
+                              className="text-red-400 hover:text-red-300 ml-2 text-sm"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex gap-3 mt-6">
                     {interviewStep > 0 && (

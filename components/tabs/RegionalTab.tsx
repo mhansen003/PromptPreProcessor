@@ -57,7 +57,7 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
-              State (Optional)
+              State
             </label>
             <select
               value={config.state || ''}
@@ -65,16 +65,53 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
               className="w-full px-3 py-2 bg-robinhood-card border border-robinhood-card-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-robinhood-green"
             >
               <option value="">-- Select State --</option>
-              {US_STATES.map((state) => (
+              {US_STATES.filter(state => state).map((state) => (
                 <option key={state} value={state}>
-                  {state || '-- None --'}
+                  {state}
                 </option>
               ))}
             </select>
             <p className="text-xs text-gray-400">
-              Specific state for highly localized content
+              Required for local context features below
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Local Context & References */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <span>🏘️</span>
+          <span>Local Context</span>
+          {!config.state && (
+            <span className="text-xs text-gray-500 font-normal">(Select a state first)</span>
+          )}
+        </h3>
+
+        <div className="space-y-3">
+          <Toggle
+            label="Include Local References"
+            checked={config.includeLocalReferences}
+            onChange={(checked) => onUpdate({ includeLocalReferences: checked })}
+            description="Reference local landmarks, culture, events, and regional characteristics"
+            disabled={!config.state}
+          />
+
+          <Toggle
+            label="Time Zone Awareness"
+            checked={config.timeZoneAwareness}
+            onChange={(checked) => onUpdate({ timeZoneAwareness: checked })}
+            description="Consider regional time zones when discussing time-sensitive topics"
+            disabled={!config.state}
+          />
+
+          <Toggle
+            label="Local Market Knowledge"
+            checked={config.localMarketKnowledge}
+            onChange={(checked) => onUpdate({ localMarketKnowledge: checked })}
+            description="Include local real estate market insights, pricing trends, and regional mortgage practices"
+            disabled={!config.state}
+          />
         </div>
       </div>
 
@@ -110,36 +147,6 @@ export default function RegionalTab({ config, onUpdate }: RegionalTabProps) {
         />
       </div>
 
-      {/* Local Context & References */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>🏘️</span>
-          <span>Local Context</span>
-        </h3>
-
-        <div className="space-y-3">
-          <Toggle
-            label="Include Local References"
-            checked={config.includeLocalReferences}
-            onChange={(checked) => onUpdate({ includeLocalReferences: checked })}
-            description="Reference local landmarks, culture, events, and regional characteristics"
-          />
-
-          <Toggle
-            label="Time Zone Awareness"
-            checked={config.timeZoneAwareness}
-            onChange={(checked) => onUpdate({ timeZoneAwareness: checked })}
-            description="Consider regional time zones when discussing time-sensitive topics"
-          />
-
-          <Toggle
-            label="Local Market Knowledge"
-            checked={config.localMarketKnowledge}
-            onChange={(checked) => onUpdate({ localMarketKnowledge: checked })}
-            description="Include local real estate market insights, pricing trends, and regional mortgage practices"
-          />
-        </div>
-      </div>
 
       {/* Cultural Sensitivity */}
       <div className="space-y-4">

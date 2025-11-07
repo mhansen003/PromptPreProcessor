@@ -10,6 +10,7 @@ interface ToggleProps {
   description?: string;
   tooltip?: string;
   onShowExample?: () => void;
+  disabled?: boolean;
 }
 
 export const Toggle: React.FC<ToggleProps> = ({
@@ -19,20 +20,24 @@ export const Toggle: React.FC<ToggleProps> = ({
   description,
   tooltip,
   onShowExample,
+  disabled = false,
 }) => {
   return (
-    <div className="flex items-start gap-3">
+    <div className={`flex items-start gap-3 ${disabled ? 'opacity-40' : ''}`}>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
-        onClick={() => onChange(!checked)}
+        onClick={() => !disabled && onChange(!checked)}
+        disabled={disabled}
         className={`
-          relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full
+          relative inline-flex h-5 w-9 flex-shrink-0 rounded-full
           border-2 border-transparent transition-colors duration-200 ease-in-out
           focus:outline-none focus:ring-1 focus:ring-robinhood-green focus:ring-offset-1
           focus:ring-offset-robinhood-dark
+          ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
           ${checked ? 'bg-robinhood-green' : 'bg-robinhood-border'}
+          ${disabled && 'grayscale'}
         `}
       >
         <span
@@ -47,7 +52,7 @@ export const Toggle: React.FC<ToggleProps> = ({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <label className="text-sm font-medium text-gray-300 cursor-pointer">
+          <label className={`text-sm font-medium ${disabled ? 'text-gray-500 cursor-not-allowed' : 'text-gray-300 cursor-pointer'}`}>
             {label}
           </label>
           {tooltip && (
