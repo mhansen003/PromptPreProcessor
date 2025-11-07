@@ -143,17 +143,29 @@ export default function ExampleModal({
               <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
                 Example Output
               </h3>
-              <button
-                onClick={generateExample}
-                disabled={isGenerating}
-                className={`px-3 py-1 text-xs rounded-lg transition-all ${
-                  isGenerating
-                    ? 'bg-indigo-500/30 border-2 border-indigo-500 text-white animate-pulse shadow-lg shadow-indigo-500/50'
-                    : 'bg-indigo-500/20 border border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/30'
-                }`}
-              >
-                {isGenerating ? '✨ Generating...' : '🔄 Regenerate'}
-              </button>
+              <div className="flex items-center gap-2">
+                {hasChanged && !isGenerating && (
+                  <div className="flex items-center gap-1 animate-pulse">
+                    <span className="text-robinhood-green text-sm font-medium">Try it!</span>
+                    <svg className="w-4 h-4 text-robinhood-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                )}
+                <button
+                  onClick={generateExample}
+                  disabled={isGenerating}
+                  className={`px-3 py-1 text-xs rounded-lg transition-all ${
+                    isGenerating
+                      ? 'bg-indigo-500/30 border-2 border-indigo-500 text-white animate-pulse shadow-lg shadow-indigo-500/50'
+                      : hasChanged
+                      ? 'bg-robinhood-green/20 border-2 border-robinhood-green/50 text-robinhood-green hover:bg-robinhood-green/30 shadow-lg shadow-robinhood-green/20'
+                      : 'bg-indigo-500/20 border border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/30'
+                  }`}
+                >
+                  {isGenerating ? '✨ Generating...' : '🔄 Regenerate'}
+                </button>
+              </div>
             </div>
 
             <div

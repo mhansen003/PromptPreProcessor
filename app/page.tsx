@@ -313,6 +313,27 @@ export default function Home() {
     }
   };
 
+  const handleNameEmojiUpdate = async (updates: Partial<PersonaConfig>) => {
+    if (!activeConfig) return;
+
+    // Update local state
+    updateConfig(activeConfig.id, updates);
+
+    // If persona is published, also save to backend immediately
+    if (activeConfig.isPublished) {
+      try {
+        const updatedConfig = { ...activeConfig, ...updates };
+        await saveConfig(updatedConfig);
+        showToast('✅ Published persona updated!');
+      } catch (error) {
+        console.error('Error updating published persona:', error);
+        showToast('⚠️ Local update saved, but failed to update published version');
+      }
+    } else {
+      setHasUnsavedChanges(true);
+    }
+  };
+
   const renderTabContent = () => {
     if (!activeConfig) return null;
 
@@ -450,7 +471,7 @@ export default function Home() {
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleConfigUpdate({ name: editingName, emoji: editingEmoji });
+                        handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
                         setIsEditingName(false);
                       } else if (e.key === 'Escape') {
                         setIsEditingName(false);
@@ -462,7 +483,7 @@ export default function Home() {
                   />
                   <button
                     onClick={() => {
-                      handleConfigUpdate({ name: editingName, emoji: editingEmoji });
+                      handleNameEmojiUpdate({ name: editingName, emoji: editingEmoji });
                       setIsEditingName(false);
                     }}
                     className="px-3 py-1 bg-robinhood-green text-robinhood-dark rounded hover:bg-robinhood-green/90 text-sm"
@@ -526,7 +547,7 @@ export default function Home() {
                   <div
                     key={config.id}
                     onClick={() => setActiveConfig(config)}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                    className={`p-3 rounded-lg cursor-pointer transition-all relative ${
                       activeConfig?.id === config.id
                         ? 'bg-robinhood-green/20 border-2 border-robinhood-green'
                         : 'bg-robinhood-card hover:bg-robinhood-card-hover border-2 border-transparent'
@@ -568,6 +589,11 @@ export default function Home() {
                         </div>
                       )}
                     </div>
+
+                    {/* Pulsating blue bar during generation */}
+                    {isSaving && activeConfig?.id === config.id && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 animate-pulse shadow-lg shadow-blue-500/50" />
+                    )}
                   </div>
                 ))
               )}
